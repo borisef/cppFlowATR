@@ -2,3 +2,5 @@ build
 build/*
 libs/shared/*
 .vscode
+temp
+temp/*
