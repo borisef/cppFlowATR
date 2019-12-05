@@ -1,5 +1,4 @@
 build
 build/*
-libs/shared
 libs/shared/*.so
 .vscode
