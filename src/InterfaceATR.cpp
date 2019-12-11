@@ -15,7 +15,7 @@ bool mbInterfaceATR::LoadNewModel(const char* modelPath)
 
 
 
-    m_outNames1 = new Tensor(*m_model, "num_detections");
+    m_outTensorNumDetections = new Tensor(*m_model, "num_detections");
     m_outNames2 = new Tensor(*m_model, "detection_scores");
     m_outNames3 = new Tensor(*m_model, "detection_boxes");
     m_outNames4 = new Tensor(*m_model, "detection_classes");
@@ -35,14 +35,14 @@ int mbInterfaceATR::RunRGBimage(cv::Mat inp)
     img_data.assign(inp.data, inp.data + inp.total() * inp.channels());
     m_inpName->set_data(img_data, {1,  2160, 4096, 3});
 
-    m_model->run(m_inpName, {m_outNames1, m_outNames2, m_outNames3, m_outNames4});
+    m_model->run(m_inpName, {m_outTensorNumDetections, m_outNames2, m_outNames3, m_outNames4});
 
     return 1;
 }
 
 int mbInterfaceATR::GetResultNumDetections()
 {
-    return (int)m_outNames1->get_data<float>()[0];
+    return (int)m_outTensorNumDetections->get_data<float>()[0];
 }
 
 int mbInterfaceATR::GetResultClasses(int i)

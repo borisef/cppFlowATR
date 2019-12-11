@@ -3,6 +3,10 @@
 #include <opencv2/opencv.hpp>
 #include <cppflow/Tensor.h>
 #include <cppflow/Model.h>
+
+#include <cppflowATRInterface/Object_Detection_Types.h>
+#include <cppflowATRInterface/Object_Detection_API.h>
+
 #include <string>
 
 class mbInterfaceATR
@@ -10,11 +14,11 @@ class mbInterfaceATR
   protected:
 	bool active;
     Model* m_model;
-    Tensor* m_outNames1;
+    Tensor* m_outTensorNumDetections;
     Tensor* m_outNames2;
     Tensor* m_outNames3;
     Tensor* m_outNames4;
-    Tensor * m_inpName ;
+    Tensor* m_inpName ;
 
   public:
     

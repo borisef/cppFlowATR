@@ -18,8 +18,41 @@ using namespace std::chrono;
 
 int main() {
 
+
+//ObjectDetectionManager* nm = CreateObjectDetector(); // before everything 
+
+
+///
+//InitObjectDetection() // new mission 
+
+
+// for loop 
+//OperateObjectDetectionAPI()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     bool SHOW = true;
     mbInterfaceATR* mbATR = new mbInterfaceATR();
+
+
     mbATR->LoadNewModel("/home/borisef/projects/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb");
 
     // Read image
