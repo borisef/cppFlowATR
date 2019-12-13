@@ -35,11 +35,11 @@ int main() {
     cv::resize(img, inp, cv::Size(4096,2160));
     cv::cvtColor(inp, inp, CV_BGR2RGB);
 
-    // Put image in Tensor
+    //put image in vector
     std::vector<uint8_t > img_data;
     img_data.assign(inp.data, inp.data + inp.total() * inp.channels());
     
-
+    // Put VECTOR in Tensor
     inpName->set_data(img_data, {1,  2160, 4096, 3});
     model.run(inpName, {outNames1, outNames2, outNames3, outNames4});
 

@@ -12,13 +12,13 @@ add_executable(main_like_coco src/main_like_coco.cpp src/Model.cpp src/Tensor.cp
 #target_include_directories(main_like_coco PRIVATE include)
 target_link_libraries (main_like_coco -ltensorflow ${OpenCV_LIBS})
 
-add_executable(main_ATR src/main_ATR.cpp src/Model.cpp src/Tensor.cpp src/InterfaceATR.cpp)
+add_executable(main_ATR src/main_ATR.cpp src/Model.cpp src/Tensor.cpp src/InterfaceATR.cpp src/Object_Detection_API.cpp src/imgUtils.cpp)
 #find_package( OpenCV REQUIRED )
 #target_include_directories(main_ATR PRIVATE include)
 #target_link_libraries (main_ATR ${MY_LIB} ${OpenCV_LIBS})
 target_link_libraries (main_ATR -ltensorflow ${OpenCV_LIBS})
 
-add_library(mbATR SHARED src/InterfaceATR.cpp)
-#find_package( OpenCV REQUIRED )
-#target_include_directories(mbATR PRIVATE include)
-target_link_libraries (mbATR -ltensorflow ${OpenCV_LIBS})
+# add_library(mbATR SHARED src/InterfaceATR.cpp)
+# #find_package( OpenCV REQUIRED )
+# #target_include_directories(mbATR PRIVATE include)
+# target_link_libraries (mbATR -ltensorflow ${OpenCV_LIBS})

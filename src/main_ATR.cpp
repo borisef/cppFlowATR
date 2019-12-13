@@ -6,31 +6,74 @@
 #include "cppflow/Model.h"
 #include "cppflow/Tensor.h"
 #include "cppflowATR/InterfaceATR.h"
+#include <cppflowATRInterface/Object_Detection_API.h>
+#include <cppflowATRInterface/Object_Detection_Types.h>
+#include <utils/imgUtils.h>
 
 #include <opencv2/opencv.hpp>
 #include <numeric>
 #include <iomanip>
-#include <chrono> 
+#include <chrono>
+#include <algorithm>
 
-
-using namespace std; 
+using namespace std;
 using namespace std::chrono;
-
-int main() {
-
-
-//ObjectDetectionManager* nm = CreateObjectDetector(); // before everything 
-
-
-///
-//InitObjectDetection() // new mission 
-
-
-// for loop 
-//OperateObjectDetectionAPI()
+using namespace OD;
 
 
 
+int main()
+{
+  int H = 4056;
+  int W = 3040;
+
+  std::vector <unsigned char> vv = readBytesFromFile("/home/borisef/projects/cppflowATR/00006160.raw");
+  cv::Mat* myRGB = new Mat(H, W,CV_8UC1);
+  convertYUV420toRGB(vv, H, W, myRGB);
+  
+  std::vector <unsigned char>* myVector;
+  convertYUV420toVector(vv, H, W, myVector);
+  
+  int stam1 = myVector->size();
+
+  // MATMON MISSION
+  MB_Mission mission1 = {
+      MB_MissionType::MATMON,       //mission1.missionType
+      e_OD_TargetSubClass::PRIVATE, //mission1.targetClas
+      e_OD_TargetColor::WHITE       //mission1.targetColor
+  };
+
+  OD_SupportData supportData1 = {
+      4096,                       //imageWidth
+      2160,                       //imageHeight
+      e_OD_ColorImageType::COLOR, // colorType;
+      100,                        //rangeInMeters
+      70.0f,                      //fcameraAngle; //BE
+      NULL,                       //cameraParams[10];//BE
+      NULL                        //float	spare[3];
+  };
+
+  OD_InitParams *initParams1 = new OD_InitParams();
+  initParams1->iniFilePath = "inifile.txt"; // path to ini file
+  initParams1->numOfObjects = 100;          // max number of items to be returned
+  initParams1->supportData = supportData1;
+  initParams1->mbMission = mission1;
+
+  ObjectDetectionManager *atrManager;
+  atrManager = CreateObjectDetector(initParams1); // before everything
+
+  // new mission
+  InitObjectDetection(atrManager, initParams1);
+
+
+  //load image 
+   // Read image
+  cv::Mat img, inp, imgS;
+  inp = cv::imread("/home/borisef/projects/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
+
+  int rows = inp.rows;
+  int cols = inp.cols;
+  cv::cvtColor(inp, inp, CV_BGR2RGB);
 
 
 
@@ -38,68 +81,60 @@ int main() {
 
 
 
+  // for loop
+  //OperateObjectDetectionAPI()
 
+  bool SHOW = true;
+  mbInterfaceATR *mbATR = new mbInterfaceATR();
 
+  mbATR->LoadNewModel("/home/borisef/projects/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb");
 
+  // Read image
+  // img = cv::imread("/home/borisef/projects/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
+  // int rows = img.rows;
+  // int cols = img.cols;
 
+  cv::resize(img, inp, cv::Size(4096, 2160));
+  cv::cvtColor(inp, inp, CV_BGR2RGB);
 
+  mbATR->RunRGBimage(inp);
 
+  float numIter = 5.0;
+  auto start = high_resolution_clock::now();
+  for (int i = 0; i < numIter; i++)
+  {
+    std::cout << "Start run *****" << std::endl;
+    mbATR->RunRGBimage(inp);
+  }
+  auto stop = high_resolution_clock::now();
+  auto duration = duration_cast<microseconds>(stop - start);
+  cout << "*** Duration per detection " << float(duration.count()) / (numIter * 1000000.0f) << " seconds " << endl;
 
+  // Visualize detected bounding boxes.
+  int num_detections = mbATR->GetResultNumDetections();
+  cout << "***** num_detections " << num_detections << endl;
 
-
-
-
-    bool SHOW = true;
-    mbInterfaceATR* mbATR = new mbInterfaceATR();
-
-
-    mbATR->LoadNewModel("/home/borisef/projects/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb");
-
-    // Read image
-    cv::Mat img, inp, imgS;
-    img = cv::imread("/home/borisef/projects/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
-
-    int rows = img.rows;
-    int cols = img.cols;
-
-	
-    cv::resize(img, inp, cv::Size(4096,2160));
-    cv::cvtColor(inp, inp, CV_BGR2RGB);
-
-    mbATR->RunRGBimage(inp);    
-
-    float numIter = 5.0;
-    auto start = high_resolution_clock::now(); 
-    for (int i=0;i<numIter;i++){
-      std::cout << "Start run *****" << std::endl;  
-      mbATR->RunRGBimage(inp);  
+  for (int i = 0; i < num_detections; i++)
+  {
+    int classId = mbATR->GetResultClasses(i);
+    float score = mbATR->GetResultScores(i);
+    auto bbox_data = mbATR->GetResultBoxes();
+    std::vector<float> bbox = {bbox_data[i * 4], bbox_data[i * 4 + 1], bbox_data[i * 4 + 2], bbox_data[i * 4 + 3]};
+    if (score > 0.1)
+    {
+      std::cout << "*****" << std::endl;
+      float x = bbox[1] * cols;
+      float y = bbox[0] * rows;
+      float right = bbox[3] * cols;
+      float bottom = bbox[2] * rows;
+      cv::rectangle(img, {(int)x, (int)y}, {(int)right, (int)bottom}, {125, 255, 51}, 2);
     }
-    auto stop = high_resolution_clock::now(); 
-    auto duration = duration_cast<microseconds>(stop - start); 
-    cout << "*** Duration per detection " << float(duration.count())/(numIter*1000000.0f) << " seconds "<<  endl;
+  }
 
-    // Visualize detected bounding boxes.
-    int num_detections = mbATR->GetResultNumDetections();
-    cout << "***** num_detections " << num_detections << endl;
-   
-
-    for (int i=0; i<num_detections; i++) {
-           int classId = mbATR->GetResultClasses(i);
-           float score = mbATR->GetResultScores(i);
-           auto bbox_data = mbATR->GetResultBoxes();
-           std::vector<float> bbox = {bbox_data[i*4], bbox_data[i*4+1], bbox_data[i*4+2], bbox_data[i*4+3]};
-         if (score > 0.1) {
-	         std::cout << "*****" << std::endl;
-             float x = bbox[1] * cols;
-             float y = bbox[0] * rows;
-             float right = bbox[3] * cols;
-             float bottom = bbox[2] * rows;
-             cv::rectangle(img, {(int)x, (int)y}, {(int)right, (int)bottom}, {125, 255, 51}, 2);
-         }
-    }
-	
-    if(SHOW){
-    cv::resize(img, imgS, cv::Size(1365, 720)) ;
+  if (SHOW)
+  {
+    cv::resize(img, imgS, cv::Size(1365, 720));
     cv::imshow("Image", imgS);
-    cv::waitKey(0);}
+    cv::waitKey(0);
+  }
 }

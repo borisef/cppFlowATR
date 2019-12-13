@@ -4,3 +4,6 @@ libs/shared/*
 .vscode
 temp
 temp/*
+*.tif
+*.png
+*.raw

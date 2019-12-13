@@ -4,15 +4,14 @@
 #include <cppflow/Tensor.h>
 #include <cppflow/Model.h>
 
-#include <cppflowATRInterface/Object_Detection_Types.h>
-#include <cppflowATRInterface/Object_Detection_API.h>
+
 
 #include <string>
 
 class mbInterfaceATR
 {
   protected:
-	bool active;
+	  bool active;
     Model* m_model;
     Tensor* m_outTensorNumDetections;
     Tensor* m_outNames2;
@@ -24,7 +23,7 @@ class mbInterfaceATR
     
     bool m_show;
   public:
-	mbInterfaceATR();
+	  mbInterfaceATR();
     bool LoadNewModel(const char* modelPath);
     int RunRGBimage(cv::Mat img);
     int GetResultNumDetections();
