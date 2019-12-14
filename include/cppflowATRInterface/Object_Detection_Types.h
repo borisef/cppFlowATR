@@ -22,7 +22,11 @@ enum OD_ErrorCode{
 enum e_OD_ColorImageType
 {
 	COLOR	= 0,
-	BLACK_WHITE = 1
+	BLACK_WHITE = 1,
+	YUV422 = 2,
+	RGB = 3,
+	BGR = 4, 
+	YUV = 5
 };
 
 enum MB_MissionType //BE
@@ -136,6 +140,8 @@ struct OD_DetectionItem
 	float tarScore;
 	float tarColorScore;  //BE
 	float occlusionScore; //BE
+	OD_DetectionItem();
+	void copyData(OD_DetectionItem tocopy);
 };
 
 struct OD_CycleInput
@@ -148,7 +154,12 @@ struct OD_CycleOutput
 {
 	unsigned int ImgID_output;
 	unsigned int numOfObjects;
+	unsigned int maxNumOfObjects; 
 	OD_DetectionItem *ObjectsArr;
+	OD_CycleOutput(OD_CycleOutput & tocopy);
+	OD_CycleOutput(int maxTargets);
+
+
 };
 
 #endif // OBJECT_DETECTION_TYPES_H

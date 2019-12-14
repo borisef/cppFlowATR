@@ -28,29 +28,30 @@ int main()
   int W = 3040;
 
   
-  // MATMON MISSION
+  // Mission
   MB_Mission mission1 = {
       MB_MissionType::MATMON,       //mission1.missionType
       e_OD_TargetSubClass::PRIVATE, //mission1.targetClas
       e_OD_TargetColor::WHITE       //mission1.targetColor
   };
-
+// support data
   OD_SupportData supportData1 = {
-      H,                       //imageWidth
-      W,                       //imageHeight
-      e_OD_ColorImageType::COLOR, // colorType;
-      100,                        //rangeInMeters
+      H,W,                       //imageHeight//imageWidth
+      e_OD_ColorImageType::YUV422, // colorType;
+      100,                        //rangeInMeters 
       70.0f,                      //fcameraAngle; //BE
       NULL,                       //cameraParams[10];//BE
       NULL                        //float	spare[3];
   };
 
+  // ATR params
   OD_InitParams *initParams1 = new OD_InitParams();
   initParams1->iniFilePath = "inifile.txt"; // path to ini file
   initParams1->numOfObjects = 100;          // max number of items to be returned
   initParams1->supportData = supportData1;
   initParams1->mbMission = mission1;
 
+  // Creation of ATR manager + new mission
   ObjectDetectionManager *atrManager;
   atrManager = CreateObjectDetector(initParams1); //first mission 
 
@@ -59,8 +60,25 @@ int main()
 
 
   //emulate buffer from RAW
-  std::vector <unsigned char> vv = readBytesFromFile("/home/borisef/projects/cppflowATR/00006160.raw");
+  std::vector <unsigned char> vecFromRaw = readBytesFromFile("/home/borisef/projects/cppflowATR/00006160.raw");
 
+
+  OD_CycleInput* ci1 = {
+    42, //unsigned int ImgID_input;
+	  &vecFromRaw// const unsigned char *ptr; // pointer to picture buffer
+  };
+
+  OD_CycleOutput* co = new OD_CycleOutput(initParams1->numOfObjects); // allocate empty cycle output buffer 
+  
+  OD_ErrorCode statusCycle;
+  statusCycle = OperateObjectDetectionAPI(atrManager , ci1 , co);
+
+
+  
+  
+  
+  
+  
   //emulate buffer from tif 
   cv::Mat inp = cv::imread("/home/borisef/projects/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
   cv::cvtColor(inp, inp, CV_BGR2RGB);
@@ -68,18 +86,14 @@ int main()
   std::vector<uint8_t > img_data;
   img_data.assign(inp.data, inp.data + inp.total() * inp.channels());
 
-  OD_CycleInput* ci1 = {
-    42, //unsigned int ImgID_input;
-	  &vv// const unsigned char *ptr; // pointer to picture buffer
-  };
-
+  
   OD_CycleInput* ci2 = {
     42, //unsigned int ImgID_input;
 	  &img_data// const unsigned char *ptr; // pointer to picture buffer
   };
 
 
-  OD_CycleOutput* co = NULL;
+  
 
   //TODO: call inference 
   OD_ErrorCode atrStatus = OperateObjectDetectionAPI(atrManager , ci1 , co );

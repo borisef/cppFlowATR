@@ -76,14 +76,9 @@ return true;
 
 
 
-bool convertYUV420toVector(vector <unsigned char> raw, int width, int height, vector <uint8_t>* outVector)//,
-                        // vector <unsigned char>* R = NULL, 
-                        // vector <unsigned char>* G = NULL,
-                        // vector <unsigned char>* B = NULL)
+bool convertYUV420toVector(vector <unsigned char> raw, int width, int height, vector <uint8_t>* outVector)
     {
-    // vector <unsigned char> Y ; Y.reserve(width*height);
-    // vector <unsigned char> U ; U.reserve(width*height);
-    // vector <unsigned char> V ; V.reserve(width*height);
+
     cv:Mat ymat(height, width,CV_8UC1), umat(height, width,CV_8UC1), vmat(height, width,CV_8UC1);
    
     int t = 0;
@@ -97,11 +92,6 @@ bool convertYUV420toVector(vector <unsigned char> raw, int width, int height, ve
         ymat.at<uint8_t>(i,j)=raw[t*2];
         if(skip >0)
         {
-        // U[2*t]=raw[t*2+1];
-        // U[2*t+1]=U[2*t];
-        // V[2*t]=raw[t*2+3];
-        // V[2*t+1]=V[2*t];
-        
         umat.at<uint8_t>(i,j)=raw[t*2 + 1];
         umat.at<uint8_t>(i,j+1)=raw[t*2 + 1];
         
@@ -130,4 +120,20 @@ bool convertYUV420toVector(vector <unsigned char> raw, int width, int height, ve
     outVector->assign(rgb.data, rgb.data + rgb.total() * rgb.channels());
 
 return true;
+}
+
+bool convertCvMatToVector(cv::Mat* inBGR, std::vector<uint8_t>* outVec )
+{
+    int h = inBGR->rows;
+    int w = inBGR->cols;
+    int c = inBGR->channels();
+
+    cv::Mat rgb(h, w, CV_8UC1);
+    cv::cvtColor(*inBGR, rgb, cv::COLOR_BGR2RGB);
+
+    outVec = new std::vector<uint8_t >();
+    outVec->reserve(w*h*c);
+    outVec->assign(rgb.data, rgb.data + rgb.total() * rgb.channels());
+
+    return true;
 }

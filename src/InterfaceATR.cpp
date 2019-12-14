@@ -33,12 +33,23 @@ int mbInterfaceATR::RunRGBimage(cv::Mat inp)
     // Put image in Tensor
     std::vector<uint8_t > img_data;
     img_data.assign(inp.data, inp.data + inp.total() * inp.channels());
-    m_inpName->set_data(img_data, {1,  2160, 4096, 3});
+    m_inpName->set_data(img_data, {1,  inp.rows, inp.cols, inp.channels()});
 
     m_model->run(m_inpName, {m_outTensorNumDetections, m_outNames2, m_outNames3, m_outNames4});
 
     return 1;
 }
+
+int mbInterfaceATR::RunRGBVector(std::vector<uint8_t > img_data, height, width)
+{
+    // Put image in Tensor
+    m_inpName->set_data(img_data, {1,  height, width, 3});
+    m_model->run(m_inpName, {m_outTensorNumDetections, m_outNames2, m_outNames3, m_outNames4});
+    return 1;
+}
+
+
+
 
 int mbInterfaceATR::GetResultNumDetections()
 {

@@ -26,6 +26,7 @@ class mbInterfaceATR
 	  mbInterfaceATR();
     bool LoadNewModel(const char* modelPath);
     int RunRGBimage(cv::Mat img);
+    int RunRGBVector(std::vector<uint8_t > img_data, height, width);
     int GetResultNumDetections();
     int GetResultClasses(int i);
     float GetResultScores(int i);

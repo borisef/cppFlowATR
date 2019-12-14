@@ -32,9 +32,13 @@ namespace OD
 #define OD_API_VERSION 0
 
 class DECLARE_API_FUNCTION ObjectDetectionManager
-{
+{	protected:
+		OD_InitParams* m_initParams;
+
 	public:
 		mbInterfaceATR* m_mbATR;
+		ObjectDetectionManager(OD_InitParams* ip):m_initParams(ip){}
+		
 
 };
 

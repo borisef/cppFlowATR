@@ -7,8 +7,8 @@ namespace OD
 
 DECLARE_API_FUNCTION ObjectDetectionManager* CreateObjectDetector(OD_InitParams * initParams)
 {
-    //TODO: use initParams
-    ObjectDetectionManager* new_manager = new ObjectDetectionManager();
+    // use initParams
+    ObjectDetectionManager* new_manager = new ObjectDetectionManager(initParams);
 
 
     return new_manager;
@@ -34,10 +34,19 @@ DECLARE_API_FUNCTION OD_ErrorCode InitObjectDetection(ObjectDetectionManager* od
 
 DECLARE_API_FUNCTION OD_ErrorCode OperateObjectDetectionAPI(ObjectDetectionManager* odm, OD_CycleInput* odIn, OD_CycleOutput* odOut)
 {
-    //TODO
-    //mbATR->RunRGBimage(odIn);  
+    //TODO: if raw 
+    //mbATR->RunRawImage(odIn->ptr);  
      
-    //odOut = mbATR-> GetResults()
+
+    //TODO: if rgb
+
+
+     
+    //odOut = mbATR-> GetCycleOutput()
+
+
+
+
     return OD_ErrorCode::OD_OK; 
 }
 
