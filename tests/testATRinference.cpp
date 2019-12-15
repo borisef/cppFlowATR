@@ -24,8 +24,9 @@ using namespace OD;
 
 int main()
 {
-  int H = 4056;
-  int W = 3040;
+  unsigned int H = 4056;
+  unsigned int W = 3040;
+  unsigned int frameID = 42;
 
   
   // Mission
@@ -46,7 +47,7 @@ int main()
 
   // ATR params
   OD_InitParams *initParams1 = new OD_InitParams();
-  initParams1->iniFilePath = "inifile.txt"; // path to ini file
+  initParams1->iniFilePath =  "inifile.txt"; // path to ini file
   initParams1->numOfObjects = 100;          // max number of items to be returned
   initParams1->supportData = supportData1;
   initParams1->mbMission = mission1;
@@ -62,117 +63,37 @@ int main()
   //emulate buffer from RAW
   std::vector <unsigned char> vecFromRaw = readBytesFromFile("/home/borisef/projects/cppflowATR/00006160.raw");
 
+  unsigned char *ptr = new unsigned char[vecFromRaw.size()];
+  std::copy(begin(vecFromRaw), end(vecFromRaw), ptr);
 
-  OD_CycleInput* ci1 = {
-    42, //unsigned int ImgID_input;
-	  &vecFromRaw// const unsigned char *ptr; // pointer to picture buffer
-  };
+  OD_CycleInput * ci1 = new OD_CycleInput(frameId);
+  c1->ptr = ptr;
 
   OD_CycleOutput* co = new OD_CycleOutput(initParams1->numOfObjects); // allocate empty cycle output buffer 
-  
   OD_ErrorCode statusCycle;
   statusCycle = OperateObjectDetectionAPI(atrManager , ci1 , co);
 
+  //TODO: draw 
+  //atrManager->SaveResultsATRimage(ci1,co,"res1.tif");
 
-  
-  
-  
-  
-  
-  //emulate buffer from tif 
-  cv::Mat inp = cv::imread("/home/borisef/projects/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
-  cv::cvtColor(inp, inp, CV_BGR2RGB);
-  // //put image in vector
-  std::vector<uint8_t > img_data;
-  img_data.assign(inp.data, inp.data + inp.total() * inp.channels());
 
-  
-  OD_CycleInput* ci2 = {
-    42, //unsigned int ImgID_input;
-	  &img_data// const unsigned char *ptr; // pointer to picture buffer
+  //TODO: run on image from file
+  OD_SupportData supportData2 = {
+      2160, 4096,                       //imageHeight//imageWidth
+      e_OD_ColorImageType::RGB, // colorType;
+      100,                        //rangeInMeters 
+      70.0f,                      //fcameraAngle; //BE
+      NULL,                       //cameraParams[10];//BE
+      NULL                        //float	spare[3];
   };
+ initParams1->supportData = supportData2;
+ // new mission
+  InitObjectDetection(atrManager, initParams1);
 
-
+  //TODO: draw
+  //atrManager->SaveResultsATRimage(ci1,co,"res2.tif");
+  
+  
   
 
-  //TODO: call inference 
-  OD_ErrorCode atrStatus = OperateObjectDetectionAPI(atrManager , ci1 , co );
-
-
-  //TODO: draw results using  OD_CycleOutput
-
-
-
-  //load image 
-   // Read image
-  //cv::Mat img, inp, imgS;
-  //inp = cv::imread("/home/borisef/projects/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
-
-  // int rows = inp.rows;
-  // int cols = inp.cols;
-  // cv::cvtColor(inp, inp, CV_BGR2RGB);
-
-
-
-
-
-
-
-
-  // for loop
-  //OperateObjectDetectionAPI()
-
-  bool SHOW = true;
-  mbInterfaceATR *mbATR = new mbInterfaceATR();
-
-  mbATR->LoadNewModel("/home/borisef/projects/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb");
-
-  // Read image
-  // img = cv::imread("/home/borisef/projects/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
-  // int rows = img.rows;
-  // int cols = img.cols;
-
-  cv::resize(img, inp, cv::Size(4096, 2160));
-  cv::cvtColor(inp, inp, CV_BGR2RGB);
-
-  mbATR->RunRGBimage(inp);
-
-  float numIter = 5.0;
-  auto start = high_resolution_clock::now();
-  for (int i = 0; i < numIter; i++)
-  {
-    std::cout << "Start run *****" << std::endl;
-    mbATR->RunRGBimage(inp);
-  }
-  auto stop = high_resolution_clock::now();
-  auto duration = duration_cast<microseconds>(stop - start);
-  cout << "*** Duration per detection " << float(duration.count()) / (numIter * 1000000.0f) << " seconds " << endl;
-
-  // Visualize detected bounding boxes.
-  int num_detections = mbATR->GetResultNumDetections();
-  cout << "***** num_detections " << num_detections << endl;
-
-  for (int i = 0; i < num_detections; i++)
-  {
-    int classId = mbATR->GetResultClasses(i);
-    float score = mbATR->GetResultScores(i);
-    auto bbox_data = mbATR->GetResultBoxes();
-    std::vector<float> bbox = {bbox_data[i * 4], bbox_data[i * 4 + 1], bbox_data[i * 4 + 2], bbox_data[i * 4 + 3]};
-    if (score > 0.1)
-    {
-      std::cout << "*****" << std::endl;
-      float x = bbox[1] * cols;
-      float y = bbox[0] * rows;
-      float right = bbox[3] * cols;
-      float bottom = bbox[2] * rows;
-      cv::rectangle(img, {(int)x, (int)y}, {(int)right, (int)bottom}, {125, 255, 51}, 2);
-    }
-  }
-
-  if (SHOW)
-  {
-    cv::resize(img, imgS, cv::Size(1365, 720));
-    cv::imshow("Image", imgS);
-    cv::waitKey(0);
-  }
 }

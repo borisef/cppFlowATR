@@ -24,8 +24,16 @@ OD_CycleOutput::OD_CycleOutput(OD_CycleOutput & tocopy)
     }
 }
 
-OD_CycleOutput::OD_CycleOutput (int maxTargets = 100)
+OD_CycleOutput::OD_CycleOutput (int maxTargets)
 {
+    ImgID_output = -1;
+	numOfObjects = 0;
+    maxNumOfObjects = maxTargets;
+	ObjectsArr = new OD_DetectionItem[maxTargets];
+}
+OD_CycleOutput::OD_CycleOutput ()
+{
+	int maxTargets = 100;
     ImgID_output = -1;
 	numOfObjects = 0;
     maxNumOfObjects = maxTargets;

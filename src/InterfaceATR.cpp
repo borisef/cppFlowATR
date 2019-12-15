@@ -1,5 +1,6 @@
 //#include "../include/cppflowATR/InterfaceATR.h"
 #include "cppflowATR/InterfaceATR.h"
+#include <utils/imgUtils.h>
 
 
 
@@ -40,15 +41,51 @@ int mbInterfaceATR::RunRGBimage(cv::Mat inp)
     return 1;
 }
 
-int mbInterfaceATR::RunRGBVector(std::vector<uint8_t > img_data, height, width)
+int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width)
+{
+    std::vector<uint8_t > img_data(height*width*3);
+    unsigned char* buffer = (unsigned char*)ptr;
+
+    for (int i =0;i<height*width*3;i++)
+        img_data[i]=buffer[i];
+
+    return(RunRGBVector(img_data,height,width));
+    
+}
+int mbInterfaceATR::RunRGBVector(std::vector<uint8_t > img_data, int height, int width)
 {
     // Put image in Tensor
     m_inpName->set_data(img_data, {1,  height, width, 3});
     m_model->run(m_inpName, {m_outTensorNumDetections, m_outNames2, m_outNames3, m_outNames4});
     return 1;
+
 }
+int mbInterfaceATR::RunRawImage(const unsigned char *ptr, int height, int width)
+{
+    
+    std::vector<uint8_t > img_data(height*width*3);
+    unsigned char* buffer = (unsigned char*)ptr;
+   
+    for (int i =0;i<height*width*3;i++)
+        img_data[i]=buffer[i];
 
 
+     //
+    cv::Mat* myRGB = new cv::Mat(height, width,CV_8UC1);
+    convertYUV420toRGB(img_data, height, width, myRGB);
+  // save JPG for debug
+    //std::vector<uint8_t > img_data;
+    img_data.assign(myRGB->data, myRGB->data + myRGB->total() * myRGB->channels());
+    
+    int status = RunRGBVector(img_data, height, width);
+    //std::vector<uint8_t >::size_type size = strlen((const char*)buffer);
+    //std::vector<uint8_t > vec(buffer, size + buffer);
+
+    //m_inpName->set_data(img_data, {1,  height, width, 3});
+    //m_model->run(m_inpName, {m_outTensorNumDetections, m_outNames2, m_outNames3, m_outNames4});
+    return 0;
+
+}
 
 
 int mbInterfaceATR::GetResultNumDetections()

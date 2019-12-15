@@ -37,8 +37,13 @@ class DECLARE_API_FUNCTION ObjectDetectionManager
 
 	public:
 		mbInterfaceATR* m_mbATR;
-		ObjectDetectionManager(OD_InitParams* ip):m_initParams(ip){}
-		
+		OD_InitParams* getParams(){return m_initParams;}
+		void setParams(odInitParams* ip){m_initParams = ip;}
+		int PopulateCycleOutput(OD_CycleOutput* cycleOutput);
+		bool SaveResultsATRimage(OD_CycleInput* ci,OD_CycleOutput* co, char* imgName);
+		//constructors
+		ObjectDetectionManager(OD_InitParams* ip):m_initParams(ip){m_mbATR = NULL;}
+		ObjectDetectionManager():m_initParams(NULL),m_mbATR(NULL){}
 
 };
 

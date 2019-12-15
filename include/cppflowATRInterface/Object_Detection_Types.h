@@ -148,6 +148,7 @@ struct OD_CycleInput
 {
 	unsigned int ImgID_input;
 	const unsigned char *ptr; // pointer to picture buffer
+	OD_CycleInput(int ii):ImgID_input(ii){ptr=NULL;}
 };
 
 struct OD_CycleOutput
@@ -156,8 +157,11 @@ struct OD_CycleOutput
 	unsigned int numOfObjects;
 	unsigned int maxNumOfObjects; 
 	OD_DetectionItem *ObjectsArr;
+
+	//constructors
 	OD_CycleOutput(OD_CycleOutput & tocopy);
 	OD_CycleOutput(int maxTargets);
+	OD_CycleOutput();
 
 
 };
