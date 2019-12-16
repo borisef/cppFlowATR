@@ -148,7 +148,9 @@ struct OD_CycleInput
 {
 	unsigned int ImgID_input;
 	const unsigned char *ptr; // pointer to picture buffer
-	OD_CycleInput(int ii):ImgID_input(ii){ptr=NULL;}
+	OD_CycleInput(int ii):ImgID_input(ii){ptr=nullptr;}
+	OD_CycleInput(int ii, const unsigned char *pp ):ImgID_input(ii){ptr=pp;}
+
 };
 
 struct OD_CycleOutput

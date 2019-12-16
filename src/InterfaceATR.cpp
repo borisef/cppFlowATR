@@ -66,24 +66,21 @@ int mbInterfaceATR::RunRawImage(const unsigned char *ptr, int height, int width)
     std::vector<uint8_t > img_data(height*width*3);
     unsigned char* buffer = (unsigned char*)ptr;
    
-    for (int i =0;i<height*width*3;i++)
+    for (int i =0;i<height*width*3;i++)//TODO: can we optimize it ? 
         img_data[i]=buffer[i];
 
 
      //
     cv::Mat* myRGB = new cv::Mat(height, width,CV_8UC1);
-    convertYUV420toRGB(img_data, height, width, myRGB);
+    convertYUV420toRGB(img_data, width, height, myRGB);
   // save JPG for debug
+    cv::imwrite("debug_yuv420torgb.tif",*myRGB);
     //std::vector<uint8_t > img_data;
     img_data.assign(myRGB->data, myRGB->data + myRGB->total() * myRGB->channels());
-    
+    delete myRGB;//??? TODO: is it safe? 
     int status = RunRGBVector(img_data, height, width);
-    //std::vector<uint8_t >::size_type size = strlen((const char*)buffer);
-    //std::vector<uint8_t > vec(buffer, size + buffer);
-
-    //m_inpName->set_data(img_data, {1,  height, width, 3});
-    //m_model->run(m_inpName, {m_outTensorNumDetections, m_outNames2, m_outNames3, m_outNames4});
-    return 0;
+    
+    return status; 
 
 }
 

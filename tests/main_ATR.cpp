@@ -24,8 +24,8 @@ using namespace OD;
 
 int main()
 {
-  int H = 4056;
-  int W = 3040;
+  unsigned int H = 4056;
+  unsigned int W = 3040;
 
   
   // MATMON MISSION
@@ -41,8 +41,8 @@ int main()
       e_OD_ColorImageType::COLOR, // colorType;
       100,                        //rangeInMeters
       70.0f,                      //fcameraAngle; //BE
-      NULL,                       //cameraParams[10];//BE
-      NULL                        //float	spare[3];
+      0,                       //cameraParams[10];//BE
+      0                        //float	spare[3];
   };
 
   OD_InitParams *initParams1 = new OD_InitParams();

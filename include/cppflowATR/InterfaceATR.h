@@ -23,7 +23,9 @@ class mbInterfaceATR
     
     bool m_show;
   public:
+    //constructors
 	  mbInterfaceATR();
+
     bool LoadNewModel(const char* modelPath);
     int RunRGBimage(cv::Mat img);
     int RunRGBVector(const unsigned char *ptr, int height, int width);
