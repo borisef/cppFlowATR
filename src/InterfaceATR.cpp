@@ -1,21 +1,52 @@
 //#include "../include/cppflowATR/InterfaceATR.h"
 #include "cppflowATR/InterfaceATR.h"
 #include <utils/imgUtils.h>
+#include <iostream>
 
 
 
 mbInterfaceATR::mbInterfaceATR()
 {
+    cout << "Construct mbInterfaceATR" <<endl;
     m_show = false;
+    m_model = nullptr;
+    m_outTensorNumDetections = nullptr;
+    m_outNames2 = nullptr;
+    m_outNames3 = nullptr;
+    m_outNames4 = nullptr;
+    m_inpName  = nullptr;
 
+}
+mbInterfaceATR::~mbInterfaceATR()
+{
+    cout << "Destruct mbInterfaceATR" <<endl;
+
+     if(m_model != nullptr)
+    {
+        delete m_model;
+        delete m_outTensorNumDetections;
+        delete m_outNames2;
+        delete m_outNames3;
+        delete m_outNames4;
+        delete m_inpName;
+    }
 }
 
 bool mbInterfaceATR::LoadNewModel(const char* modelPath)
 {
+    std::cout<< " LoadNewModel begin" << std::endl;
+
+    if(m_model != nullptr)
+    {
+        delete m_model;
+        delete m_outTensorNumDetections;
+        delete m_outNames2;
+        delete m_outNames3;
+        delete m_outNames4;
+        delete m_inpName;
+    }
+
     m_model = new Model(modelPath);
-
-
-
     m_outTensorNumDetections = new Tensor(*m_model, "num_detections");
     m_outNames2 = new Tensor(*m_model, "detection_scores");
     m_outNames3 = new Tensor(*m_model, "detection_boxes");

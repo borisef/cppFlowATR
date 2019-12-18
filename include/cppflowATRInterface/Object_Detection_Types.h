@@ -140,16 +140,16 @@ struct OD_DetectionItem
 	float tarScore;
 	float tarColorScore;  //BE
 	float occlusionScore; //BE
-	OD_DetectionItem();
-	void copyData(OD_DetectionItem tocopy);
+	//OD_DetectionItem();
+	//void copyData(OD_DetectionItem tocopy);
 };
 
 struct OD_CycleInput
 {
 	unsigned int ImgID_input;
 	const unsigned char *ptr; // pointer to picture buffer
-	OD_CycleInput(int ii):ImgID_input(ii){ptr=nullptr;}
-	OD_CycleInput(int ii, const unsigned char *pp ):ImgID_input(ii){ptr=pp;}
+	//OD_CycleInput(int ii):ImgID_input(ii){ptr=nullptr;}
+	//OD_CycleInput(int ii, const unsigned char *pp ):ImgID_input(ii){ptr=pp;}
 
 };
 
@@ -161,9 +161,9 @@ struct OD_CycleOutput
 	OD_DetectionItem *ObjectsArr;
 
 	//constructors
-	OD_CycleOutput(OD_CycleOutput & tocopy);
-	OD_CycleOutput(int maxTargets);
-	OD_CycleOutput();
+	// OD_CycleOutput(OD_CycleOutput & tocopy);
+	// OD_CycleOutput(int maxTargets);
+	// OD_CycleOutput();
 
 
 };

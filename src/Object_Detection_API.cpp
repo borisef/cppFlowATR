@@ -16,7 +16,14 @@ DECLARE_API_FUNCTION ObjectDetectionManager *CreateObjectDetector(OD_InitParams 
 
 DECLARE_API_FUNCTION OD_ErrorCode TerminateObjectDetection(ObjectDetectionManager *odm)
 {
-    delete odm;
+    if (odm != nullptr)
+    {
+        if (odm->m_mbATR != nullptr)
+            delete odm->m_mbATR;
+
+        delete odm;
+        odm = nullptr;
+    }
     return OD_ErrorCode::OD_OK;
 }
 
@@ -28,7 +35,7 @@ DECLARE_API_FUNCTION OD_ErrorCode InitObjectDetection(ObjectDetectionManager *od
     {
         mbATR = new mbInterfaceATR();
         //TODO: decide which model to take (if to take or stay with old )
-        mbATR->LoadNewModel("/home/borisef/projects/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb");
+        mbATR->LoadNewModel(odInitParams->iniFilePath);
         odm->m_mbATR = mbATR;
     }
 
@@ -41,7 +48,7 @@ DECLARE_API_FUNCTION OD_ErrorCode InitObjectDetection(ObjectDetectionManager *od
         }
         //TODO: decide which model to take (if to take or stay with old )
         mbATR = new mbInterfaceATR();
-        mbATR->LoadNewModel("/home/borisef/projects/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb");
+        mbATR->LoadNewModel(odInitParams->iniFilePath);
         odm->m_mbATR = mbATR;
     }
 
@@ -89,7 +96,7 @@ bool DECLARE_API_FUNCTION ObjectDetectionManager::SaveResultsATRimage(OD_CycleIn
     std::vector<uint8_t> img_data(h * w * 3);
     if (colortype == e_OD_ColorImageType::YUV422) // if raw
     {
-        
+
         for (int i = 0; i < h * w * 3; i++)
             img_data[i] = buffer[i];
 
@@ -113,11 +120,12 @@ bool DECLARE_API_FUNCTION ObjectDetectionManager::SaveResultsATRimage(OD_CycleIn
         int classId = co->ObjectsArr[i].tarClass;
         float score = co->ObjectsArr[i].tarScore;
         OD_BoundingBox bbox_data = co->ObjectsArr[i].tarBoundingBox;
-        
+
         std::vector<float> bbox = {bbox_data.x1, bbox_data.x2, bbox_data.y1, bbox_data.y2};
-        
+
         if (score > 0.1)
         {
+            cout << "add rectangle to drawing" <<endl;
             float x = bbox[1] * w;
             float y = bbox[0] * h;
             float right = bbox[3] * w;
@@ -126,7 +134,7 @@ bool DECLARE_API_FUNCTION ObjectDetectionManager::SaveResultsATRimage(OD_CycleIn
             cv::rectangle(*myRGB, {(int)x, (int)y}, {(int)right, (int)bottom}, {125, 255, 51}, 2);
         }
     }
-    cout<<" Done reading targets"<<endl;
+    cout << " Done reading targets" << endl;
     if (show)
     {
         cv::Mat imgS;
@@ -134,14 +142,22 @@ bool DECLARE_API_FUNCTION ObjectDetectionManager::SaveResultsATRimage(OD_CycleIn
         cv::imshow("Image", imgS);
         cv::waitKey(0);
     }
-    cv::Mat bgr(h, w, CV_8UC1);
+    cv::Mat bgr(h, w, CV_8UC3);
     cv::cvtColor(*myRGB, bgr, cv::COLOR_RGB2BGR);
     cv::imwrite(imgNam, bgr);
-    delete myRGB;
+     cout << " Done saving image" << endl;
+    if(myRGB != nullptr){
+        myRGB->release();
+        delete myRGB; // TODO
+        
+    }
+    cout << " Done cleaning image" << endl;
+
 }
 
 int DECLARE_API_FUNCTION ObjectDetectionManager::PopulateCycleOutput(OD_CycleOutput *cycleOutput)
 {
+    
 
     OD_DetectionItem *odi = cycleOutput->ObjectsArr;
 
@@ -165,10 +181,13 @@ DECLARE_API_FUNCTION OD_ErrorCode ResetObjectDetection(ObjectDetectionManager *o
     return OD_ErrorCode::OD_OK;
 }
 
-DECLARE_API_FUNCTION  OD_ErrorCode DeleteObjectDetection(ObjectDetectionManager* odm)
-{
-    delete odm;
-}
+// DECLARE_API_FUNCTION  OD_ErrorCode DeleteObjectDetection(ObjectDetectionManager* odm)
+// {
+//     if(odm->m_mbATR != nullptr)
+//         delete odm->m_mbATR;
+//     delete odm;
+//     return OD_ErrorCode::OD_OK;
+// }
 
 DECLARE_API_FUNCTION OD_ErrorCode GetMetry(ObjectDetectionManager *odm, int size, void *metry)
 {

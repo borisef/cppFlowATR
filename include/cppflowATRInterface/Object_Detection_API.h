@@ -42,8 +42,8 @@ class DECLARE_API_FUNCTION ObjectDetectionManager
 		int PopulateCycleOutput(OD_CycleOutput* cycleOutput);
 		bool SaveResultsATRimage(OD_CycleInput* ci,OD_CycleOutput* co, char* imgName, bool show);
 		//constructors
-		ObjectDetectionManager(OD_InitParams* ip):m_initParams(ip){m_mbATR = NULL;}
-		ObjectDetectionManager():m_initParams(NULL),m_mbATR(NULL){}
+		ObjectDetectionManager(OD_InitParams* ip):m_initParams(ip){m_mbATR = nullptr;}
+		ObjectDetectionManager():m_initParams(nullptr),m_mbATR(nullptr){}
 
 };
 
@@ -55,7 +55,7 @@ extern "C"
 	DECLARE_API_FUNCTION  OD_ErrorCode InitObjectDetection(ObjectDetectionManager*, OD_InitParams *);
 	DECLARE_API_FUNCTION  OD_ErrorCode OperateObjectDetectionAPI(ObjectDetectionManager* , OD_CycleInput* , OD_CycleOutput* );
 	DECLARE_API_FUNCTION  OD_ErrorCode ResetObjectDetection(ObjectDetectionManager*);
-	DECLARE_API_FUNCTION  OD_ErrorCode DeleteObjectDetection(ObjectDetectionManager*);
+	//DECLARE_API_FUNCTION  OD_ErrorCode DeleteObjectDetection(ObjectDetectionManager*);
 	DECLARE_API_FUNCTION  OD_ErrorCode GetMetry(ObjectDetectionManager*, int size, void *metry);
 }
 }

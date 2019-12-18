@@ -67,7 +67,7 @@ bool convertYUV420toRGB(vector <unsigned char> raw, int width, int height, cv::M
     std::vector<cv::Mat> yuv_channels = { ymat, umat, vmat };
     cv::merge(yuv_channels, yuv);
 
-    cv::Mat rgb(height, width,CV_8UC1);
+    // cv::Mat rgb(height, width,CV_8UC3);
     cv::cvtColor(yuv, *outRGB, cv::COLOR_YUV2RGB);
     cv::imwrite("RGB.tif", *outRGB);
 
@@ -111,7 +111,7 @@ bool convertYUV420toVector(vector <unsigned char> raw, int width, int height, ve
     std::vector<cv::Mat> yuv_channels = { ymat, umat, vmat };
     cv::merge(yuv_channels, yuv);
 
-    cv::Mat rgb(height, width,CV_8UC1);
+    cv::Mat rgb(height, width,CV_8UC3);
     cv::cvtColor(yuv, rgb, cv::COLOR_YUV2RGB);
    
     outVector = new std::vector<uint8_t >();
@@ -128,7 +128,7 @@ bool convertCvMatToVector(cv::Mat* inBGR, std::vector<uint8_t>* outVec )
     int w = inBGR->cols;
     int c = inBGR->channels();
 
-    cv::Mat rgb(h, w, CV_8UC1);
+    cv::Mat rgb(h, w, CV_8UC3);
     cv::cvtColor(*inBGR, rgb, cv::COLOR_BGR2RGB);
 
     outVec = new std::vector<uint8_t >();

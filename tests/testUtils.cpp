@@ -22,12 +22,12 @@ int main()
   std::vector<unsigned char> rawVec = readBytesFromFile("00006160.raw");
 
   //
-  cv::Mat *myRGB = new Mat(H, W, CV_8UC1);
+  cv::Mat *myRGB = new Mat(H, W, CV_8UC3);
   convertYUV420toRGB(rawVec, H, W, myRGB);
   // save JPG for debug
 
   //DEBUG
-  cv::Mat bgr(H, W, CV_8UC1);
+  cv::Mat bgr(H, W, CV_8UC3);
   cv::cvtColor(*myRGB, bgr, cv::COLOR_RGB2BGR);
   cv::imwrite("raw2im.tif", bgr);
 

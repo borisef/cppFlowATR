@@ -25,6 +25,7 @@ class mbInterfaceATR
   public:
     //constructors
 	  mbInterfaceATR();
+    ~mbInterfaceATR();
 
     bool LoadNewModel(const char* modelPath);
     int RunRGBimage(cv::Mat img);

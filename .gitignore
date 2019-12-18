@@ -8,3 +8,6 @@ temp/*
 *.png
 *.raw
 *.pb
+junk/
+junk/*
+

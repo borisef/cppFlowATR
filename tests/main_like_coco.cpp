@@ -25,7 +25,7 @@ int main() {
 
     auto inpName = new Tensor(model, "image_tensor");
 
-    bool SHOW = true;
+    bool SHOW = false;
     // Read image
     cv::Mat img, inp, imgS;
     //img = cv::imread("/home/borisef/projects/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
@@ -34,18 +34,18 @@ int main() {
     int rows = img.rows;
     int cols = img.cols;
 	
-    cv::resize(img, inp, cv::Size(4096,2160));
-    cv::cvtColor(inp, inp, CV_BGR2RGB);
+    //cv::resize(img, inp, cv::Size(4096,2160));
+    cv::cvtColor(img, inp, CV_BGR2RGB);
 
     //put image in vector
     std::vector<uint8_t > img_data;
     img_data.assign(inp.data, inp.data + inp.total() * inp.channels());
     
     // Put VECTOR in Tensor
-    inpName->set_data(img_data, {1,  2160, 4096, 3});
+    inpName->set_data(img_data, {1,  rows, cols, 3});
     model.run(inpName, {outNames1, outNames2, outNames3, outNames4});
 
-    float numIter = 10.0;
+    float numIter = 3.0;
     auto start = high_resolution_clock::now(); 
     for (int i=0;i<numIter;i++){
     	std::cout << "Start run *****" << std::endl;  
@@ -80,4 +80,7 @@ int main() {
         cv::resize(img, imgS, cv::Size(1365, 720)) ;
         cv::imshow("Image", imgS);
         cv::waitKey(0);}
+
+return 0;
+
 }
