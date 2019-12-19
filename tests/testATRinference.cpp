@@ -39,7 +39,7 @@ int main() {
     // support data
     OD_SupportData supportData1 = {
         H, W,                        //imageHeight//imageWidth
-        e_OD_ColorImageType::RGB, // colorType;
+        e_OD_ColorImageType::RGB,    //colorType;
         100,                         //rangeInMeters
         70.0f,                       //fcameraAngle; //BE
         0,                           //TEMP:cameraParams[10];//BE
@@ -47,7 +47,14 @@ int main() {
     };
 
     OD_InitParams initParams1 = 
-    {   (char*)"/home/borisef/projects/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb",  
+    {   
+        //(char*)"/home/borisef/projects/MB2/TrainedModels/faster_MB_140719_persons_sel4/frozen_390k/frozen_inference_graph.pb", //fails
+        //(char*)"tryTRT_humans.pb", //sometimes works  
+        //(char*)"/home/borisef/projects/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb", //works
+       //(char*)"tryTRT_humans.pb", //sometimes OK, sometimes crashes the system
+       (char*)"frozen_inference_graph_humans.pb",
+       //  (char*)"tryTRT_all.pb", //Nope
+       // (char*)"/home/borisef/projects/cppflowATR/frozen_inference_graph_all.pb",
         100,                  // max number of items to be returned
         supportData1,
         mission1

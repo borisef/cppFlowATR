@@ -14,10 +14,12 @@
 #include "Tensor.h"
 
 class Tensor;
+TF_SessionOptions* CreateSessionOptions ( double percentage );
 
 class Model {
 public:
     explicit Model(const std::string&);
+    Model(const std::string&, TF_SessionOptions* sess_opts);
     ~Model();
 
     void init();

@@ -9,6 +9,8 @@ namespace OD
 DECLARE_API_FUNCTION ObjectDetectionManager *CreateObjectDetector(OD_InitParams *initParams)
 {
     // use initParams
+    cout<<"Creating graph from" << initParams->iniFilePath<<std::endl;
+
     ObjectDetectionManager *new_manager = new ObjectDetectionManager(initParams);
 
     return new_manager;
