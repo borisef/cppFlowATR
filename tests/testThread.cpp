@@ -2,10 +2,6 @@
 #include <future>
 using namespace std;
 
-void outStam(void)
-{
-
-}
 
 class Runner
 {
@@ -16,11 +12,6 @@ class Runner
 	std::future<void> result;
     int countR1 = 0;
     int countR2 = 0;
-    
-
-
-
-
     
      void Run1()
     {
@@ -54,30 +45,6 @@ class RunnerHandler:public Runner
         Run2();
         m_isBusy = false;
     }
-
-    public:
-    
-    public: 
-        // void Stam(int a)
-        // {
-
-
-        // }
-        // void Run2()
-        // {
-        //     cout<<"Hadler Run2"<<endl;
-            
-        //     Runner::Run2();
-            
-        // }
-        // void RunMe(int s)
-        // {
-        //     cout<<" * * *"<<endl<<"Run in handler"<<endl;
-        //     Run1();
-        //     Run2();
-        //     cout<<"Finished Running step " <<s<<endl;
-
-        // }
 
 };
 
