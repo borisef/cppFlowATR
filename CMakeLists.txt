@@ -33,10 +33,17 @@ target_link_libraries (testUtils  ${OpenCV_LIBS})
 
 add_executable(testATRInference  tests/testATRinference.cpp src/Model.cpp src/Tensor.cpp 
                                     src/imgUtils.cpp src/Object_Detection_API.cpp src/InterfaceATR.cpp)
+
+
+add_executable(testTamir tests/testATRinference.cpp)
+FIND_LIBRARY(MY_LIB1 NAMES libmbATR.so PATHS /home/borisef/projects/cppflowATR/build )
+target_link_libraries (testTamir  ${MY_LIB} ${OpenCV_LIBS} ${MY_LIB1})
+
 #target_link_libraries (testATRInference -ltensorflow ${OpenCV_LIBS})
 target_link_libraries (testATRInference ${MY_LIB} ${OpenCV_LIBS})
 
 #SO 
-add_library(mbATR SHARED src/InterfaceATR.cpp  src/Object_Detection_API.cpp)
+add_library(mbATR SHARED    src/InterfaceATR.cpp  src/Object_Detection_API.cpp
+                            src/Model.cpp src/Tensor.cpp    src/imgUtils.cpp)
 target_link_libraries (mbATR -ltensorflow ${OpenCV_LIBS})
 

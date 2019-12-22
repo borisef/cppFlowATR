@@ -13,6 +13,8 @@ DECLARE_API_FUNCTION ObjectDetectionManager *CreateObjectDetector(OD_InitParams 
 
     ObjectDetectionManager *new_manager = new ObjectDetectionManager(initParams);
 
+    cout<<"Created ObjectDetectionManager "<<endl;
+
     return new_manager;
 }
 
@@ -31,28 +33,23 @@ DECLARE_API_FUNCTION OD_ErrorCode TerminateObjectDetection(ObjectDetectionManage
 
 DECLARE_API_FUNCTION OD_ErrorCode InitObjectDetection(ObjectDetectionManager *odm, OD_InitParams *odInitParams)
 {
+    cout<<"Entering InitObjectDetection"<<endl;
     mbInterfaceATR *mbATR = nullptr;
     //initialization
     if (odm->m_mbATR == nullptr)
     {
         mbATR = new mbInterfaceATR();
+        cout<<"Create new mbInterfaceATR in InitObjectDetection"<<endl;
         //TODO: decide which model to take (if to take or stay with old )
         mbATR->LoadNewModel(odInitParams->iniFilePath);
         odm->m_mbATR = mbATR;
+        cout<<"Executed LoadNewModel in  InitObjectDetection"<<endl;
     }
 
     odm->setParams(odInitParams);
-    if (0)
-    {
-        if (odm->m_mbATR != nullptr)
-        {
-            delete (odm->m_mbATR);
-        }
-        //TODO: decide which model to take (if to take or stay with old )
-        mbATR = new mbInterfaceATR();
-        mbATR->LoadNewModel(odInitParams->iniFilePath);
-        odm->m_mbATR = mbATR;
-    }
+    
+    cout<<"Finished InitObjectDetection"<<endl;
+    
 
     return OD_ErrorCode::OD_OK;
 }
