@@ -74,8 +74,22 @@ int mbInterfaceATR::RunRGBimage(cv::Mat inp)
 
 int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width)
 {
+
+    cout << " RunRGBVector:Internal Run on RGB Vector on ptr*" << endl;
+
+
     std::vector<uint8_t > img_data(height*width*3);
     unsigned char* buffer = (unsigned char*)ptr;
+
+    cout << " RunRGBVector:casted buffer to unsigned char* " << endl;
+
+    cv::Mat tempIm(height, width,CV_8UC3);
+    cout << " RunRGBVector:copy buffer to cv::Mat* " << endl;
+    tempIm.data = buffer; //TODO ???
+    cv::cvtColor(tempIm, tempIm, cv::COLOR_RGB2BGR);//TEMP
+    cout << " RunRGBVector:saving cv::Mat* " << endl;
+    cv::imwrite("testRGBbuffer.tif",tempIm);
+
 
     for (int i =0;i<height*width*3;i++)
         img_data[i]=buffer[i];
@@ -85,6 +99,7 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
 }
 int mbInterfaceATR::RunRGBVector(std::vector<uint8_t > img_data, int height, int width)
 {
+    cout << " RunRGBVector:Internal Run on RGB Vector on vector<uint8_t> " << endl;
     // Put image in Tensor
     m_inpName->set_data(img_data, {1,  height, width, 3});
     m_model->run(m_inpName, {m_outTensorNumDetections, m_outNames2, m_outNames3, m_outNames4});
@@ -102,7 +117,7 @@ int mbInterfaceATR::RunRawImage(const unsigned char *ptr, int height, int width)
 
 
      //
-    cv::Mat* myRGB = new cv::Mat(height, width,CV_8UC1);
+    cv::Mat* myRGB = new cv::Mat(height, width,CV_8UC3);
     convertYUV420toRGB(img_data, width, height, myRGB);
   // save JPG for debug
     cv::imwrite("debug_yuv420torgb.tif",*myRGB);

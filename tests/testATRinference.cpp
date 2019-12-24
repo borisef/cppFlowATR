@@ -25,8 +25,8 @@ int main() {
     bool SHOW = false;
     float numIter = 3.0;
     
-    unsigned int H =  4096;
-    unsigned int W =  2160;
+    unsigned int W =  4096;
+    unsigned int H =  2160;
     unsigned int frameID = 42;
 
     // Mission
@@ -38,7 +38,7 @@ int main() {
 
     // support data
     OD_SupportData supportData1 = {
-        H, W,                        //imageHeight//imageWidth
+        W, H,                        //imageHeight//imageWidth
         e_OD_ColorImageType::RGB,    //colorType;
         100,                         //rangeInMeters
         70.0f,                       //fcameraAngle; //BE
@@ -109,13 +109,13 @@ int main() {
     //release buffer
     delete ptrTif;
 
-    H = 4056;//TODO: flip
-    W = 3040;
+    W = 4056;
+    H = 3040;
     frameID++;
 
     // change  support data
     OD_SupportData supportData2 = {
-        H, W,                        //imageHeight//imageWidth
+        W, H,                        //imageHeight//imageWidth
         e_OD_ColorImageType::YUV422, // colorType;
         100,                         //rangeInMeters
         70.0f,                       //fcameraAngle; //BE
