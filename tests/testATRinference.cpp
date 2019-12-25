@@ -22,7 +22,7 @@ using namespace std::chrono;
 
 int main() {
 
-    bool SHOW = false;
+    bool SHOW = true;
     float numIter = 3.0;
     
     unsigned int W =  4096;
@@ -48,13 +48,13 @@ int main() {
 
     OD_InitParams initParams1 = 
     {   
-        //(char*)"/home/borisef/projects/MB2/TrainedModels/faster_MB_140719_persons_sel4/frozen_390k/frozen_inference_graph.pb", //fails
+        //(char*)"/home/magshim/MB2/TrainedModels/faster_MB_140719_persons_sel4/frozen_390k/frozen_inference_graph.pb", //fails
         //(char*)"tryTRT_humans.pb", //sometimes works  
-        //(char*)"/home/borisef/projects/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb", //works
+        //(char*)"/home/magshim/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb", //works
        //(char*)"tryTRT_humans.pb", //sometimes OK, sometimes crashes the system
-       (char*)"frozen_inference_graph_humans.pb",
+       (char*)"graphs/frozen_inference_graph_humans.pb",
        //  (char*)"tryTRT_all.pb", //Nope
-       // (char*)"/home/borisef/projects/cppflowATR/frozen_inference_graph_all.pb",
+       // (char*)"/home/magshim/cppflowATR/frozen_inference_graph_all.pb",
         100,                  // max number of items to be returned
         supportData1,
         mission1
@@ -73,7 +73,7 @@ int main() {
      //emulate buffer from TIF
     cout << " ***  Read tif image to rgb buffer  ***  " << endl;
 
-    cv::Mat inp1 = cv::imread("00000018.tif", CV_LOAD_IMAGE_COLOR);
+    cv::Mat inp1 = cv::imread("media/00000018.tif", CV_LOAD_IMAGE_COLOR);
     cv::cvtColor(inp1, inp1, CV_BGR2RGB);
 
     //put image in vector
@@ -128,7 +128,7 @@ int main() {
     InitObjectDetection(atrManager, &initParams1);
 
     //emulate buffer from RAW
-    std::vector<unsigned char> vecFromRaw = readBytesFromFile("00006160.raw");
+    std::vector<unsigned char> vecFromRaw = readBytesFromFile("media/00006160.raw");
 
      
     unsigned char *ptrRaw = new unsigned char[vecFromRaw.size()];
