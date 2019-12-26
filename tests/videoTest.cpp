@@ -1,22 +1,28 @@
 //by itay
 
 #define VIDEO_PATH "media/00000018.MP4"
-
+#define CONFIG_PATH "config.ini"
 #include <opencv2/opencv.hpp>
 #include "cppflow/Model.h"
 #include "cppflow/Tensor.h"
+
 #include <iostream>
+#include <exception>
 
 #include <cppflowATRInterface/Object_Detection_API.h>
 #include <cppflowATRInterface/Object_Detection_Types.h>
 #include <utils/imgUtils.h>
 
+#include "inih/INIReader.h"
+
 void doATRinference(cv::Mat inp1, OD::ObjectDetectionManager *atrManager);
+OD_InitParams *loadConfig(string path);
 OD::ObjectDetectionManager *createAtrManager();
 
 int main()
 {
-  cv::Mat frame(2160, 4096, CV_8UC3);
+
+  cv::Mat frame;
   cv::VideoCapture cap(VIDEO_PATH);
   OD::ObjectDetectionManager *atrManager = createAtrManager();
 
@@ -63,6 +69,59 @@ int main()
   cv::destroyAllWindows();
 
   return 0;
+}
+
+OD_InitParams *loadConfig(string path)
+{
+  INIReader *reader = new INIReader(path);
+
+  if (reader->ParseError() < 0)
+  {
+    throw "error loading config file \"" + path + "\" is a directory or doesn't exist.";
+  }
+
+  std::cout << "Config loaded from 'test.ini': version="
+            << reader->GetInteger("protocol", "version", -1)
+            << ", name=" << reader->Get("user", "name", "UNKNOWN")
+            // << ", email=" << reader->Get("user", "email", "UNKNOWN")
+            // << ", pi=" << reader->GetReal("user", "pi", -1)
+            // << ", active=" << reader->GetBoolean("user", "active", true)
+            << std::endl;
+
+  bool SHOW = false;
+  float numIter = 3.0;
+
+  MB_Mission *mission1 = new MB_Mission();
+  *mission1 = {
+      MB_MissionType::MATMON,       //mission1.missionType
+      e_OD_TargetSubClass::PRIVATE, //mission1.targetClas
+      e_OD_TargetColor::WHITE       //mission1.targetColor
+  };
+
+  // support data
+  OD_SupportData *supportData1 = new OD_SupportData();
+  *supportData1 = {
+      (unsigned int)reader->GetInteger("supportData", "height", 0), //imageHeight
+      (unsigned int)reader->GetInteger("supportData", "width", 0),  //imageWidth
+
+      e_OD_ColorImageType::RGB, //colorType;
+      100,                      //rangeInMeters
+      70.0f,                    //fcameraAngle; //BE
+      0,                        //TEMP:cameraParams[10];//BE
+      0                         //TEMP: float	spare[3];
+  };
+
+  string *graph = new string();
+  *graph = reader->Get("initParams", "graph", "err");
+
+  OD_InitParams *initParams = new OD_InitParams();
+  *initParams = {
+      graph->c_str(),                                    //graph
+      reader->GetInteger("initParams", "max_items", -1), // max number of items to be returned
+      *supportData1,
+      *mission1};
+
+  return initParams;
 }
 
 void doATRinference(cv::Mat inp1, OD::ObjectDetectionManager *atrManager)
@@ -118,44 +177,9 @@ void doATRinference(cv::Mat inp1, OD::ObjectDetectionManager *atrManager)
 
 OD::ObjectDetectionManager *createAtrManager()
 {
-  bool SHOW = false;
-  float numIter = 3.0;
-
-  unsigned int H = 4096;
-  unsigned int W = 2160;
-  unsigned int frameID = 42;
 
   // Mission
-  MB_Mission *mission1 = new MB_Mission();
-  *mission1 = {
-      MB_MissionType::MATMON,       //mission1.missionType
-      e_OD_TargetSubClass::PRIVATE, //mission1.targetClas
-      e_OD_TargetColor::WHITE       //mission1.targetColor
-  };
-
-  // support data
-  OD_SupportData *supportData1 = new OD_SupportData();
-  *supportData1 = {
-      H, W,                     //imageHeight//imageWidth
-      e_OD_ColorImageType::RGB, //colorType;
-      100,                      //rangeInMeters
-      70.0f,                    //fcameraAngle; //BE
-      0,                        //TEMP:cameraParams[10];//BE
-      0                         //TEMP: float	spare[3];
-  };
-
-  OD_InitParams *initParams1 = new OD_InitParams();
-  (*initParams1) = {
-      //(char*)"/home/magshim/MB2/TrainedModels/faster_MB_140719_persons_sel4/frozen_390k/frozen_inference_graph.pb", //fails
-      //(char*)"tryTRT_humans.pb", //sometimes works
-      //(char*)"/home/magshim/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb", //works
-      //(char*)"tryTRT_humans.pb", //sometimes OK, sometimes crashes the system
-      (char *)"graphs/frozen_inference_graph_humans.pb",
-      //  (char*)"tryTRT_all.pb", //Nope
-      // (char*)"/home/magshim/cppflowATR/frozen_inference_graph_all.pb",
-      100, // max number of items to be returned
-      *supportData1,
-      *mission1};
+  OD_InitParams *initParams1 = loadConfig(CONFIG_PATH);
 
   // Creation of ATR manager + new mission
   OD::ObjectDetectionManager *atrManager = OD::CreateObjectDetector(initParams1); //first mission

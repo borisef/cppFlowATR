@@ -5,6 +5,7 @@ add_compile_options(-pthread)
 
 include_directories(PRIVATE include)
 
+AUX_SOURCE_DIRECTORY(src SRC)
 
 find_package( OpenCV REQUIRED )
 set(OpenCV_STATIC ON)
@@ -42,9 +43,7 @@ add_executable(testATRInference  tests/testATRinference.cpp src/Model.cpp src/Te
 #target_link_libraries (testATRInference -ltensorflow ${OpenCV_LIBS})
 target_link_libraries (testATRInference ${MY_LIB} ${OpenCV_LIBS})
 
-add_executable(videoTest  tests/videoTest.cpp src/Model.cpp src/Tensor.cpp 
-                                    src/imgUtils.cpp src/Object_Detection_API.cpp src/InterfaceATR.cpp
-                                    src/Object_Detection_Handler.cpp)
+add_executable(videoTest  tests/videoTest.cpp ${SRC})
 
 
 
