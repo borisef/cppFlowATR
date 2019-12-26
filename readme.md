@@ -1,7 +1,7 @@
 # CppFlowATR
-######a fork by borisef
+###### a fork by borisef
 
-##Installation
+## Installation
 
 - Clone the project:
 ```sh
@@ -30,8 +30,8 @@
 1) Make sure the paths in `CMakeLists.txt` are correct
 
 2) Build files using cmake:
-    ```sh
-        mkdir build
-        cd build
-        cmake ..
-        make ```
+```sh
+mkdir build
+cd build
+cmake ..
+make ```
