@@ -42,8 +42,11 @@ add_executable(testATRInference  tests/testATRinference.cpp src/Model.cpp src/Te
 
 #target_link_libraries (testATRInference -ltensorflow ${OpenCV_LIBS})
 target_link_libraries (testATRInference ${MY_LIB} ${OpenCV_LIBS})
-
 add_executable(videoTest  tests/videoTest.cpp ${SRC})
+
+
+add_executable(spliced_video_test  tests/spliced_video_test.cpp ${SRC})
+target_link_libraries (spliced_video_test ${MY_LIB} ${OpenCV_LIBS})
 
 
 
