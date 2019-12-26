@@ -6,6 +6,40 @@
 #include <algorithm>
 #include "cppflow/Model.h"
 
+TF_SessionOptions* CreateSessionOptions ( double percentage ) {
+  TF_Status* status = TF_NewStatus();
+  TF_SessionOptions* options = TF_NewSessionOptions();
+
+  // the following is an equivalent of setting this in Python:
+  // config = tf.ConfigProto( allow_soft_placement = True )
+  // config.gpu_options.allow_growth = True
+  // config.gpu_options.per_process_gpu_memory_fraction = percentage
+
+  // create a byte-array for the serialized ProtoConfig, set the mandatory bytes (first three and last four)
+  uint8_t config[15] = { 0x32, 0xb, 0x9, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x20, 0x1, 0x38, 0x1 };
+
+  // convert the desired percentage into a byte-array
+  uint8_t* bytes = reinterpret_cast<uint8_t*>(&percentage);
+
+  // put it to the config byte-array, from 3 to 10:
+  for ( int i = 0; i < sizeof( percentage ); i++ ) {     
+   config[i + 3] = bytes[i];
+  }
+
+  TF_SetConfig( options, (void *) config, 15, status );
+
+  if ( TF_GetCode( status ) != TF_OK ) {
+    std::cerr << "Can't set options: " << TF_Message( status ) << std::endl;
+
+    TF_DeleteStatus( status );
+    return nullptr;
+  }
+    
+  TF_DeleteStatus( status );
+  return options;
+}                                                    
+
+
 Model::Model(const std::string& model_filename) {
 
     this->status = TF_NewStatus();
@@ -13,6 +47,37 @@ Model::Model(const std::string& model_filename) {
 
     // Create the session.
     TF_SessionOptions* sess_opts = TF_NewSessionOptions();
+
+    this->session = TF_NewSession(this->graph, sess_opts, this->status);
+    TF_DeleteSessionOptions(sess_opts);
+
+    // Check the status
+    this->status_check(true);
+
+    // Create the graph
+    TF_Graph* g = this->graph;
+
+
+    // Import the graph definition
+    TF_Buffer* def = read(model_filename);
+    this->error_check(def != nullptr, "An error occurred reading the model");
+
+    TF_ImportGraphDefOptions* graph_opts = TF_NewImportGraphDefOptions();
+    TF_GraphImportGraphDef(g, def, graph_opts, this->status);
+    TF_DeleteImportGraphDefOptions(graph_opts);
+    TF_DeleteBuffer(def);
+
+
+    this->status_check(true);
+}
+
+Model::Model(const std::string& model_filename, TF_SessionOptions* so) {
+
+    this->status = TF_NewStatus();
+    this->graph = TF_NewGraph();
+
+    // Create the session.
+    TF_SessionOptions* sess_opts = so;
 
     this->session = TF_NewSession(this->graph, sess_opts, this->status);
     TF_DeleteSessionOptions(sess_opts);

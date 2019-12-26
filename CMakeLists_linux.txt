@@ -4,7 +4,7 @@ project(cppFlowATR)
 include_directories(PRIVATE include)
 find_package( OpenCV REQUIRED )
 
-#FIND_LIBRARY(MY_LIB NAMES libstam.so PATHS /home/borisef/projects/cppflowATR/libs/shared/)
+#FIND_LIBRARY(MY_LIB NAMES libstam.so PATHS /home/magshim/cppflowATR/libs/shared/)
 set(CMAKE_CXX_STANDARD 17)
 
 add_executable(main_like_coco src/main_like_coco.cpp src/Model.cpp src/Tensor.cpp)

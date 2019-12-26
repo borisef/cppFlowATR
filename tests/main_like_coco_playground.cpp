@@ -47,7 +47,7 @@ int main() {
     };
 
     OD_InitParams initParams1 = 
-    {   (char*)"/home/borisef/projects/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb",  
+    {   (char*)"frozen_inference_graph_all.pb",  
         100,                  // max number of items to be returned
         supportData1,
         mission1

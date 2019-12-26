@@ -59,10 +59,10 @@ int main()
 
 
   //emulate buffer from RAW
-  std::vector <unsigned char> vv = readBytesFromFile("/home/borisef/projects/cppflowATR/00006160.raw");
+  std::vector <unsigned char> vv = readBytesFromFile("/home/magshim/cppflowATR/00006160.raw");
 
   //emulate buffer from tif 
-  cv::Mat inp = cv::imread("/home/borisef/projects/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
+  cv::Mat inp = cv::imread("/home/magshim/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
   cv::cvtColor(inp, inp, CV_BGR2RGB);
   // //put image in vector
   std::vector<uint8_t > img_data;
@@ -97,7 +97,7 @@ int main()
   //load image 
    // Read image
   //cv::Mat img, inp, imgS;
-  //inp = cv::imread("/home/borisef/projects/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
+  //inp = cv::imread("/home/magshim/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
 
   // int rows = inp.rows;
   // int cols = inp.cols;
@@ -116,11 +116,11 @@ int main()
   bool SHOW = true;
   mbInterfaceATR *mbATR = new mbInterfaceATR();
 
-  mbATR->LoadNewModel("/home/borisef/projects/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb");
+  mbATR->LoadNewModel("/home/magshim/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb");
 
   // Read image
   cv:Mat img, imgS;
-  img = cv::imread("/home/borisef/projects/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
+  img = cv::imread("/home/magshim/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
   int rows = img.rows;
   int cols = img.cols;
 
