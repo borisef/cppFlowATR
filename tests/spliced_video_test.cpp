@@ -16,7 +16,7 @@
 int main()
 {
     INIReader *reader = new INIReader(CONFIG_PATH);
-    string path = reader->Get("spliced_video", "path", "") + "/*.bmp";
+    string path = reader->Get("spliced_video", "path", "") + "/*";
 
     vector<String> fn;
     cv::glob(path, fn, true);
