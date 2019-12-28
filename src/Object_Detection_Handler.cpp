@@ -37,7 +37,7 @@ ObjectDetectionManagerHandler::~ObjectDetectionManagerHandler()
 {
 
       if (m_mbATR != nullptr)
-        m_mbATR;
+        delete m_mbATR;
 }
 
 OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams* odInitParams) 
@@ -110,15 +110,6 @@ OD_ErrorCode  ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleInpu
 
 bool  ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleInput *ci, OD_CycleOutput *co, char *imgNam, bool show)
 {
-    // Create an output string stream
-    std::ostringstream streamObj2;
-    // Set Fixed -Point Notation
-    streamObj2 << std::fixed;
-//Add double to stream
-streamObj2 << 3.1456;
-// Get string from output string stream
-std::string strObj2 = streamObj2.str();
-
     //TODO:
     unsigned int fi = ci->ImgID_input;
     unsigned int h = m_initParams->supportData.imageHeight;

@@ -8,6 +8,17 @@
 
 namespace OD
 {
+ DECLARE_API_FUNCTION ObjectDetectionManager::ObjectDetectionManager()
+ {
+     m_initParams=nullptr;
+     
+ }
+ DECLARE_API_FUNCTION ObjectDetectionManager::ObjectDetectionManager(OD_InitParams * ip)
+ {
+     m_initParams=ip;
+     
+ }
+
 
  ObjectDetectionManager::ObjectDetectionManager()
  {

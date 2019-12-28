@@ -76,8 +76,8 @@ struct MB_Mission //BE
 
 struct OD_SupportData // extra data to support detection alg
 {
-	unsigned int imageWidth;
 	unsigned int imageHeight;
+	unsigned int imageWidth;
 	e_OD_ColorImageType colorType; 
 	float rangeInMeters;
 	float cameraAngle; //BE
@@ -87,7 +87,7 @@ struct OD_SupportData // extra data to support detection alg
 
 struct OD_InitParams
 {
-    char* iniFilePath; 		// path to ini file
+    const char* iniFilePath; 		// path to ini file
 	unsigned int numOfObjects; 	// max number of items to be returned
 	OD_SupportData  supportData;
 	

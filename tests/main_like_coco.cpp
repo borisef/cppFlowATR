@@ -16,7 +16,7 @@ using namespace std::chrono;
 
 int main() {
     //Model model("../ssd_inception/frozen_inference_graph.pb");
-    //Model model("/home/borisef/projects/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb");
+    //Model model("/home/magshim/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb");
     Model model("frozen_inference_graph.pb");
     auto outNames1 = new Tensor(model, "num_detections");
     auto outNames2 = new Tensor(model, "detection_scores");
@@ -28,7 +28,7 @@ int main() {
     bool SHOW = false;
     // Read image
     cv::Mat img, inp, imgS;
-    //img = cv::imread("/home/borisef/projects/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
+    //img = cv::imread("/home/magshim/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
     img = cv::imread("00000018.tif", CV_LOAD_IMAGE_COLOR);
 
     int rows = img.rows;

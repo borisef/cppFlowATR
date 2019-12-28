@@ -13,6 +13,7 @@ link_directories(${CMAKE_CURRENT_LIST_DIR}/lib)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 FIND_LIBRARY(MY_LIB NAMES libtensorflow.so PATHS /home/borisef/projects/cppflowATR/libs/shared/115 )
+#FIND_LIBRARY(MY_LIB NAMES libstam.so PATHS /home/magshim/cppflowATR/libs/shared/)
 set(CMAKE_CXX_STANDARD 17)
 
 # add_executable(main_like_coco tests/main_like_coco.cpp src/Model.cpp src/Tensor.cpp)

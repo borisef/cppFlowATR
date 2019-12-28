@@ -25,13 +25,16 @@ int main()
     cout<<"Test Mode"<<endl;
 #endif
 
-    bool SHOW = false;
+    bool SHOW = true;
     float numIter = 3.0;
 
-     unsigned int W = 1292;
-     unsigned int H = 969;
+    //  unsigned int W = 1292;
+    //  unsigned int H = 969;
     // unsigned int W = 4096;
     //unsigned int H = 2160;
+    
+    unsigned int W =  4096;
+    unsigned int H =  2160;
     unsigned int frameID = 42;
 
     // Mission
@@ -43,30 +46,29 @@ int main()
 
     // support data
     OD_SupportData supportData1 = {
-        W, H,                     //imageHeight//imageWidth
-        e_OD_ColorImageType::RGB, //colorType;
-        100,                      //rangeInMeters
-        70.0f,                    //fcameraAngle; //BE
-        0,                        //TEMP:cameraParams[10];//BE
-        0                         //TEMP: float	spare[3];
+        W, H,                        //imageHeight//imageWidth
+        e_OD_ColorImageType::RGB,    //colorType;
+        100,                         //rangeInMeters
+        70.0f,                       //fcameraAngle; //BE
+        0,                           //TEMP:cameraParams[10];//BE
+        0                            //TEMP: float	spare[3];
     };
 
-    OD_InitParams initParams1 =
-        {
-            //(char*)"/home/borisef/projects/MB2/TrainedModels/faster_MB_140719_persons_sel4/frozen_390k/frozen_inference_graph.pb", //fails
-            //(char*)"tryTRT_humans.pb", //sometimes works
-            //(char*)"/home/borisef/projects/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb", //works
-            //(char*)"tryTRT_humans.pb", //sometimes OK, sometimes crashes the system
-            //(char*)"frozen_inference_graph_humans.pb", //works
-             (char*)"d:/Data/pretrained_nets/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03/frozen_inference_graph.pb",
-            //  (char*)"/home/borisef/projects/MB2/TrainedModels/ckpts_along_the_train_process/local_frozen_1_2M/frozen_inference_graph.pb",
-            //  (char*)"tryTRT_all.pb", //Nope
-            // (char*)"/home/borisef/projects/cppflowATR/frozen_inference_graph_all.pb",
-            350, // max number of items to be returned
-            supportData1,
-            mission1};
+    OD_InitParams initParams1 = 
+    {   
+        //(char*)"/home/magshim/MB2/TrainedModels/faster_MB_140719_persons_sel4/frozen_390k/frozen_inference_graph.pb", //fails
+        //(char*)"tryTRT_humans.pb", //sometimes works  
+        //(char*)"/home/magshim/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb", //works
+       //(char*)"tryTRT_humans.pb", //sometimes OK, sometimes crashes the system
+       (char*)"graphs/frozen_inference_graph_humans.pb",
+       //  (char*)"tryTRT_all.pb", //Nope
+       // (char*)"/home/magshim/cppflowATR/frozen_inference_graph_all.pb",
+        100,                  // max number of items to be returned
+        supportData1,
+        mission1
+    };
 
-    // Creation of ATR manager + new mission
+     // Creation of ATR manager + new mission
     OD::ObjectDetectionManager *atrManager;
     atrManager = OD::CreateObjectDetector(&initParams1); //first mission
 
@@ -78,9 +80,7 @@ int main()
     //emulate buffer from TIF
     cout << " ***  Read tif image to rgb buffer  ***  " << endl;
 
-    cv::Mat inp1 = cv::imread("girl.jpg", CV_LOAD_IMAGE_COLOR);
-    //cv::Mat inp1 = cv::imread("00000018.tif", CV_LOAD_IMAGE_COLOR);
-    
+    cv::Mat inp1 = cv::imread("media/00000018.tif", CV_LOAD_IMAGE_COLOR);
     cv::cvtColor(inp1, inp1, CV_BGR2RGB);
 
     //put image in vector
@@ -160,7 +160,7 @@ int main()
     InitObjectDetection(atrManager, &initParams1);
 
     //emulate buffer from RAW
-    std::vector<unsigned char> vecFromRaw = readBytesFromFile("00006160.raw");
+    std::vector<unsigned char> vecFromRaw = readBytesFromFile("media/00006160.raw");
 
     unsigned char *ptrRaw = new unsigned char[vecFromRaw.size()];
     std::copy(begin(vecFromRaw), end(vecFromRaw), ptrRaw);

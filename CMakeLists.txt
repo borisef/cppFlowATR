@@ -3,6 +3,14 @@ project(cppFlowATR)
 set(CMAKE_CXX_STANDARD 17)
 
 add_definitions(-DTEST_MODE)
+add_compile_options(-pthread)
+
+include_directories(PRIVATE include)
+
+AUX_SOURCE_DIRECTORY(src SRC)
+
+find_package( OpenCV REQUIRED )
+set(OpenCV_STATIC ON)
 
 #include_directories(PRIVATE include e:/Installs/opencv/sources/include e:/Installs/libtensorflow-gpu-windows-x86_64-1.15.0/include c:/Users/efrat/.conda/envs/keras-gpu/Library/include )
 #set(OpenCV_DIR e:/Installs/opencv/build)
@@ -10,16 +18,17 @@ add_definitions(-DTEST_MODE)
 #find_package( OpenCV REQUIRED)
 #find_package(OpenCV REQUIRED PATHS e:/Installs/opencv/build/x64/vc14/bin NO_DEFAULT_PATH)
 
- # For some reason CMake uses its defaults before the above paths.)
+FIND_LIBRARY(MY_LIB NAMES libtensorflow.so PATHS /home/magshim/cppflowATR/libs/shared/115 )
+set(CMAKE_CXX_STANDARD 17)
 
-#FIND_LIBRARY(MY_LIBS NAMES tensorflow.lib opencv_world343.lib opencv_world343d.lib PATHS e:/Installs/libtensorflow-gpu-windows-x86_64-1.15.0/lib
-#e:/Installs/opencv/build/x64/vc14/lib)
+# add_executable(main_like_coco tests/main_like_coco.cpp src/Model.cpp src/Tensor.cpp)
+# target_link_libraries (main_like_coco -ltensorflow ${OpenCV_LIBS})
 
+# add_executable(main_ATR tests/main_ATR.cpp src/Model.cpp 
+#                          src/Tensor.cpp src/InterfaceATR.cpp 
+#                          src/Object_Detection_API.cpp src/imgUtils.cpp)
 
-# add_executable(main_like_coco src/main_like_coco.cpp src/Model.cpp src/Tensor.cpp)
-# #find_package( OpenCV REQUIRED )
-# target_include_directories(main_like_coco PRIVATE include)
-# target_link_libraries (main_like_coco  ${MY_LIB} ${OpenCV_LIBS})
+# target_link_libraries (main_ATR -ltensorflow ${OpenCV_LIBS})
 
 #add_executable(main_ATR src/main_ATR.cpp src/Model.cpp src/Tensor.cpp src/InterfaceATR.cpp src/Object_Detection_API.cpp src/imgUtils.cpp)
 #find_package( OpenCV REQUIRED )
@@ -42,12 +51,28 @@ link_directories(e:/Installs/opencv/build/x64/vc14/lib e:/Installs/libtensorflow
 # add_executable(${PROJECT_NAME} ${SOURCE})
 
 add_executable(testATRInference  tests/testATRinference.cpp src/Model.cpp src/Tensor.cpp 
-                                     src/imgUtils.cpp src/Object_Detection_API.cpp src/InterfaceATR.cpp src/Object_Detection_Handler.cpp)
+                                    src/imgUtils.cpp src/Object_Detection_API.cpp src/InterfaceATR.cpp
+                                    src/Object_Detection_Handler.cpp)
 
-#target_link_libraries (testATRInference ${MY_LIB})
-target_link_libraries (testATRInference opencv_world343d.lib tensorflow.dll )
+
+
+
 
 # test threads
 add_executable(testThread  tests/testThread.cpp)
 
+add_executable(videoTest  tests/videoTest.cpp ${SRC})
+
+
+
+
+
+#target_link_libraries (testATRInference -ltensorflow ${OpenCV_LIBS})
+target_link_libraries (videoTest ${MY_LIB} ${OpenCV_LIBS})
+
+#SO 
+add_library(mbATR SHARED    src/InterfaceATR.cpp  src/Object_Detection_API.cpp
+                            src/Model.cpp src/Tensor.cpp    src/imgUtils.cpp
+                            src/Object_Detection_Handler.cpp)
+target_link_libraries (mbATR -ltensorflow ${OpenCV_LIBS})
 
