@@ -1,49 +1,53 @@
 cmake_minimum_required(VERSION 3.10)
 project(cppFlowATR)
-
-add_compile_options(-pthread)
-
-include_directories(PRIVATE include)
-
-
-find_package( OpenCV REQUIRED )
-set(OpenCV_STATIC ON)
-
-link_directories(${CMAKE_CURRENT_LIST_DIR}/lib)
-include_directories(${OpenCV_INCLUDE_DIRS})
-
-FIND_LIBRARY(MY_LIB NAMES libtensorflow.so PATHS /home/borisef/projects/cppflowATR/libs/shared/115 )
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(main_like_coco tests/main_like_coco.cpp src/Model.cpp src/Tensor.cpp)
-target_link_libraries (main_like_coco -ltensorflow ${OpenCV_LIBS})
+add_definitions(-DTEST_MODE)
 
-add_executable(main_ATR tests/main_ATR.cpp src/Model.cpp 
-                         src/Tensor.cpp src/InterfaceATR.cpp 
-                         src/Object_Detection_API.cpp src/imgUtils.cpp)
+#include_directories(PRIVATE include e:/Installs/opencv/sources/include e:/Installs/libtensorflow-gpu-windows-x86_64-1.15.0/include c:/Users/efrat/.conda/envs/keras-gpu/Library/include )
+#set(OpenCV_DIR e:/Installs/opencv/build)
+#set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} e:/Installs/opencv/build)
+#find_package( OpenCV REQUIRED)
+#find_package(OpenCV REQUIRED PATHS e:/Installs/opencv/build/x64/vc14/bin NO_DEFAULT_PATH)
 
-target_link_libraries (main_ATR -ltensorflow ${OpenCV_LIBS})
+ # For some reason CMake uses its defaults before the above paths.)
+
+#FIND_LIBRARY(MY_LIBS NAMES tensorflow.lib opencv_world343.lib opencv_world343d.lib PATHS e:/Installs/libtensorflow-gpu-windows-x86_64-1.15.0/lib
+#e:/Installs/opencv/build/x64/vc14/lib)
 
 
+# add_executable(main_like_coco src/main_like_coco.cpp src/Model.cpp src/Tensor.cpp)
+# #find_package( OpenCV REQUIRED )
+# target_include_directories(main_like_coco PRIVATE include)
+# target_link_libraries (main_like_coco  ${MY_LIB} ${OpenCV_LIBS})
 
-#TESTS
-add_executable(testUtils tests/testUtils.cpp src/imgUtils.cpp)
-target_link_libraries (testUtils  ${OpenCV_LIBS})
+#add_executable(main_ATR src/main_ATR.cpp src/Model.cpp src/Tensor.cpp src/InterfaceATR.cpp src/Object_Detection_API.cpp src/imgUtils.cpp)
+#find_package( OpenCV REQUIRED )
+#target_include_directories(main_ATR PRIVATE include)
+#target_link_libraries (main_ATR ${MY_LIB} ${OpenCV_LIBS})
+#target_link_libraries (main_ATR -ltensorflow ${OpenCV_LIBS})
 
+# add_library(mbATR SHARED src/InterfaceATR.cpp)
+# #find_package( OpenCV REQUIRED )
+# #target_include_directories(mbATR PRIVATE include)
+# target_link_libraries (mbATR -ltensorflow ${OpenCV_LIBS})
+
+#TEST
+include_directories(PRIVATE include e:/Installs/opencv/build/include e:/Installs/opencv/sources/include e:/Installs/libtensorflow-gpu-windows-x86_64-1.15.0/include )
+link_directories(e:/Installs/opencv/build/x64/vc14/lib e:/Installs/libtensorflow-gpu-windows-x86_64-1.15.0/lib)
+#add_executable(testUtils tests/testUtils.cpp src/imgUtils.cpp)
+#target_link_libraries (testUtils  opencv_world343d.lib)
+
+# set(SOURCE main.cpp)
+# add_executable(${PROJECT_NAME} ${SOURCE})
 
 add_executable(testATRInference  tests/testATRinference.cpp src/Model.cpp src/Tensor.cpp 
-                                    src/imgUtils.cpp src/Object_Detection_API.cpp src/InterfaceATR.cpp)
+                                     src/imgUtils.cpp src/Object_Detection_API.cpp src/InterfaceATR.cpp src/Object_Detection_Handler.cpp)
 
+#target_link_libraries (testATRInference ${MY_LIB})
+target_link_libraries (testATRInference opencv_world343d.lib tensorflow.dll )
 
-add_executable(testTamir tests/testATRinference.cpp)
-FIND_LIBRARY(MY_LIB1 NAMES libmbATR.so PATHS /home/borisef/projects/cppflowATR/build )
-target_link_libraries (testTamir  ${MY_LIB} ${OpenCV_LIBS} ${MY_LIB1})
+# test threads
+add_executable(testThread  tests/testThread.cpp)
 
-#target_link_libraries (testATRInference -ltensorflow ${OpenCV_LIBS})
-target_link_libraries (testATRInference ${MY_LIB} ${OpenCV_LIBS})
-
-#SO 
-add_library(mbATR SHARED    src/InterfaceATR.cpp  src/Object_Detection_API.cpp
-                            src/Model.cpp src/Tensor.cpp    src/imgUtils.cpp)
-target_link_libraries (mbATR -ltensorflow ${OpenCV_LIBS})
 

@@ -74,8 +74,24 @@ int mbInterfaceATR::RunRGBimage(cv::Mat inp)
 
 int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width)
 {
+
+    cout << " RunRGBVector:Internal Run on RGB Vector on ptr*" << endl;
+
+
     std::vector<uint8_t > img_data(height*width*3);
     unsigned char* buffer = (unsigned char*)ptr;
+    
+#ifdef TEST_MODE
+    cout << " RunRGBVector:casted buffer to unsigned char* " << endl;
+
+    cv::Mat tempIm(height, width,CV_8UC3);
+    cout << " RunRGBVector:copy buffer to cv::Mat* " << endl;
+    tempIm.data = buffer; //risky
+    cv::cvtColor(tempIm, tempIm, cv::COLOR_RGB2BGR);
+    cout << " RunRGBVector:saving cv::Mat* " << endl;
+    cv::imwrite("testRGBbuffer.tif",tempIm);
+    cv::cvtColor(tempIm, tempIm, cv::COLOR_BGR2RGB);//because we do on original buffer
+#endif
 
     for (int i =0;i<height*width*3;i++)
         img_data[i]=buffer[i];
@@ -85,8 +101,10 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
 }
 int mbInterfaceATR::RunRGBVector(std::vector<uint8_t > img_data, int height, int width)
 {
+    cout << " RunRGBVector:Internal Run on RGB Vector on vector<uint8_t> " << endl;
     // Put image in Tensor
     m_inpName->set_data(img_data, {1,  height, width, 3});
+    cout << " RunRGBVector:Internal Run on RGB Vector on vector<uint8_t>  done setting data" << endl;
     m_model->run(m_inpName, {m_outTensorNumDetections, m_outNames2, m_outNames3, m_outNames4});
     return 1;
 
@@ -94,15 +112,15 @@ int mbInterfaceATR::RunRGBVector(std::vector<uint8_t > img_data, int height, int
 int mbInterfaceATR::RunRawImage(const unsigned char *ptr, int height, int width)
 {
     
-    std::vector<uint8_t > img_data(height*width*3);
+    std::vector<uint8_t > img_data(height*width*2);
     unsigned char* buffer = (unsigned char*)ptr;
    
-    for (int i =0;i<height*width*3;i++)//TODO: can we optimize it ? 
+    for (int i =0;i<height*width*2;i++)//TODO: can we optimize it ? 
         img_data[i]=buffer[i];
 
 
      //
-    cv::Mat* myRGB = new cv::Mat(height, width,CV_8UC1);
+    cv::Mat* myRGB = new cv::Mat(height, width,CV_8UC3);
     convertYUV420toRGB(img_data, width, height, myRGB);
   // save JPG for debug
     cv::imwrite("debug_yuv420torgb.tif",*myRGB);

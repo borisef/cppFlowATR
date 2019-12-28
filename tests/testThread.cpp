@@ -1,36 +1,39 @@
 #include <iostream>
 #include <future>
+#include <numeric>
+#include <iomanip>
+#include <chrono>
+#include <thread>
 using namespace std;
+using namespace std::chrono;
 
 
 class Runner
 {
     public:
-    bool m_isBusy = false;
-    virtual void Operate() = 0;
+    
+    virtual int Operate() = 0;
 	
-	std::future<void> result;
+	std::future<int> result;
     int countR1 = 0;
     int countR2 = 0;
     
      void Run1()
     {
-        int L = 1000;
-        for (int i=0;i<L;i++)
-        {
-            //like pause
-        }
-        cout<<"****Run1****"<<endl;
+         cout<<"----Run1 begin----"<<endl;
+        float milliseconds = 500;
+        std::this_thread::sleep_for(std::chrono::milliseconds((uint16_t)milliseconds));
+        std::cout << "R1: Waited sec:" << (milliseconds/1000.0)<<endl;
+         cout<<"----Run1 end----"<<endl;
         ++countR1;
     }
     virtual void Run2()
     {
-        int L = 500000;
-        for (int i=0;i<L;i++)
-        {
-            //like pause
-        }
-        cout<<"----Run2----"<<endl;
+        cout<<"----Run2 begin----"<<endl;
+        float milliseconds = 1344;
+        std::this_thread::sleep_for(std::chrono::milliseconds((uint16_t)milliseconds));
+        std::cout << "R2: Waited sec:" << (milliseconds/1000.0)<<endl;
+        cout<<"----Run2 end----"<<endl;
         ++countR2;
     }
 
@@ -39,11 +42,13 @@ class Runner
 class RunnerHandler:public Runner
 {
     public: 
-    void Operate()
+    bool m_isBusy = false;
+    int Operate()
     {
         m_isBusy = true;
         Run2();
         m_isBusy = false;
+        return 0;
     }
 
 };
@@ -57,6 +62,7 @@ void OperateAPI(Runner* rrr, int step)
             handle->Run1();
 			if (!handle->m_isBusy){
                 
+                std::cout<< "Run step" << step<<endl; 
 				// Copy input data
 				handle->result = std::async(std::launch::async, &RunnerHandler::Operate, handle);
 			}
@@ -70,7 +76,7 @@ int main()
     cout<<"Hi"<<endl;
     Runner* myrunner = (Runner*) new RunnerHandler();
 
-for (int i = 0;i<1000;i++)
+for (int i = 0;i<10;i++)
     OperateAPI(myrunner,i); 
 
 cout<<"Run1 count"<<myrunner->countR1<<endl;

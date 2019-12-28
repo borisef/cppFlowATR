@@ -1,194 +1,105 @@
 #include <cppflowATRInterface/Object_Detection_API.h>
 #include <cppflowATRInterface/Object_Detection_Types.h>
+#include <cppflowATRInterface/Object_Detection_Handler.h>
 #include <cppflowATR/InterfaceATR.h>
 #include <utils/imgUtils.h>
+
+
 
 namespace OD
 {
 
-DECLARE_API_FUNCTION ObjectDetectionManager *CreateObjectDetector(OD_InitParams *initParams)
+ ObjectDetectionManager::ObjectDetectionManager()
+ {
+     m_initParams=nullptr;
+     
+ }
+
+ObjectDetectionManager::ObjectDetectionManager(OD_InitParams * ip)
+ {
+     m_initParams=ip;
+     
+ }
+
+
+ ObjectDetectionManager *CreateObjectDetector(OD_InitParams *initParams)
 {
     // use initParams
     cout<<"Creating graph from" << initParams->iniFilePath<<std::endl;
 
-    ObjectDetectionManager *new_manager = new ObjectDetectionManager(initParams);
+   
 
+    ObjectDetectionManager *new_manager;
+    ObjectDetectionManagerHandler *new_managerH = new ObjectDetectionManagerHandler(initParams);
+    new_manager = (ObjectDetectionManager *)new_managerH;
     cout<<"Created ObjectDetectionManager "<<endl;
 
     return new_manager;
 }
 
-DECLARE_API_FUNCTION OD_ErrorCode TerminateObjectDetection(ObjectDetectionManager *odm)
+DECLARE_API_FUNCTION OD_ErrorCode TerminateObjectDetection(ObjectDetectionManager *);
+ OD_ErrorCode TerminateObjectDetection(ObjectDetectionManager *odm)
 {
     if (odm != nullptr)
     {
-        if (odm->m_mbATR != nullptr)
-            delete odm->m_mbATR;
-
-        delete odm;
+        delete (ObjectDetectionManagerHandler*)odm;//delete as handler
         odm = nullptr;
     }
     return OD_ErrorCode::OD_OK;
 }
 
-DECLARE_API_FUNCTION OD_ErrorCode InitObjectDetection(ObjectDetectionManager *odm, OD_InitParams *odInitParams)
+DECLARE_API_FUNCTION OD_ErrorCode InitObjectDetection(ObjectDetectionManager *, OD_InitParams *);
+ OD_ErrorCode InitObjectDetection(ObjectDetectionManager *odm, OD_InitParams *odInitParams)
 {
     cout<<"Entering InitObjectDetection"<<endl;
-    mbInterfaceATR *mbATR = nullptr;
-    //initialization
-    if (odm->m_mbATR == nullptr)
-    {
-        mbATR = new mbInterfaceATR();
-        cout<<"Create new mbInterfaceATR in InitObjectDetection"<<endl;
-        //TODO: decide which model to take (if to take or stay with old )
-        mbATR->LoadNewModel(odInitParams->iniFilePath);
-        odm->m_mbATR = mbATR;
-        cout<<"Executed LoadNewModel in  InitObjectDetection"<<endl;
-    }
 
-    odm->setParams(odInitParams);
+    ObjectDetectionManagerHandler* odmHandler = (ObjectDetectionManagerHandler*)odm;
+
+    OD_ErrorCode ec =  odmHandler-> InitObjectDetection(odInitParams);
     
     cout<<"Finished InitObjectDetection"<<endl;
     
 
-    return OD_ErrorCode::OD_OK;
+    return ec;
 }
 
-DECLARE_API_FUNCTION OD_ErrorCode OperateObjectDetectionAPI(ObjectDetectionManager *odm, OD_CycleInput *odIn, OD_CycleOutput *odOut)
+DECLARE_API_FUNCTION OD_ErrorCode OperateObjectDetectionAPI(ObjectDetectionManager *, OD_CycleInput *, OD_CycleOutput *);
+ OD_ErrorCode OperateObjectDetectionAPI(ObjectDetectionManager *odm, OD_CycleInput *odIn, OD_CycleOutput *odOut)
 {
-    //TODO: keep OD_CycleInput copy
+    OD_ErrorCode ec = OD_ErrorCode::OD_OK;
+    ObjectDetectionManagerHandler* odmHandler = (ObjectDetectionManagerHandler*)odm;
 
-    unsigned int fi = odIn->ImgID_input;
-    int h = odm->getParams()->supportData.imageHeight;
-    int w = odm->getParams()->supportData.imageWidth;
+    OD_ErrorCode prepOD = odmHandler->PrepareOperateObjectDetection(odIn, odOut);// run synchroniusly
 
-    e_OD_ColorImageType colortype = odm->getParams()->supportData.colorType;
-
-    if (colortype == e_OD_ColorImageType::YUV422) // if raw
-        odm->m_mbATR->RunRawImage(odIn->ptr, h, w);
-    else if (colortype == e_OD_ColorImageType::RGB) // if rgb
+    if(prepOD == OD_ErrorCode::OD_OK && !odmHandler->IsBusy())
     {
-        cout << " Internal Run on RGB buffer " << endl;
-        odm->m_mbATR->RunRGBVector(odIn->ptr, h, w);
+        cout<<"+++Can  Operate OD... Free for step "<< odIn->ImgID_input<<endl;
+        //ec = odmHandler->OperateObjectDetection(odIn, odOut); // synchroniously
+        odmHandler->m_result  = std::async(std::launch::async, &ObjectDetectionManagerHandler::OperateObjectDetection, odmHandler,odIn,odOut); 
     }
     else
     {
-        return OD_ErrorCode::OD_ILEGAL_INPUT;
+            cout<<"---Can not Operate OD... Busy for step "<< odIn->ImgID_input<<endl;
     }
-
-    // save results
-    odm->PopulateCycleOutput(odOut);
-    odOut->ImgID_output = fi;
-    return OD_ErrorCode::OD_OK;
-}
-
-bool DECLARE_API_FUNCTION ObjectDetectionManager::SaveResultsATRimage(OD_CycleInput *ci, OD_CycleOutput *co, char *imgNam, bool show)
-{
-    //TODO:
-    unsigned int fi = ci->ImgID_input;
-    unsigned int h = m_initParams->supportData.imageHeight;
-    unsigned int w = m_initParams->supportData.imageWidth;
-
-    e_OD_ColorImageType colortype = m_initParams->supportData.colorType;
-    cv::Mat *myRGB = nullptr;
-    unsigned char *buffer = (unsigned char *)(ci->ptr);
-    std::vector<uint8_t> img_data(h * w * 3);
-    if (colortype == e_OD_ColorImageType::YUV422) // if raw
-    {
-
-        for (int i = 0; i < h * w * 3; i++)
-            img_data[i] = buffer[i];
-
-        myRGB = new cv::Mat(h, w, CV_8UC3);
-        convertYUV420toRGB(img_data, w, h, myRGB);
-    }
-    else if (colortype == e_OD_ColorImageType::RGB) // if rgb
-    {
-        myRGB = new cv::Mat(h, w, CV_8UC3);
-        myRGB->data = buffer;
-        cv::imwrite("debug_newImg1_bgr.tif", *myRGB);
-    }
-    else
-    {
-        return false;
-    }
-
-    std::cout << "***** num_detections " << co->numOfObjects << std::endl;
-    for (int i = 0; i < co->numOfObjects; i++)
-    {
-        int classId = co->ObjectsArr[i].tarClass;
-        float score = co->ObjectsArr[i].tarScore;
-        OD_BoundingBox bbox_data = co->ObjectsArr[i].tarBoundingBox;
-
-        std::vector<float> bbox = {bbox_data.x1, bbox_data.x2, bbox_data.y1, bbox_data.y2};
-
-        if (score > 0.1)
-        {
-            cout << "add rectangle to drawing" <<endl;
-            float x = bbox[1] * w;
-            float y = bbox[0] * h;
-            float right = bbox[3] * w;
-            float bottom = bbox[2] * h;
-
-            cv::rectangle(*myRGB, {(int)x, (int)y}, {(int)right, (int)bottom}, {125, 255, 51}, 2);
-        }
-    }
-    cout << " Done reading targets" << endl;
-    if (show)
-    {
-        cv::Mat imgS;
-        cv::resize(*myRGB, imgS, cv::Size(1365, 720));
-        cv::imshow("Image", imgS);
-        cv::waitKey(0);
-    }
-    cv::Mat bgr(h, w, CV_8UC3);
-    cv::cvtColor(*myRGB, bgr, cv::COLOR_RGB2BGR);
-    cv::imwrite(imgNam, bgr);
-     cout << " Done saving image" << endl;
-    if(myRGB != nullptr){
-        myRGB->release();
-        delete myRGB; // TODO
-        
-    }
-    cout << " Done cleaning image" << endl;
-
-}
-
-int DECLARE_API_FUNCTION ObjectDetectionManager::PopulateCycleOutput(OD_CycleOutput *cycleOutput)
-{
     
-
-    OD_DetectionItem *odi = cycleOutput->ObjectsArr;
-
-    cycleOutput->numOfObjects = m_mbATR->GetResultNumDetections();
-
-    auto bbox_data = m_mbATR->GetResultBoxes();
-    for (int i = 0; i < cycleOutput->numOfObjects; i++)
-    {
-        e_OD_TargetClass aa = e_OD_TargetClass(1);
-        odi[i].tarClass = e_OD_TargetClass(m_mbATR->GetResultClasses(i));
-        odi[i].tarScore = m_mbATR->GetResultScores(i);
-
-        odi[i].tarBoundingBox = {bbox_data[i * 4], bbox_data[i * 4 + 1], bbox_data[i * 4 + 2], bbox_data[i * 4 + 3]};
-    }
-
-    return cycleOutput->numOfObjects;
+    return ec; // TODO: not always ok
 }
 
-DECLARE_API_FUNCTION OD_ErrorCode ResetObjectDetection(ObjectDetectionManager *odm)
+
+bool  ObjectDetectionManager::SaveResultsATRimage(OD_CycleInput *ci, OD_CycleOutput *co, char *imgNam, bool show)
+{
+   return ((ObjectDetectionManagerHandler*)this)->SaveResultsATRimage(ci,co,imgNam,show);
+}
+
+
+DECLARE_API_FUNCTION OD_ErrorCode ResetObjectDetection(ObjectDetectionManager *odm);
+ OD_ErrorCode ResetObjectDetection(ObjectDetectionManager *odm)
 {
     return OD_ErrorCode::OD_OK;
 }
 
-// DECLARE_API_FUNCTION  OD_ErrorCode DeleteObjectDetection(ObjectDetectionManager* odm)
-// {
-//     if(odm->m_mbATR != nullptr)
-//         delete odm->m_mbATR;
-//     delete odm;
-//     return OD_ErrorCode::OD_OK;
-// }
-
-DECLARE_API_FUNCTION OD_ErrorCode GetMetry(ObjectDetectionManager *odm, int size, void *metry)
+DECLARE_API_FUNCTION OD_ErrorCode GetMetry(ObjectDetectionManager *odm, int size, void *metry);
+ OD_ErrorCode GetMetry(ObjectDetectionManager *odm, int size, void *metry)
 {
     return OD_ErrorCode::OD_OK;
 }
