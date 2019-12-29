@@ -32,9 +32,12 @@ namespace OD
 #define OD_API_VERSION 0
 
 //class DECLARE_API_FUNCTION ObjectDetectionManager;
-//class  ObjectDetectionManager // for windows
 
+#ifdef WIN32
+    class  ObjectDetectionManager // for windows
+#else
 class DECLARE_API_FUNCTION ObjectDetectionManager
+#endif
 {	protected:
 		OD_InitParams* m_initParams;
 

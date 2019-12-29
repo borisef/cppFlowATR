@@ -69,6 +69,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_Cyc
    // m_cycleInput.ImgID_input = CycleInput->ImgID_input;
 
     //remark: can be skipped for performance but may be risky 
+    //TODO: during prepare we can convert to RGB
 
     return OD_ErrorCode::OD_OK;
 
@@ -118,11 +119,11 @@ bool  ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleInput *ci, OD_C
     e_OD_ColorImageType colortype = m_initParams->supportData.colorType;
     cv::Mat *myRGB = nullptr;
     unsigned char *buffer = (unsigned char *)(ci->ptr);
-    std::vector<uint8_t> img_data(h * w * 3);
+    std::vector<uint8_t> img_data(h * w * 2);
     if (colortype == e_OD_ColorImageType::YUV422) // if raw
     {
 
-        for (int i = 0; i < h * w * 3; i++)
+        for (int i = 0; i < h * w * 2; i++)//TODO: without for loop
             img_data[i] = buffer[i];
 
         myRGB = new cv::Mat(h, w, CV_8UC3);

@@ -30,6 +30,7 @@ bool convertYUV420toRGB(vector <unsigned char> raw, int width, int height, cv::M
     // vector <unsigned char> Y ; Y.reserve(width*height);
     // vector <unsigned char> U ; U.reserve(width*height);
     // vector <unsigned char> V ; V.reserve(width*height);
+    //TODO: this is very slow
     cv:Mat ymat(height, width,CV_8UC1), umat(height, width,CV_8UC1), vmat(height, width,CV_8UC1);
    
     int t = 0;
