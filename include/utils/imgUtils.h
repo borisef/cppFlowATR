@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
-#include <e:/Installs/opencv/sources/include/opencv2/opencv.hpp>
+//#include <e:/Installs/opencv/sources/include/opencv2/opencv.hpp>
+#include <opencv2/opencv.hpp>
 using namespace std;
 using namespace cv;
 

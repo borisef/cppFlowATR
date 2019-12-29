@@ -1,6 +1,7 @@
-#include <utils\imgUtils.h>
+#include <utils/imgUtils.h>
 
-#include <e:/Installs/opencv/sources/include/opencv2/opencv.hpp>
+#include <opencv2/opencv.hpp>
+//#include <e:/Installs/opencv/sources/include/opencv2/opencv.hpp>
 #include <numeric>
 #include <iomanip>
 #include <chrono>

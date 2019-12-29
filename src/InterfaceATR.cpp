@@ -92,17 +92,6 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
     cv::imwrite("testRGBbuffer.tif",tempIm);
     cv::cvtColor(tempIm, tempIm, cv::COLOR_BGR2RGB);//because we do on original buffer
 #endif
-
-    cout << " RunRGBVector:casted buffer to unsigned char* " << endl;
-
-    cv::Mat tempIm(height, width,CV_8UC3);
-    cout << " RunRGBVector:copy buffer to cv::Mat* " << endl;
-    tempIm.data = buffer; //TODO ???
-    cv::cvtColor(tempIm, tempIm, cv::COLOR_RGB2BGR);//TEMP
-    cout << " RunRGBVector:saving cv::Mat* " << endl;
-    cv::imwrite("testRGBbuffer.tif",tempIm);
-
-
     for (int i =0;i<height*width*3;i++)
         img_data[i]=buffer[i];
 

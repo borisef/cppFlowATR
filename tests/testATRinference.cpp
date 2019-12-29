@@ -46,7 +46,7 @@ int main()
 
     // support data
     OD_SupportData supportData1 = {
-        W, H,                        //imageHeight//imageWidth
+        H,W,                        //imageHeight//imageWidth
         e_OD_ColorImageType::RGB,    //colorType;
         100,                         //rangeInMeters
         70.0f,                       //fcameraAngle; //BE
@@ -63,7 +63,7 @@ int main()
        (char*)"graphs/frozen_inference_graph_humans.pb",
        //  (char*)"tryTRT_all.pb", //Nope
        // (char*)"/home/magshim/cppflowATR/frozen_inference_graph_all.pb",
-        100,                  // max number of items to be returned
+        350,                  // max number of items to be returned
         supportData1,
         mission1
     };
@@ -133,7 +133,7 @@ int main()
          atrManager->SaveResultsATRimage(ci, co, (char *)outName.c_str(), false);
          }
 
-        float milliseconds = 5;
+        float milliseconds = 100;
         std::this_thread::sleep_for(std::chrono::milliseconds((uint)milliseconds));
         std::cout << "Waited sec:" << (milliseconds/1000.0)<<endl;
     }
@@ -147,7 +147,7 @@ int main()
 
     // change  support data
     OD_SupportData supportData2 = {
-        W, H,                        //imageHeight//imageWidth
+        H,W,                        //imageHeight//imageWidth
         e_OD_ColorImageType::YUV422, // colorType;
         100,                         //rangeInMeters
         70.0f,                       //fcameraAngle; //BE

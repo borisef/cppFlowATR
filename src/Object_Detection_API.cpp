@@ -20,17 +20,17 @@ namespace OD
  }
 
 
- ObjectDetectionManager::ObjectDetectionManager()
- {
-     m_initParams=nullptr;
+//  ObjectDetectionManager::ObjectDetectionManager()
+//  {
+//      m_initParams=nullptr;
      
- }
+//  }
 
-ObjectDetectionManager::ObjectDetectionManager(OD_InitParams * ip)
- {
-     m_initParams=ip;
+// ObjectDetectionManager::ObjectDetectionManager(OD_InitParams * ip)
+//  {
+//      m_initParams=ip;
      
- }
+//  }
 
 
  ObjectDetectionManager *CreateObjectDetector(OD_InitParams *initParams)
@@ -85,8 +85,8 @@ DECLARE_API_FUNCTION OD_ErrorCode OperateObjectDetectionAPI(ObjectDetectionManag
     if(prepOD == OD_ErrorCode::OD_OK && !odmHandler->IsBusy())
     {
         cout<<"+++Can  Operate OD... Free for step "<< odIn->ImgID_input<<endl;
-        //ec = odmHandler->OperateObjectDetection(odIn, odOut); // synchroniously
-        odmHandler->m_result  = std::async(std::launch::async, &ObjectDetectionManagerHandler::OperateObjectDetection, odmHandler,odIn,odOut); 
+        ec = odmHandler->OperateObjectDetection(odIn, odOut); // synchroniously
+        //odmHandler->m_result  = std::async(std::launch::async, &ObjectDetectionManagerHandler::OperateObjectDetection, odmHandler,odIn,odOut); 
     }
     else
     {
