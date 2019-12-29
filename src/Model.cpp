@@ -269,7 +269,6 @@ void Model::run(const std::vector<Tensor*>& inputs, const std::vector<Tensor*>& 
     // Prepare output recipients
     auto ov = new TF_Tensor*[outputs.size()];
 
-    std::cout<<"TF_SessionRun"<<std::endl; //BE
     TF_SessionRun(this->session, nullptr, io.data(), iv.data(), inputs.size(), oo.data(), ov, outputs.size(), nullptr, 0, nullptr, this->status);
     this->status_check(true);
 
@@ -282,8 +281,6 @@ void Model::run(const std::vector<Tensor*>& inputs, const std::vector<Tensor*>& 
 
     // Mark input as empty
     std::for_each(inputs.begin(), inputs.end(), [] (Tensor* i) {i->clean();});
-
-    
 }
 
 void Model::run(Tensor &input, Tensor &output) {
