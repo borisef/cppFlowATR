@@ -18,20 +18,7 @@ namespace OD
  }
 
 
-//  ObjectDetectionManager::ObjectDetectionManager()
-//  {
-//      m_initParams=nullptr;
-     
-//  }
-
-// ObjectDetectionManager::ObjectDetectionManager(OD_InitParams * ip)
-//  {
-//      m_initParams=ip;
-     
-//  }
-
-
- ObjectDetectionManager *CreateObjectDetector(OD_InitParams *initParams)
+DECLARE_API_FUNCTION ObjectDetectionManager *CreateObjectDetector(OD_InitParams *initParams)
 {
     // use initParams
     cout<<"Creating graph from" << initParams->iniFilePath<<std::endl;
@@ -72,23 +59,8 @@ DECLARE_API_FUNCTION OD_ErrorCode InitObjectDetection(ObjectDetectionManager *od
 
 DECLARE_API_FUNCTION OD_ErrorCode OperateObjectDetectionAPI(ObjectDetectionManager *odm, OD_CycleInput *odIn, OD_CycleOutput *odOut)
 {
-    OD_ErrorCode ec = OD_ErrorCode::OD_OK;
-    ObjectDetectionManagerHandler* odmHandler = (ObjectDetectionManagerHandler*)odm;
-
-    OD_ErrorCode prepOD = odmHandler->PrepareOperateObjectDetection(odIn, odOut);// run synchroniusly
-
-    if(prepOD == OD_ErrorCode::OD_OK && !odmHandler->IsBusy())
-    {
-        cout<<"+++Can  Operate OD... Free for step "<< odIn->ImgID_input<<endl;
-        ec = odmHandler->OperateObjectDetection(odIn, odOut); // synchroniously
-        //odmHandler->m_result  = std::async(std::launch::async, &ObjectDetectionManagerHandler::OperateObjectDetection, odmHandler,odIn,odOut); 
-    }
-    else
-    {
-            cout<<"---Can not Operate OD... Busy for step "<< odIn->ImgID_input<<endl;
-    }
-    
-    return ec; // TODO: not always ok
+    OD_ErrorCode  ec = ((ObjectDetectionManagerHandler*)odm)->OperateObjectDetection(odIn, odOut); 
+    return ec;
 }
 
 bool DECLARE_API_FUNCTION ObjectDetectionManager::SaveResultsATRimage(OD_CycleInput *ci, OD_CycleOutput *co, char *imgNam, bool show)
