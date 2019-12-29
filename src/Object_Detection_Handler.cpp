@@ -134,7 +134,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleInput *ci, OD_Cy
         cv::Mat imgS;
         cv::resize(*myRGB, imgS, cv::Size(1365, 720));
         cv::imshow("Image", imgS);
-        //cv::waitKey(0);
+       // cv::waitKey(0);
     }
 
     if (myRGB != nullptr)
