@@ -31,6 +31,8 @@ namespace OD
 
 #define OD_API_VERSION 0
 
+//class DECLARE_API_FUNCTION ObjectDetectionManager;
+//class  ObjectDetectionManager // for windows
 
 class DECLARE_API_FUNCTION ObjectDetectionManager
 {	protected:
@@ -58,7 +60,7 @@ extern "C"
 	DECLARE_API_FUNCTION  OD_ErrorCode OperateObjectDetectionAPI(ObjectDetectionManager* , OD_CycleInput* , OD_CycleOutput* );
 	DECLARE_API_FUNCTION  OD_ErrorCode ResetObjectDetection(ObjectDetectionManager*);
 	//DECLARE_API_FUNCTION  OD_ErrorCode DeleteObjectDetection(ObjectDetectionManager*);
-	DECLARE_API_FUNCTION  OD_ErrorCode GetMetry(ObjectDetectionManager*, int size, void *metry);
+	DECLARE_API_FUNCTION  OD_ErrorCode GetMetry(ObjectDetectionManager*, int , void *);
 }
 }
 

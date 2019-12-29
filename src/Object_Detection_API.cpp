@@ -4,6 +4,8 @@
 #include <cppflowATR/InterfaceATR.h>
 #include <utils/imgUtils.h>
 
+
+
 namespace OD
 {
  DECLARE_API_FUNCTION ObjectDetectionManager::ObjectDetectionManager()
@@ -18,7 +20,20 @@ namespace OD
  }
 
 
-DECLARE_API_FUNCTION ObjectDetectionManager *CreateObjectDetector(OD_InitParams *initParams)
+ ObjectDetectionManager::ObjectDetectionManager()
+ {
+     m_initParams=nullptr;
+     
+ }
+
+ObjectDetectionManager::ObjectDetectionManager(OD_InitParams * ip)
+ {
+     m_initParams=ip;
+     
+ }
+
+
+ ObjectDetectionManager *CreateObjectDetector(OD_InitParams *initParams)
 {
     // use initParams
     cout<<"Creating graph from" << initParams->iniFilePath<<std::endl;
@@ -33,7 +48,8 @@ DECLARE_API_FUNCTION ObjectDetectionManager *CreateObjectDetector(OD_InitParams 
     return new_manager;
 }
 
-DECLARE_API_FUNCTION OD_ErrorCode TerminateObjectDetection(ObjectDetectionManager *odm)
+DECLARE_API_FUNCTION OD_ErrorCode TerminateObjectDetection(ObjectDetectionManager *);
+ OD_ErrorCode TerminateObjectDetection(ObjectDetectionManager *odm)
 {
     if (odm != nullptr)
     {
@@ -43,7 +59,8 @@ DECLARE_API_FUNCTION OD_ErrorCode TerminateObjectDetection(ObjectDetectionManage
     return OD_ErrorCode::OD_OK;
 }
 
-DECLARE_API_FUNCTION OD_ErrorCode InitObjectDetection(ObjectDetectionManager *odm, OD_InitParams *odInitParams)
+DECLARE_API_FUNCTION OD_ErrorCode InitObjectDetection(ObjectDetectionManager *, OD_InitParams *);
+ OD_ErrorCode InitObjectDetection(ObjectDetectionManager *odm, OD_InitParams *odInitParams)
 {
     cout<<"Entering InitObjectDetection"<<endl;
 
@@ -57,26 +74,43 @@ DECLARE_API_FUNCTION OD_ErrorCode InitObjectDetection(ObjectDetectionManager *od
     return ec;
 }
 
-DECLARE_API_FUNCTION OD_ErrorCode OperateObjectDetectionAPI(ObjectDetectionManager *odm, OD_CycleInput *odIn, OD_CycleOutput *odOut)
+DECLARE_API_FUNCTION OD_ErrorCode OperateObjectDetectionAPI(ObjectDetectionManager *, OD_CycleInput *, OD_CycleOutput *);
+ OD_ErrorCode OperateObjectDetectionAPI(ObjectDetectionManager *odm, OD_CycleInput *odIn, OD_CycleOutput *odOut)
 {
-    OD_ErrorCode  ec = ((ObjectDetectionManagerHandler*)odm)->OperateObjectDetection(odIn, odOut); 
-    return ec;
+    OD_ErrorCode ec = OD_ErrorCode::OD_OK;
+    ObjectDetectionManagerHandler* odmHandler = (ObjectDetectionManagerHandler*)odm;
+
+    OD_ErrorCode prepOD = odmHandler->PrepareOperateObjectDetection(odIn, odOut);// run synchroniusly
+
+    if(prepOD == OD_ErrorCode::OD_OK && !odmHandler->IsBusy())
+    {
+        cout<<"+++Can  Operate OD... Free for step "<< odIn->ImgID_input<<endl;
+        //ec = odmHandler->OperateObjectDetection(odIn, odOut); // synchroniously
+        odmHandler->m_result  = std::async(std::launch::async, &ObjectDetectionManagerHandler::OperateObjectDetection, odmHandler,odIn,odOut); 
+    }
+    else
+    {
+            cout<<"---Can not Operate OD... Busy for step "<< odIn->ImgID_input<<endl;
+    }
+    
+    return ec; // TODO: not always ok
 }
 
-bool DECLARE_API_FUNCTION ObjectDetectionManager::SaveResultsATRimage(OD_CycleInput *ci, OD_CycleOutput *co, char *imgNam, bool show)
+
+bool  ObjectDetectionManager::SaveResultsATRimage(OD_CycleInput *ci, OD_CycleOutput *co, char *imgNam, bool show)
 {
    return ((ObjectDetectionManagerHandler*)this)->SaveResultsATRimage(ci,co,imgNam,show);
 }
 
 
-
-DECLARE_API_FUNCTION OD_ErrorCode ResetObjectDetection(ObjectDetectionManager *odm)
+DECLARE_API_FUNCTION OD_ErrorCode ResetObjectDetection(ObjectDetectionManager *odm);
+ OD_ErrorCode ResetObjectDetection(ObjectDetectionManager *odm)
 {
     return OD_ErrorCode::OD_OK;
 }
 
-
-DECLARE_API_FUNCTION OD_ErrorCode GetMetry(ObjectDetectionManager *odm, int size, void *metry)
+DECLARE_API_FUNCTION OD_ErrorCode GetMetry(ObjectDetectionManager *odm, int size, void *metry);
+ OD_ErrorCode GetMetry(ObjectDetectionManager *odm, int size, void *metry)
 {
     return OD_ErrorCode::OD_OK;
 }
