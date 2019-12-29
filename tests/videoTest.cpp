@@ -15,9 +15,11 @@
 
 #include "inih/INIReader.h"
 
-void doATRinference(cv::Mat inp1, OD::ObjectDetectionManager *atrManager);
+void doATRinference(cv::Mat inp1, OD::ObjectDetectionManager *atrManager, OD_CycleInput *ci, OD_CycleOutput *co);
 OD_InitParams *loadConfig(string path);
 OD::ObjectDetectionManager *createAtrManager();
+unsigned char *parseImg(cv::Mat inp1);
+
 
 int main()
 {
@@ -25,6 +27,8 @@ int main()
   cv::Mat frame;
   cv::VideoCapture cap(VIDEO_PATH);
   OD::ObjectDetectionManager *atrManager = createAtrManager();
+  OD_CycleInput *ci = new OD_CycleInput();
+  OD_CycleOutput *co = new OD_CycleOutput(); // allocate empty cycle output buffer
 
   // Check if camera opened successfully
   if (!cap.isOpened())
@@ -39,12 +43,20 @@ int main()
     frame.release();
     cap >> frame;
 
+    unsigned char *ptrTif = parseImg(frame);
+
     // If the frame is empty, break immediately
     if (frame.empty())
       break;
 
+    ci->ImgID_input = 42;
+    ci->ptr = ptrTif;
+
     //send to tensorflow
-    doATRinference(frame, atrManager);
+    doATRinference(frame, atrManager, ci, co);
+
+    //release buffer
+    delete ptrTif;
 
     //resize but keep aspect ratio
     cv::resize(frame, frame, cv::Size(frame.size().width / 3, frame.size().height / 3));
@@ -57,6 +69,12 @@ int main()
     if (c == 27)
       break;
   }
+
+  //release OD_CycleInput
+  delete ci;
+
+  //release OD_CycleOutput
+  delete co;
 
   // When everything done, release the video capture object
   cap.release();
@@ -124,10 +142,8 @@ OD_InitParams *loadConfig(string path)
   return initParams;
 }
 
-void doATRinference(cv::Mat inp1, OD::ObjectDetectionManager *atrManager)
+unsigned char *parseImg(cv::Mat inp1)
 {
-
-  //emulate buffer from TIF
   cout << " ***  Read tif image to rgb buffer  ***  " << endl;
 
   cv::cvtColor(inp1, inp1, CV_BGR2RGB);
@@ -139,12 +155,13 @@ void doATRinference(cv::Mat inp1, OD::ObjectDetectionManager *atrManager)
   unsigned char *ptrTif = new unsigned char[img_data1.size()];
   std::copy(begin(img_data1), end(img_data1), ptrTif);
 
-  OD_CycleInput *ci = new OD_CycleInput();
-  ci->ImgID_input = 42;
-  ci->ptr = ptrTif;
+  return ptrTif;
+}
 
-  OD_CycleOutput *co = new OD_CycleOutput(); // allocate empty cycle output buffer
-  OD_ErrorCode statusCycle;
+void doATRinference(cv::Mat inp1, OD::ObjectDetectionManager *atrManager, OD_CycleInput *ci, OD_CycleOutput *co)
+{
+
+  //emulate buffer from TIF
 
   co->maxNumOfObjects = 300;
   // co->ImgID_output = -1;
@@ -153,8 +170,8 @@ void doATRinference(cv::Mat inp1, OD::ObjectDetectionManager *atrManager)
 
   cout << " ***  Run inference on RGB image  ***  " << endl;
 
+  OD_ErrorCode statusCycle;
   statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
-
   cout << " ***  .... After inference on RGB image   *** " << endl;
 
   // //draw
@@ -162,16 +179,7 @@ void doATRinference(cv::Mat inp1, OD::ObjectDetectionManager *atrManager)
 
   atrManager->SaveResultsATRimage(ci, co, (char *)"out_res2.tif", true);
 
-  //release buffer
-  delete ptrTif;
-
-  //release OD_CycleInput
-  delete ci;
-
-  //release OD_CycleOutput
   delete co->ObjectsArr;
-  delete co;
-
   //return *ret;
 }
 

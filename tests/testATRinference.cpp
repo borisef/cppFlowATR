@@ -8,22 +8,30 @@
 #include <opencv2/opencv.hpp>
 #include <numeric>
 #include <iomanip>
-#include <chrono> 
-
+#include <chrono>
+#include <thread>
 
 #include <cppflowATRInterface/Object_Detection_API.h>
 #include <cppflowATRInterface/Object_Detection_Types.h>
 #include <utils/imgUtils.h>
 
-
-
-using namespace std; 
+using namespace std;
 using namespace std::chrono;
 
-int main() {
+int main()
+{
+
+#ifdef TEST_MODE
+    cout<<"Test Mode"<<endl;
+#endif
 
     bool SHOW = true;
     float numIter = 3.0;
+
+    //  unsigned int W = 1292;
+    //  unsigned int H = 969;
+    // unsigned int W = 4096;
+    //unsigned int H = 2160;
     
     unsigned int W =  4096;
     unsigned int H =  2160;
@@ -38,7 +46,7 @@ int main() {
 
     // support data
     OD_SupportData supportData1 = {
-        W, H,                        //imageHeight//imageWidth
+        H,W,                        //imageHeight//imageWidth
         e_OD_ColorImageType::RGB,    //colorType;
         100,                         //rangeInMeters
         70.0f,                       //fcameraAngle; //BE
@@ -55,7 +63,7 @@ int main() {
        (char*)"graphs/frozen_inference_graph_humans.pb",
        //  (char*)"tryTRT_all.pb", //Nope
        // (char*)"/home/magshim/cppflowATR/frozen_inference_graph_all.pb",
-        100,                  // max number of items to be returned
+        350,                  // max number of items to be returned
         supportData1,
         mission1
     };
@@ -68,9 +76,8 @@ int main() {
 
     // new mission
     OD::InitObjectDetection(atrManager, &initParams1);
-   
 
-     //emulate buffer from TIF
+    //emulate buffer from TIF
     cout << " ***  Read tif image to rgb buffer  ***  " << endl;
 
     cv::Mat inp1 = cv::imread("media/00000018.tif", CV_LOAD_IMAGE_COLOR);
@@ -79,32 +86,57 @@ int main() {
     //put image in vector
     std::vector<uint8_t> img_data1;
     img_data1.assign(inp1.data, inp1.data + inp1.total() * inp1.channels());
-    
+
     unsigned char *ptrTif = new unsigned char[img_data1.size()];
     std::copy(begin(img_data1), end(img_data1), ptrTif);
 
     OD_CycleInput *ci = new OD_CycleInput();
-    ci->ImgID_input = 42;
+    // ci->ImgID_input = 42;
     ci->ptr = ptrTif;
 
     OD_CycleOutput *co = new OD_CycleOutput(); // allocate empty cycle output buffer
     OD_ErrorCode statusCycle;
 
-    co->maxNumOfObjects = 300;
-    co->ImgID_output = -1;
-    co->numOfObjects = 300;
+    co->maxNumOfObjects = 350;
+    co->ImgID_output = 0;
+    co->numOfObjects = 350;
     co->ObjectsArr = new OD_DetectionItem[co->maxNumOfObjects];
 
 
-    cout << " ***  Run inference on RGB image  ***  " << endl;
-
+    // RUN ONE EMPTY CYCLE
     statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
+    float milliseconds = 20000;
+    std::cout << "Empty Waiting sec:" << (milliseconds/1000.0)<<endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds((uint)milliseconds));
+    
+    co->ImgID_output = 0;
 
-    cout << " ***  .... After inference on RGB image   *** " << endl;
 
+    uint lastReadyFrame = 0;
+    for (int i = 1; i < 200; i++)
+    {
+        ci->ImgID_input = 0 + i;
+        // std::copy(begin(img_data1), end(img_data1), ptrTif);
+        // ci->ptr = ptrTif;
 
-    // //draw
-    atrManager->SaveResultsATRimage(ci, co, (char *)"out_res1.tif", false);
+        cout << " ***  Run inference on RGB image  ***  step " << i << endl;
+
+        statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
+
+        cout << " ***  .... After inference on RGB image   *** " << endl;
+
+        if (lastReadyFrame != co->ImgID_output)
+         { //draw
+         cout << " Detected new results for frame " << co->ImgID_output << endl;
+         string outName = "outRes/out_res1_" + std::to_string(co->ImgID_output) + ".png";
+         lastReadyFrame = co->ImgID_output;
+         atrManager->SaveResultsATRimage(ci, co, (char *)outName.c_str(), false);
+         }
+
+        float milliseconds = 100;
+        std::this_thread::sleep_for(std::chrono::milliseconds((uint)milliseconds));
+        std::cout << "Waited sec:" << (milliseconds/1000.0)<<endl;
+    }
 
     //release buffer
     delete ptrTif;
@@ -115,7 +147,7 @@ int main() {
 
     // change  support data
     OD_SupportData supportData2 = {
-        W, H,                        //imageHeight//imageWidth
+        H,W,                        //imageHeight//imageWidth
         e_OD_ColorImageType::YUV422, // colorType;
         100,                         //rangeInMeters
         70.0f,                       //fcameraAngle; //BE
@@ -130,27 +162,26 @@ int main() {
     //emulate buffer from RAW
     std::vector<unsigned char> vecFromRaw = readBytesFromFile("media/00006160.raw");
 
-     
     unsigned char *ptrRaw = new unsigned char[vecFromRaw.size()];
     std::copy(begin(vecFromRaw), end(vecFromRaw), ptrRaw);
 
-    ci->ptr = ptrRaw;//use same ci and co
+    ci->ptr = ptrRaw; //use same ci and co
 
-    cout << " ***  Run inference on RAW image  ***  " << endl;
+    for (int i = 0; i < 0; i++)
+    {
+        cout << " ***  Run inference on RAW image  ***  " << endl;
 
-    statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
+        statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
 
-    cout << " ***  .... After inference on RAW image   *** " << endl;
-
+        cout << " ***  .... After inference on RAW image   *** " << endl;
+    }
     atrManager->SaveResultsATRimage(ci, co, (char *)"out_res2.tif", false);
 
     delete ptrRaw;
 
-
-
-   //at the end
+    //at the end
     OD::TerminateObjectDetection(atrManager);
-    
+
     //release OD_CycleInput
     delete ci;
 
@@ -158,6 +189,5 @@ int main() {
     delete co->ObjectsArr;
     delete co;
 
-return 0;
-
+    return 0;
 }
