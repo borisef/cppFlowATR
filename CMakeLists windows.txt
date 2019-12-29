@@ -3,6 +3,8 @@ project(cppFlowATR)
 set(CMAKE_CXX_STANDARD 17)
 
 add_definitions(-DTEST_MODE)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTEST_MODE")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTEST_MODE")
 
 #include_directories(PRIVATE include e:/Installs/opencv/sources/include e:/Installs/libtensorflow-gpu-windows-x86_64-1.15.0/include c:/Users/efrat/.conda/envs/keras-gpu/Library/include )
 #set(OpenCV_DIR e:/Installs/opencv/build)
