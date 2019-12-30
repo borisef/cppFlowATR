@@ -78,7 +78,7 @@ OD_ErrorCode OperateObjectDetectionAPI(ObjectDetectionManager *odm, OD_CycleInpu
     {
         cout << "+++Can  Operate OD... Free for step " << odIn->ImgID_input << endl;
         //ec = odmHandler->OperateObjectDetection(odIn, odOut); // synchroniously
-        odmHandler->m_result = std::async(std::launch::async, &ObjectDetectionManagerHandler::OperateObjectDetection, odmHandler, odIn, odOut);
+        odmHandler->m_result = std::async(std::launch::async, &ObjectDetectionManagerHandler::OperateObjectDetection, odmHandler,odIn,  odOut);
     }
     else
     {

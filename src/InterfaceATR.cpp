@@ -11,9 +11,9 @@ mbInterfaceATR::mbInterfaceATR()
     m_show = false;
     m_model = nullptr;
     m_outTensorNumDetections = nullptr;
-    m_outNames2 = nullptr;
-    m_outNames3 = nullptr;
-    m_outNames4 = nullptr;
+    m_outTensorScores = nullptr;
+    m_outTensorBB = nullptr;
+    m_outTensorClasses = nullptr;
     m_inpName  = nullptr;
 
 }
@@ -25,9 +25,9 @@ mbInterfaceATR::~mbInterfaceATR()
     {
         delete m_model;
         delete m_outTensorNumDetections;
-        delete m_outNames2;
-        delete m_outNames3;
-        delete m_outNames4;
+        delete m_outTensorScores;
+        delete m_outTensorBB;
+        delete m_outTensorClasses;
         delete m_inpName;
     }
 }
@@ -40,17 +40,18 @@ bool mbInterfaceATR::LoadNewModel(const char* modelPath)
     {
         delete m_model;
         delete m_outTensorNumDetections;
-        delete m_outNames2;
-        delete m_outNames3;
-        delete m_outNames4;
+        delete m_outTensorScores;
+        delete m_outTensorBB;
+        delete m_outTensorClasses;
         delete m_inpName;
     }
+    
 
     m_model = new Model(modelPath, CreateSessionOptions( 0.3 ));
     m_outTensorNumDetections = new Tensor(*m_model, "num_detections");
-    m_outNames2 = new Tensor(*m_model, "detection_scores");
-    m_outNames3 = new Tensor(*m_model, "detection_boxes");
-    m_outNames4 = new Tensor(*m_model, "detection_classes");
+    m_outTensorScores = new Tensor(*m_model, "detection_scores");
+    m_outTensorBB = new Tensor(*m_model, "detection_boxes");
+    m_outTensorClasses = new Tensor(*m_model, "detection_classes");
 
     m_inpName = new Tensor(*m_model, "image_tensor");
 
@@ -67,7 +68,7 @@ int mbInterfaceATR::RunRGBimage(cv::Mat inp)
     img_data.assign(inp.data, inp.data + inp.total() * inp.channels());
     m_inpName->set_data(img_data, {1,  inp.rows, inp.cols, inp.channels()});
 
-    m_model->run(m_inpName, {m_outTensorNumDetections, m_outNames2, m_outNames3, m_outNames4});
+    m_model->run(m_inpName, {m_outTensorNumDetections, m_outTensorScores, m_outTensorBB, m_outTensorClasses});
 
     return 1;
 }
@@ -104,7 +105,7 @@ int mbInterfaceATR::RunRGBVector(std::vector<uint8_t > img_data, int height, int
     // Put image in Tensor
     m_inpName->set_data(img_data, {1,  height, width, 3});
     cout << " RunRGBVector:Internal Run on RGB Vector on vector<uint8_t>  done setting data" << endl;
-    m_model->run(m_inpName, {m_outTensorNumDetections, m_outNames2, m_outNames3, m_outNames4});
+    m_model->run(m_inpName, {m_outTensorNumDetections, m_outTensorScores, m_outTensorBB, m_outTensorClasses});
     return 1;
 
 }
@@ -140,15 +141,15 @@ int mbInterfaceATR::GetResultNumDetections()
 
 int mbInterfaceATR::GetResultClasses(int i)
 {
-    return (int)m_outNames4->get_data<float>()[i];
+    return (int)m_outTensorClasses->get_data<float>()[i];
 }
 
  float mbInterfaceATR::GetResultScores(int i)
  {
-     return m_outNames2->get_data<float>()[i];
+     return m_outTensorScores->get_data<float>()[i];
 
  }
 std::vector<float>  mbInterfaceATR::GetResultBoxes()
 {
-    return m_outNames3->get_data<float>();
+    return m_outTensorBB->get_data<float>();
 }

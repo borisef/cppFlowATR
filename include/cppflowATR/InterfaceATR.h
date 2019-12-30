@@ -14,9 +14,9 @@ class mbInterfaceATR
 	  bool active;
     Model* m_model;
     Tensor* m_outTensorNumDetections;
-    Tensor* m_outNames2;
-    Tensor* m_outNames3;
-    Tensor* m_outNames4;
+    Tensor* m_outTensorScores;
+    Tensor* m_outTensorBB;
+    Tensor* m_outTensorClasses;
     Tensor* m_inpName ;
 
   public:

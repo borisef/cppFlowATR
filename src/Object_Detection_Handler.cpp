@@ -8,23 +8,48 @@ using namespace OD;
 using namespace std;
 
 
+OD_CycleInput* NewCopyCycleInput(OD_CycleInput* tocopy,uint bufferSize)
+{
+    OD_CycleInput* newCopy = new OD_CycleInput();
+    newCopy->ImgID_input = tocopy->ImgID_input;
+    //copy buffer 
+    unsigned char* buffer = new unsigned char[bufferSize];
+    memcpy(buffer, tocopy->ptr, bufferSize);
+    newCopy->ptr = buffer;
+}
+
+void DeleteCycleInput(OD_CycleInput* todel)
+{
+    if(todel)
+    {
+        if(todel->ptr)
+            delete todel->ptr;
+        delete todel;
+    }
+}
+
 
 OD_InitParams* ObjectDetectionManagerHandler::getParams(){return m_initParams;}
 
 void ObjectDetectionManagerHandler::setParams(OD_InitParams* ip)
 {
     m_initParams = ip;
-    // if(m_cycleInput.ptr)
-    // {
-    //         delete m_cycleInput.ptr;
-    //         m_cycleInput.ptr = new unsigned char[(ip->supportData.imageWidth)*(ip->supportData.imageHeight)*3];
-    // }
+    m_numPtrPixels = ip->supportData.imageHeight*ip->supportData.imageWidth;
+    m_numImgPixels = ip->supportData.imageHeight*ip->supportData.imageWidth*3;
+    if(ip->supportData.colorType == e_OD_ColorImageType::YUV422)
+        m_numPtrPixels = m_numPtrPixels*2;
+    else
+        m_numPtrPixels = m_numPtrPixels*3;
+        
 }
 
 
 ObjectDetectionManagerHandler::ObjectDetectionManagerHandler()
 {
     m_mbATR = nullptr;
+    m_prevCycleInput = nullptr;
+    m_nextCycleInput = nullptr;
+    m_curCycleInput = nullptr;
     //m_cycleInput.ptr = nullptr;
 
 }
@@ -38,6 +63,13 @@ ObjectDetectionManagerHandler::~ObjectDetectionManagerHandler()
 
       if (m_mbATR != nullptr)
         delete m_mbATR;
+      if(m_prevCycleInput)
+        DeleteCycleInput(m_prevCycleInput);
+      if(m_curCycleInput)
+        DeleteCycleInput(m_curCycleInput);
+      if(m_nextCycleInput)
+        DeleteCycleInput(m_nextCycleInput);
+        
 }
 
 OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams* odInitParams) 
@@ -60,17 +92,23 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams* o
 
     return OD_ErrorCode::OD_OK;
 }
-OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_CycleInput* CycleInput, OD_CycleOutput* CycleOutput)
+OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_CycleInput* cycleInput, OD_CycleOutput* cycleOutput)
 {
     //keep OD_CycleInput copy
-    cout<<" PrepareOperateObjectDetection: Prepare to run on frame "<< CycleInput->ImgID_input<<endl;
-    //int wh3=(m_initParams->supportData.imageHeight)*(m_initParams->supportData.imageWidth)*3;
-   // std::copy((CycleInput->ptr),(CycleInput->ptr) + wh3, (char*)m_cycleInput.ptr);
-   // m_cycleInput.ImgID_input = CycleInput->ImgID_input;
-
-    //remark: can be skipped for performance but may be risky 
-    //TODO: during prepare we can convert to RGB
-
+    cout<<" PrepareOperateObjectDetection: Prepare to run on frame "<< cycleInput->ImgID_input<<endl;
+    if(cycleInput && cycleInput->ptr)// not null 
+        if(m_nextCycleInput)//not null
+        {
+            if(cycleInput->ImgID_input != m_nextCycleInput->ImgID_input){
+                //replace next 
+                
+                DeleteCycleInput(m_nextCycleInput);
+                m_nextCycleInput = NewCopyCycleInput(cycleInput,m_numPtrPixels);
+                }
+        }
+        else{// m_nextCycleInput is null
+            m_nextCycleInput = NewCopyCycleInput(cycleInput,m_numPtrPixels);
+        }
     return OD_ErrorCode::OD_OK;
 
 }
@@ -78,20 +116,28 @@ OD_ErrorCode  ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleInpu
 {
     m_isBusy = true; //LOCK
     cout<<"^^^Locked"<<endl;
-    cout<<" OperateObjectDetection: Run on frame "<< odIn->ImgID_input<<endl;
+ 
+    // copy next into current 
+    if(m_curCycleInput)// never suppose to happen, jic 
+        DeleteCycleInput(m_curCycleInput);
+    m_curCycleInput = m_nextCycleInput; // transfere
+    m_nextCycleInput = nullptr;
 
-    unsigned int fi = odIn->ImgID_input;
+
+    cout<<" OperateObjectDetection: Run on frame "<< m_curCycleInput->ImgID_input<<endl;
+
+    unsigned int fi = m_curCycleInput->ImgID_input;
     int h = m_initParams->supportData.imageHeight;
     int w = m_initParams->supportData.imageWidth;
 
     e_OD_ColorImageType colortype = m_initParams->supportData.colorType;
 
     if (colortype == e_OD_ColorImageType::YUV422) // if raw
-        this->m_mbATR->RunRawImage(odIn->ptr, h, w);
+        this->m_mbATR->RunRawImage(m_curCycleInput->ptr, h, w);
     else if (colortype == e_OD_ColorImageType::RGB) // if rgb
     {
         cout << " Internal Run on RGB buffer " << endl;
-        this->m_mbATR->RunRGBVector(odIn->ptr, h, w);
+        this->m_mbATR->RunRGBVector(m_curCycleInput->ptr, h, w);
     }
     else
     {
@@ -102,7 +148,14 @@ OD_ErrorCode  ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleInpu
     this->PopulateCycleOutput(odOut);
     odOut->ImgID_output = fi;
 
-    
+    // copy current into prev 
+    if(m_prevCycleInput) 
+        DeleteCycleInput(m_prevCycleInput);
+    m_prevCycleInput = m_curCycleInput; // transfere
+    m_curCycleInput = nullptr;
+
+
+
     cout<<"###UnLocked"<<endl;
     m_isBusy = false;//RELEASE
 
@@ -111,14 +164,15 @@ OD_ErrorCode  ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleInpu
 
 bool  ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleInput *ci, OD_CycleOutput *co, char *imgNam, bool show)
 {
+    float drawThresh = 0;//if 0 draw all
     //TODO:
-    unsigned int fi = ci->ImgID_input;
+    unsigned int fi = m_prevCycleInput->ImgID_input;
     unsigned int h = m_initParams->supportData.imageHeight;
     unsigned int w = m_initParams->supportData.imageWidth;
 
     e_OD_ColorImageType colortype = m_initParams->supportData.colorType;
     cv::Mat *myRGB = nullptr;
-    unsigned char *buffer = (unsigned char *)(ci->ptr);
+    unsigned char *buffer = (unsigned char *)(m_prevCycleInput->ptr);
     std::vector<uint8_t> img_data(h * w * 2);
     if (colortype == e_OD_ColorImageType::YUV422) // if raw
     {
@@ -151,7 +205,7 @@ bool  ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleInput *ci, OD_C
 
         std::vector<float> bbox = {bbox_data.x1, bbox_data.x2, bbox_data.y1, bbox_data.y2};
 
-        if (score > 0.1)
+        if (score >= drawThresh)
         {
             cout << "add rectangle to drawing" <<endl;
             float x = bbox_data.x1;
@@ -188,7 +242,7 @@ bool  ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleInput *ci, OD_C
 
 int  ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutput)
 {
-    
+    float LOWER_SCORE_THRESHOLD = 0.1;
     cout<<"ObjectDetectionManagerHandler::PopulateCycleOutput"<<endl;
 
     OD_DetectionItem *odi = cycleOutput->ObjectsArr;
@@ -198,11 +252,17 @@ int  ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOut
     auto bbox_data = m_mbATR->GetResultBoxes();
     unsigned int w = this->m_initParams->supportData.imageWidth;
     unsigned int h = this->m_initParams->supportData.imageHeight;
-    for (int i = 0; i < cycleOutput->numOfObjects; i++)
+    cycleOutput->numOfObjects = cycleOutput->maxNumOfObjects;
+    for (int i = 0; i < cycleOutput->maxNumOfObjects; i++)
     {
         e_OD_TargetClass aa = e_OD_TargetClass(1);
         odi[i].tarClass = e_OD_TargetClass(m_mbATR->GetResultClasses(i));
         odi[i].tarScore = m_mbATR->GetResultScores(i);
+        if(odi[i].tarScore < LOWER_SCORE_THRESHOLD)
+        {
+            cycleOutput->numOfObjects = i;
+            break;
+        }
         
        // odi[i].tarBoundingBox = {bbox_data[i * 4], bbox_data[i * 4 + 1], bbox_data[i * 4 + 2], bbox_data[i * 4 + 3]};
         odi[i].tarBoundingBox = {bbox_data[i * 4 + 1]*w, bbox_data[i * 4 + 3]*w, bbox_data[i * 4]*h,bbox_data[i * 4 + 2]*h};

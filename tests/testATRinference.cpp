@@ -17,16 +17,26 @@
 
 using namespace std;
 using namespace std::chrono;
+vector<string> GetFileNames();
+void MyWait(string s, float ms)
+{
+    std::cout << s << " Waiting sec:" << (ms / 1000.0) << endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds((uint)ms));
+
+}
 
 int main()
 {
 
+    int numInf1 = 50;
+    int numInf2 = 50;
+    bool SHOW = true;
+    float numIter = 3.0;
 #ifdef TEST_MODE
     cout << "Test Mode" << endl;
 #endif
 
-    bool SHOW = true;
-    float numIter = 3.0;
+    
 #ifdef WIN32
     unsigned int W = 1292;
     unsigned int H = 969;
@@ -53,7 +63,7 @@ int main()
         0                         //TEMP: float	spare[3];
     };
 
-    OD_InitParams initParams1 =
+    OD_InitParams initParams =
         {
     //(char*)"/home/magshim/MB2/TrainedModels/faster_MB_140719_persons_sel4/frozen_390k/frozen_inference_graph.pb", //fails
     //(char*)"tryTRT_humans.pb", //sometimes works
@@ -63,21 +73,19 @@ int main()
             (char *)"graphs/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_frozen_inference_graph.pb",
 #else
             (char *)"graphs/frozen_inference_graph_humans.pb",
-#endif
-            //  (char*)"tryTRT_all.pb", //Nope
-            // (char*)"/home/magshim/cppflowATR/frozen_inference_graph_all.pb",
+#endif      
             350, // max number of items to be returned
             supportData1,
             mission1};
 
     // Creation of ATR manager + new mission
     OD::ObjectDetectionManager *atrManager;
-    atrManager = OD::CreateObjectDetector(&initParams1); //first mission
+    atrManager = OD::CreateObjectDetector(&initParams); //first mission
 
     cout << " ***  ObjectDetectionManager created  *** " << endl;
 
     // new mission
-    OD::InitObjectDetection(atrManager, &initParams1);
+    OD::InitObjectDetection(atrManager, &initParams);
 
     //emulate buffer from TIF
     cout << " ***  Read tif image to rgb buffer  ***  " << endl;
@@ -111,14 +119,12 @@ int main()
 
     // RUN ONE EMPTY CYCLE
     statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
-    float milliseconds = 20000;
-    std::cout << "Empty Waiting sec:" << (milliseconds / 1000.0) << endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds((uint)milliseconds));
-
-    co->ImgID_output = 0;
+    
+    MyWait("Empty wait", 10000.0);
 
     uint lastReadyFrame = 0;
-    for (int i = 1; i < 100; i++)
+    co->ImgID_output = 0;
+    for (int i = 1; i < numInf1; i++)
     {
         ci->ImgID_input = 0 + i;
         // std::copy(begin(img_data1), end(img_data1), ptrTif);
@@ -138,10 +144,10 @@ int main()
             atrManager->SaveResultsATRimage(ci, co, (char *)outName.c_str(), false);
         }
 
-        float milliseconds = 25;
-        std::this_thread::sleep_for(std::chrono::milliseconds((uint)milliseconds));
-        std::cout << "Waited sec:" << (milliseconds / 1000.0) << endl;
+        MyWait("Small pause", 100.0);
     }
+
+     MyWait("Long pause", 10000.0);
 
     //release buffer
     delete ptrTif;
@@ -160,9 +166,9 @@ int main()
         0                            //TEMP: float	spare[3];
     };
 
-    initParams1.supportData = supportData2;
+    initParams.supportData = supportData2;
     // new mission because of support data
-    InitObjectDetection(atrManager, &initParams1);
+    InitObjectDetection(atrManager, &initParams);
 
     //emulate buffer from RAW
     std::vector<unsigned char> vecFromRaw = readBytesFromFile("media/00006160.raw");
@@ -171,8 +177,11 @@ int main()
     std::copy(begin(vecFromRaw), end(vecFromRaw), ptrRaw);
 
     ci->ptr = ptrRaw; //use same ci and co
+
     lastReadyFrame = 0;
-    for (int i = 0; i < 100; i++)
+    co->ImgID_output = 0;
+
+    for (int i = 0; i < numInf2; i++)
     {
         ci->ImgID_input = 0 + i;
         cout << " ***  Run inference on RAW image  ***  " << endl;
@@ -189,11 +198,68 @@ int main()
             atrManager->SaveResultsATRimage(ci, co, (char *)outName.c_str(), false);
         }
 
-        float milliseconds = 10;
-        std::this_thread::sleep_for(std::chrono::milliseconds((uint)milliseconds));
-        std::cout << "Waited sec:" << (milliseconds / 1000.0) << endl;
+        MyWait("Small pause", 100.0);
     }
-    atrManager->SaveResultsATRimage(ci, co, (char *)"out_res2.tif", false);
+    //atrManager->SaveResultsATRimage(ci, co, (char *)"out_res2.tif", false);
+     MyWait("Long pause", 10000.0);
+    W = 3840;
+    H = 2160;
+    frameID++;
+
+    // change  support data
+    OD_SupportData supportData3 = {
+        H, W,                     //imageHeight//imageWidth
+        e_OD_ColorImageType::RGB, // colorType;
+        100,                      //rangeInMeters
+        70.0f,                    //fcameraAngle; //BE
+        0,                        //TEMP:cameraParams[10];//BE
+        0                         //TEMP: float	spare[3];
+    };
+
+    initParams.supportData = supportData3;
+    // new mission because of support data
+    InitObjectDetection(atrManager, &initParams);
+
+    vector<string> ff = GetFileNames();
+    int N = ff.size();
+    lastReadyFrame = 0;
+    co->ImgID_output = 0;
+    int temp = 0;
+    for (size_t i1 = 0; i1 < 10; i1++)
+    {
+        /* code */
+   
+    
+    for (size_t i = 0; i < N; i++)
+    {
+        temp++;
+        ci->ImgID_input = 0 + i + temp;
+        cv::Mat inp1 = cv::imread((char *)((ff[i]).c_str()), CV_LOAD_IMAGE_COLOR);
+        cv::cvtColor(inp1, inp1, CV_BGR2RGB);
+
+        //put image in vector
+        std::vector<uint8_t> img_data1;
+        img_data1.assign(inp1.data, inp1.data + inp1.total() * inp1.channels());
+
+        unsigned char *ptrTif = new unsigned char[img_data1.size()];
+        std::copy(begin(img_data1), end(img_data1), ptrTif);
+
+        ci->ptr = ptrTif;
+        statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
+        if (lastReadyFrame != co->ImgID_output)
+        { //draw
+            cout << " Detected new results for frame " << co->ImgID_output << endl;
+            string outName = "outRes/out_res3_" + std::to_string(co->ImgID_output) + ".png";
+            lastReadyFrame = co->ImgID_output;
+            atrManager->SaveResultsATRimage(ci, co, (char *)outName.c_str(), false);
+        }
+
+        MyWait("Small pause", 10.0);
+        delete ptrTif;
+
+        
+    }
+    }
 
     delete ptrRaw;
 
@@ -208,4 +274,62 @@ int main()
     delete co;
 
     return 0;
+}
+
+vector<string> GetFileNames()
+{
+    vector<string> FileList = {"media/many_images/00000240.tif",
+                               "media/many_images/00000280.tif",
+                               "media/many_images/00000320.tif",
+                               "media/many_images/00000360.tif",
+                               "media/many_images/00000440.tif",
+                               "media/many_images/00000480.tif",
+                               "media/many_images/00000520.tif",
+                               "media/many_images/00000000.tif",
+                               "media/many_images/00000200.tif",
+                               "media/many_images/00000400.tif",
+                               "media/many_images/00000600.tif",
+                               "media/many_images/00000800.tif",
+                               "media/many_images/00001000.tif",
+                               "media/many_images/00001200.tif",
+                               "media/many_images/00001400.tif",
+                               "media/many_images/00001600.tif",
+                               "media/many_images/00001800.tif",
+                               "media/many_images/00002000.tif",
+                               "media/many_images/00002200.tif",
+                               "media/many_images/00002400.tif",
+                               "media/many_images/00002600.tif",
+                               "media/many_images/00002800.tif",
+                               "media/many_images/00003000.tif",
+                               "media/many_images/00003200.tif",
+                               "media/many_images/00003400.tif",
+                               "media/many_images/00003600.tif",
+                               "media/many_images/00003800.tif",
+                               "media/many_images/00004000.tif",
+                               "media/many_images/00004200.tif",
+                               "media/many_images/00004400.tif",
+                               "media/many_images/00004600.tif",
+                               "media/many_images/00004800.tif",
+                               "media/many_images/00005000.tif",
+                               "media/many_images/00005200.tif",
+                               "media/many_images/00005400.tif",
+                               "media/many_images/00005600.tif",
+                               "media/many_images/00005800.tif",
+                               "media/many_images/00006000.tif",
+                               "media/many_images/00006200.tif",
+                               "media/many_images/00006400.tif",
+                               "media/many_images/00006600.tif",
+                               "media/many_images/00006800.tif",
+                               "media/many_images/00009200.tif",
+                               "media/many_images/00009400.tif",
+                               "media/many_images/00009600.tif",
+                               "media/many_images/00009800.tif",
+                               "media/many_images/00010000.tif",
+                               "media/many_images/00010200.tif",
+                               "media/many_images/00010400.tif",
+                               "media/many_images/00010600.tif",
+                               "media/many_images/00010800.tif",
+                               "media/many_images/00011000.tif"};
+
+    return FileList;
 }

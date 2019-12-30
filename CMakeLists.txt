@@ -3,6 +3,12 @@ project(cppFlowATR)
 
 #add_compile_options(-pthread -lpthread)
 
+add_definitions(-DTEST_MODE) # windows
+
+set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -DTEST_MODE) #linux not working 
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -DTEST_MODE)#linux not working 
+add_compile_options(-DTEST_MODE)#linux not working 
+
 include_directories(PRIVATE include)
 
 add_definitions(-DTEST_MODE)
@@ -41,7 +47,6 @@ add_executable(testATRInference  tests/testATRinference.cpp src/Model.cpp src/Te
 
 # #target_link_libraries (testATRInference -ltensorflow ${OpenCV_LIBS})
 target_link_libraries (testATRInference ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
-
 
 
 #(3) Test testATRInference but with SO dependencies
