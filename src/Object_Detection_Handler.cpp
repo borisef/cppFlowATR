@@ -16,6 +16,7 @@ OD_CycleInput* NewCopyCycleInput(OD_CycleInput* tocopy,uint bufferSize)
     unsigned char* buffer = new unsigned char[bufferSize];
     memcpy(buffer, tocopy->ptr, bufferSize);
     newCopy->ptr = buffer;
+    return newCopy;
 }
 
 void DeleteCycleInput(OD_CycleInput* todel)
