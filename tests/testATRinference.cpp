@@ -17,7 +17,8 @@
 
 using namespace std;
 using namespace std::chrono;
-vector<string> GetFileNames();
+vector<String> GetFileNames();
+
 void MyWait(string s, float ms)
 {
     std::cout << s << " Waiting sec:" << (ms / 1000.0) << endl;
@@ -220,7 +221,7 @@ int main()
     // new mission because of support data
     InitObjectDetection(atrManager, &initParams);
 
-    vector<string> ff = GetFileNames();
+    vector<String> ff = GetFileNames();
     int N = ff.size();
     lastReadyFrame = 0;
     co->ImgID_output = 0;
@@ -234,7 +235,7 @@ int main()
     {
         temp++;
         ci->ImgID_input = 0 + i + temp;
-        cv::Mat inp1 = cv::imread((char *)((ff[i]).c_str()), CV_LOAD_IMAGE_COLOR);
+        cv::Mat inp1 = cv::imread(ff[i], CV_LOAD_IMAGE_COLOR);
         cv::cvtColor(inp1, inp1, CV_BGR2RGB);
 
         //put image in vector
@@ -276,60 +277,11 @@ int main()
     return 0;
 }
 
-vector<string> GetFileNames()
+vector<String> GetFileNames()
 {
-    vector<string> FileList = {"media/many_images/00000240.tif",
-                               "media/many_images/00000280.tif",
-                               "media/many_images/00000320.tif",
-                               "media/many_images/00000360.tif",
-                               "media/many_images/00000440.tif",
-                               "media/many_images/00000480.tif",
-                               "media/many_images/00000520.tif",
-                               "media/many_images/00000000.tif",
-                               "media/many_images/00000200.tif",
-                               "media/many_images/00000400.tif",
-                               "media/many_images/00000600.tif",
-                               "media/many_images/00000800.tif",
-                               "media/many_images/00001000.tif",
-                               "media/many_images/00001200.tif",
-                               "media/many_images/00001400.tif",
-                               "media/many_images/00001600.tif",
-                               "media/many_images/00001800.tif",
-                               "media/many_images/00002000.tif",
-                               "media/many_images/00002200.tif",
-                               "media/many_images/00002400.tif",
-                               "media/many_images/00002600.tif",
-                               "media/many_images/00002800.tif",
-                               "media/many_images/00003000.tif",
-                               "media/many_images/00003200.tif",
-                               "media/many_images/00003400.tif",
-                               "media/many_images/00003600.tif",
-                               "media/many_images/00003800.tif",
-                               "media/many_images/00004000.tif",
-                               "media/many_images/00004200.tif",
-                               "media/many_images/00004400.tif",
-                               "media/many_images/00004600.tif",
-                               "media/many_images/00004800.tif",
-                               "media/many_images/00005000.tif",
-                               "media/many_images/00005200.tif",
-                               "media/many_images/00005400.tif",
-                               "media/many_images/00005600.tif",
-                               "media/many_images/00005800.tif",
-                               "media/many_images/00006000.tif",
-                               "media/many_images/00006200.tif",
-                               "media/many_images/00006400.tif",
-                               "media/many_images/00006600.tif",
-                               "media/many_images/00006800.tif",
-                               "media/many_images/00009200.tif",
-                               "media/many_images/00009400.tif",
-                               "media/many_images/00009600.tif",
-                               "media/many_images/00009800.tif",
-                               "media/many_images/00010000.tif",
-                               "media/many_images/00010200.tif",
-                               "media/many_images/00010400.tif",
-                               "media/many_images/00010600.tif",
-                               "media/many_images/00010800.tif",
-                               "media/many_images/00011000.tif"};
+    
+    vector<String> fn;
+    cv::glob("media/spliced/*", fn, true);
 
-    return FileList;
+    return fn;
 }
