@@ -64,6 +64,8 @@ add_executable(videoTest  tests/videoTest.cpp ${SRC})
 target_link_libraries (videoTest ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
 
 
+add_executable(test_itay  tests/test_itay.cpp ${SRC})
+target_link_libraries (test_itay ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
 
 
 
