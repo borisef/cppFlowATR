@@ -17,13 +17,14 @@
 
 using namespace std;
 using namespace std::chrono;
+
+unsigned char *ParseImage(String path);
 vector<String> GetFileNames();
 
 void MyWait(string s, float ms)
 {
     std::cout << s << " Waiting sec:" << (ms / 1000.0) << endl;
     std::this_thread::sleep_for(std::chrono::milliseconds((uint)ms));
-
 }
 
 int main()
@@ -37,7 +38,6 @@ int main()
     cout << "Test Mode" << endl;
 #endif
 
-    
 #ifdef WIN32
     unsigned int W = 1292;
     unsigned int H = 969;
@@ -74,7 +74,7 @@ int main()
             (char *)"graphs/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_frozen_inference_graph.pb",
 #else
             (char *)"graphs/frozen_inference_graph_humans.pb",
-#endif      
+#endif
             350, // max number of items to be returned
             supportData1,
             mission1};
@@ -120,7 +120,7 @@ int main()
 
     // RUN ONE EMPTY CYCLE
     statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
-    
+
     MyWait("Empty wait", 10000.0);
 
     uint lastReadyFrame = 0;
@@ -142,13 +142,13 @@ int main()
             cout << " Detected new results for frame " << co->ImgID_output << endl;
             string outName = "outRes/out_res1_" + std::to_string(co->ImgID_output) + ".png";
             lastReadyFrame = co->ImgID_output;
-            atrManager->SaveResultsATRimage(ci, co, (char *)outName.c_str(), false);
+            atrManager->SaveResultsATRimage(ci, co, (char *)outName.c_str(), true);
         }
 
         MyWait("Small pause", 100.0);
     }
 
-     MyWait("Long pause", 10000.0);
+    MyWait("Long pause", 10000.0);
 
     //release buffer
     delete ptrTif;
@@ -196,14 +196,14 @@ int main()
             cout << " Detected new results for frame " << co->ImgID_output << endl;
             string outName = "outRes/out_res2_" + std::to_string(co->ImgID_output) + ".png";
             lastReadyFrame = co->ImgID_output;
-            atrManager->SaveResultsATRimage(ci, co, (char *)outName.c_str(), false);
+            atrManager->SaveResultsATRimage(ci, co, (char *)outName.c_str(), true);
         }
 
         MyWait("Small pause", 100.0);
     }
     //atrManager->SaveResultsATRimage(ci, co, (char *)"out_res2.tif", false);
-     MyWait("Long pause", 10000.0);
-    W = 3840;
+    MyWait("Long pause", 10000.0);
+    W = 4096;
     H = 2160;
     frameID++;
 
@@ -226,41 +226,33 @@ int main()
     lastReadyFrame = 0;
     co->ImgID_output = 0;
     int temp = 0;
-    for (size_t i1 = 0; i1 < 10; i1++)
+    for (size_t i1 = 0; i1 < 1; i1++)
     {
         /* code */
-   
-    
-    for (size_t i = 0; i < N; i++)
-    {
-        temp++;
-        ci->ImgID_input = 0 + i + temp;
-        cv::Mat inp1 = cv::imread(ff[i], CV_LOAD_IMAGE_COLOR);
-        cv::cvtColor(inp1, inp1, CV_BGR2RGB);
 
-        //put image in vector
-        std::vector<uint8_t> img_data1;
-        img_data1.assign(inp1.data, inp1.data + inp1.total() * inp1.channels());
+        for (size_t i = 0; i < N; i++)
+        {
+            temp++;
+            ci->ImgID_input = 0 + i + temp;
 
-        unsigned char *ptrTif = new unsigned char[img_data1.size()];
-        std::copy(begin(img_data1), end(img_data1), ptrTif);
+            ptrTif = ParseImage(ff[i]);
+            ci->ptr = ptrTif;
 
-        ci->ptr = ptrTif;
-        statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
-        if (lastReadyFrame != co->ImgID_output)
-        { //draw
-            cout << " Detected new results for frame " << co->ImgID_output << endl;
-            string outName = "outRes/out_res3_" + std::to_string(co->ImgID_output) + ".png";
-            lastReadyFrame = co->ImgID_output;
-            atrManager->SaveResultsATRimage(ci, co, (char *)outName.c_str(), false);
+            statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
+            if (lastReadyFrame != co->ImgID_output)
+            { //draw
+                cout << " Detected new results for frame " << co->ImgID_output << endl;
+                string outName = "outRes/out_res3_" + std::to_string(co->ImgID_output) + ".png";
+                lastReadyFrame = co->ImgID_output;
+                atrManager->SaveResultsATRimage(ci, co, (char *)outName.c_str(), true);
+            }
+
+            MyWait("Small pause", 10.0);
+            delete ptrTif;
         }
-
-        MyWait("Small pause", 10.0);
-        delete ptrTif;
-
-        
     }
-    }
+
+    MyWait("Long pause", 10000.0);
 
     delete ptrRaw;
 
@@ -279,9 +271,24 @@ int main()
 
 vector<String> GetFileNames()
 {
-    
+
     vector<String> fn;
     cv::glob("media/spliced/*", fn, true);
 
     return fn;
+}
+
+unsigned char* ParseImage(String path)
+{
+    cv::Mat inp1 = cv::imread(path, CV_LOAD_IMAGE_COLOR);
+    cv::cvtColor(inp1, inp1, CV_BGR2RGB);
+
+    //put image in vector
+    std::vector<uint8_t> img_data1;
+    img_data1.assign(inp1.data, inp1.data + inp1.total() * inp1.channels());
+
+    unsigned char *ptrTif = new unsigned char[img_data1.size()];
+    std::copy(begin(img_data1), end(img_data1), ptrTif);
+
+    return ptrTif;
 }
