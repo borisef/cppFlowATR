@@ -61,6 +61,15 @@ ObjectDetectionManagerHandler::ObjectDetectionManagerHandler(OD_InitParams*   ip
 
 ObjectDetectionManagerHandler::~ObjectDetectionManagerHandler()
 {
+      std::future_status fstatus = m_result.wait_for(std::chrono::seconds(0));
+      if(fstatus == future_status::ready)
+        cout<<"(ATR thread) future_status Ready"<<endl;
+      if(fstatus == future_status::deferred)
+        cout<<"(ATR thread) future_status Deferred"<<endl;
+      if(fstatus == future_status::timeout)
+        cout<<"(ATR thread) future_status Timeout"<<endl;
+        
+       
 
       if (m_mbATR != nullptr)
         delete m_mbATR;
@@ -86,7 +95,10 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams* o
         m_mbATR = mbATR;
         cout<<"Executed LoadNewModel in  InitObjectDetection"<<endl;
     }
-
+    if(m_nextCycleInput){
+        DeleteCycleInput(m_nextCycleInput);
+        m_nextCycleInput = nullptr;
+    }
     setParams(odInitParams);
    
 
@@ -98,6 +110,8 @@ OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_Cyc
     //keep OD_CycleInput copy
     cout<<" PrepareOperateObjectDetection: Prepare to run on frame "<< cycleInput->ImgID_input<<endl;
     if(cycleInput && cycleInput->ptr)// not null 
+    {
+        cout<< "Replace old next cycle input"<<endl; 
         if(m_nextCycleInput)//not null
         {
             if(cycleInput->ImgID_input != m_nextCycleInput->ImgID_input){
@@ -110,6 +124,17 @@ OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_Cyc
         else{// m_nextCycleInput is null
             m_nextCycleInput = NewCopyCycleInput(cycleInput,m_numPtrPixels);
         }
+    }
+    else
+    {
+        cout<<"PrepareOperateObjectDetection:Input cycle is null, do not replace next cycle "<<endl;
+        
+    }
+    if(m_nextCycleInput && m_nextCycleInput->ptr)
+            cout<<"PrepareOperateObjectDetection:Next cycle is valid"<<endl;
+    else
+            cout<<"PrepareOperateObjectDetection:Next cycle is empty"<<endl;
+    
     return OD_ErrorCode::OD_OK;
 
 }
@@ -117,12 +142,38 @@ OD_ErrorCode  ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleInpu
 {
     m_isBusy = true; //LOCK
     cout<<"^^^Locked"<<endl;
+
+    if(m_nextCycleInput && m_nextCycleInput->ptr)
+            cout<<"OperateObjectDetection:Next cycle is valid"<<endl;
+    else
+            cout<<"OperateObjectDetection:Next cycle is empty"<<endl;
+
+    if(m_curCycleInput && m_curCycleInput->ptr)
+            cout<<"OperateObjectDetection:Current cycle is valid"<<endl;
+    else
+            cout<<"OperateObjectDetection:Current cycle is empty"<<endl;
+
+    if(m_prevCycleInput && m_prevCycleInput->ptr)
+            cout<<"OperateObjectDetection:Previous cycle is valid"<<endl;
+    else
+            cout<<"OperateObjectDetection:Previous cycle is empty"<<endl;
+
+
  
+     if(!(m_nextCycleInput && m_nextCycleInput->ptr))// next cycle is null not null
+        {
+            cout<<"ObjectDetectionManagerHandler::OperateObjectDetection nothing todo"<<endl;
+            cout<<"###UnLocked"<<endl;
+            m_isBusy = false;//RELEASE
+
+            return OD_ErrorCode::OD_OK;
+
+        } 
     // copy next into current 
     if(m_curCycleInput)// never suppose to happen, jic 
         DeleteCycleInput(m_curCycleInput);
     m_curCycleInput = m_nextCycleInput; // transfere
-    m_nextCycleInput = nullptr;
+    m_nextCycleInput = nullptr;//TODO (is it safe?)
 
 
     cout<<" OperateObjectDetection: Run on frame "<< m_curCycleInput->ImgID_input<<endl;

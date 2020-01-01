@@ -30,8 +30,8 @@ void MyWait(string s, float ms)
 int main()
 {
 
-    int numInf1 = 50;
-    int numInf2 = 50;
+    int numInf1 = 5;
+    int numInf2 = 5;
     bool SHOW = true;
     float numIter = 3.0;
 #ifdef TEST_MODE
@@ -70,7 +70,7 @@ int main()
     //(char*)"tryTRT_humans.pb", //sometimes works
     //(char*)"/home/magshim/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb", //works
 //(char*)"tryTRT_humans.pb", //sometimes OK, sometimes crashes the system
-#ifdef WIN32
+#ifndef WIN32
             (char *)"graphs/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_frozen_inference_graph.pb",
 #else
             (char *)"graphs/frozen_inference_graph_humans.pb",
@@ -203,14 +203,14 @@ int main()
     }
     //atrManager->SaveResultsATRimage(ci, co, (char *)"out_res2.tif", false);
     MyWait("Long pause", 10000.0);
-    W = 4096;
+    W = 3840;
     H = 2160;
     frameID++;
 
     // change  support data
     OD_SupportData supportData3 = {
         H, W,                     //imageHeight//imageWidth
-        e_OD_ColorImageType::RGB, // colorType;
+        e_OD_ColorImageType::RGB, //colorType;
         100,                      //rangeInMeters
         70.0f,                    //fcameraAngle; //BE
         0,                        //TEMP:cameraParams[10];//BE
@@ -223,21 +223,29 @@ int main()
 
     vector<String> ff = GetFileNames();
     int N = ff.size();
+    N = min(10,N);
     lastReadyFrame = 0;
     co->ImgID_output = 0;
     int temp = 0;
-    for (size_t i1 = 0; i1 < 1; i1++)
+    for (size_t i1 = 0; i1 < 10; i1++)
     {
-        /* code */
+          MyWait("**** Long pause in-between **** ", 1000.0);
 
         for (size_t i = 0; i < N; i++)
         {
+            for (size_t i2 = 0; i2 < 10; i2++)
+            {
+            
+            
             temp++;
             ci->ImgID_input = 0 + i + temp;
 
             ptrTif = ParseImage(ff[i]);
             ci->ptr = ptrTif;
-
+            if(i2 >= 10 && i2 <=10) {//Check null ptrs 
+                ci->ptr = nullptr;
+                cout<<"!!!!!!!!!----------> !!!!!!!!!!!!  Test with ci->ptr = nullptr !!!!!!!!!!"<<endl;
+            }
             statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
             if (lastReadyFrame != co->ImgID_output)
             { //draw
@@ -249,10 +257,13 @@ int main()
 
             MyWait("Small pause", 10.0);
             delete ptrTif;
+            }
         }
+        
     }
 
     MyWait("Long pause", 10000.0);
+    // TODO await instead
 
     delete ptrRaw;
 
