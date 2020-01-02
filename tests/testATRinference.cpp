@@ -30,8 +30,8 @@ void MyWait(string s, float ms)
 int main()
 {
 
-    int numInf1 = 5;
-    int numInf2 = 5;
+    int numInf1 = 10;
+    int numInf2 = 10;
     bool SHOW = true;
     float numIter = 3.0;
 #ifdef TEST_MODE
@@ -70,7 +70,7 @@ int main()
     //(char*)"tryTRT_humans.pb", //sometimes works
     //(char*)"/home/magshim/MB2/TrainedModels/MB3_persons_likeBest1_default/frozen_378K/frozen_inference_graph.pb", //works
 //(char*)"tryTRT_humans.pb", //sometimes OK, sometimes crashes the system
-#ifndef WIN32
+#ifdef WIN32
             (char *)"graphs/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_frozen_inference_graph.pb",
 #else
             (char *)"graphs/frozen_inference_graph_humans.pb",
@@ -223,7 +223,7 @@ int main()
 
     vector<String> ff = GetFileNames();
     int N = ff.size();
-    N = min(10,N);
+    N = min(20,N);
     lastReadyFrame = 0;
     co->ImgID_output = 0;
     int temp = 0;
@@ -242,7 +242,7 @@ int main()
 
             ptrTif = ParseImage(ff[i]);
             ci->ptr = ptrTif;
-            if(i2 >= 10 && i2 <=10) {//Check null ptrs 
+            if(i2 >= 0 && i2 <=3) {//Check null ptrs 
                 ci->ptr = nullptr;
                 cout<<"!!!!!!!!!----------> !!!!!!!!!!!!  Test with ci->ptr = nullptr !!!!!!!!!!"<<endl;
             }

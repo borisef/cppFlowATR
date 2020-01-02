@@ -126,6 +126,7 @@ OD_InitParams *loadConfig(string path)
 
 void doATRinference(cv::Mat inp1, OD::ObjectDetectionManager *atrManager)
 {
+  //BUG: NEED TO BE FIXED  
 
   //emulate buffer from TIF
   cout << " ***  Read tif image to rgb buffer  ***  " << endl;

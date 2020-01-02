@@ -109,19 +109,28 @@ OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_Cyc
 {
     //keep OD_CycleInput copy
     cout<<" PrepareOperateObjectDetection: Prepare to run on frame "<< cycleInput->ImgID_input<<endl;
-    if(cycleInput && cycleInput->ptr)// not null 
+    if(cycleInput && cycleInput->ptr)// input is not null 
     {
         cout<< "Replace old next cycle input"<<endl; 
-        if(m_nextCycleInput)//not null
+        //cout<<"cycleInput->ptr[10]"<<cycleInput->ptr[10]<<endl;
+        if(m_nextCycleInput)//my next not null
         {
-            if(cycleInput->ImgID_input != m_nextCycleInput->ImgID_input){
+            if(cycleInput->ImgID_input != m_nextCycleInput->ImgID_input){// not same frame#
                 //replace next 
                 
                 DeleteCycleInput(m_nextCycleInput);
                 m_nextCycleInput = NewCopyCycleInput(cycleInput,m_numPtrPixels);
-                }
+            }
+            else // same next frame
+            {
+                cout<<"PrepareOperateObjectDetection: attempt to call with same frame twice, skipping"<<endl;
+            } 
         }
-        else{// m_nextCycleInput is null
+        else{// m_nextCycleInput is null or m_nextCycleInput->ptr is NULL
+            if(m_nextCycleInput){
+                 delete m_nextCycleInput;
+                m_nextCycleInput = nullptr;
+                }
             m_nextCycleInput = NewCopyCycleInput(cycleInput,m_numPtrPixels);
         }
     }
@@ -158,7 +167,7 @@ OD_ErrorCode  ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleInpu
     else
             cout<<"OperateObjectDetection:Previous cycle is empty"<<endl;
 
-
+    //cout<<"m_nextCycleInput->ptr[10]" <<m_nextCycleInput->ptr[10]<<endl;
  
      if(!(m_nextCycleInput && m_nextCycleInput->ptr))// next cycle is null not null
         {
@@ -195,12 +204,13 @@ OD_ErrorCode  ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleInpu
     {
         return OD_ErrorCode::OD_ILEGAL_INPUT;
     }
-
+    cout << " ObjectDetectionManagerHandler::OperateObjectDetection starts PopulateCycleOutput  " << endl;
     // save results
     this->PopulateCycleOutput(odOut);
     odOut->ImgID_output = fi;
 
     // copy current into prev 
+    cout<<"ObjectDetectionManagerHandler::OperateObjectDetection m_prevCycleInput<=m_curCycleInput<=nullptr"<<endl;
     if(m_prevCycleInput) 
         DeleteCycleInput(m_prevCycleInput);
     m_prevCycleInput = m_curCycleInput; // transfere
@@ -216,6 +226,12 @@ OD_ErrorCode  ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleInpu
 
 bool  ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleInput *ci, OD_CycleOutput *co, char *imgNam, bool show)
 {
+    if(!(m_prevCycleInput && m_prevCycleInput->ptr))
+    {
+        cout<<"No m_prevCycleInput data, skipping"<<endl;
+        return false;
+
+    }
     float drawThresh = 0;//if 0 draw all
     //TODO:
     unsigned int fi = m_prevCycleInput->ImgID_input;

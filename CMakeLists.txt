@@ -49,15 +49,28 @@ add_executable(testATRInference  tests/testATRinference.cpp src/Model.cpp src/Te
 target_link_libraries (testATRInference ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
 
 
+
+#SO 
+add_library(mbATR SHARED    src/InterfaceATR.cpp  src/Object_Detection_API.cpp
+                              src/Model.cpp src/Tensor.cpp    src/imgUtils.cpp 
+                              src/Object_Detection_Handler.cpp)
+target_link_libraries (mbATR ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
+# file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/build/libmbATR.so
+#      DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/libs/shared/ATR/libmbATR.so)
+
+
+
+
 #(3) Test testATRInference but with SO dependencies
-# add_executable(testTamir tests/testATRinference.cpp)
-# FIND_LIBRARY(MY_LIB1 NAMES libmbATR.so PATHS /home/borisef/projects/cppflowATR/build )
-# target_link_libraries (testTamir  ${MY_TF_LIB} ${OpenCV_LIBS} ${MY_LIB1})
+add_executable(testTamir tests/testATRinference.cpp)
+FIND_LIBRARY(MY_LIB1 NAMES libmbATR.so PATHS /home/borisef/projects/cppFlowATR/build
+                                             /home/borisef/projects/cppflowATR/libs/shared/ATR)
+target_link_libraries (testTamir  ${MY_TF_LIB} ${OpenCV_LIBS} ${MY_LIB1}  -lpthread)
 
 
 # (4) test threads
-#add_executable(testThread  tests/testThread.cpp)
-#target_link_libraries(testThread -lpthread)
+add_executable(testThread  tests/testThread.cpp)
+target_link_libraries(testThread -lpthread)
 
 #(5) test video 
 add_executable(videoTest  tests/videoTest.cpp ${SRC})
@@ -69,16 +82,9 @@ target_link_libraries (test_itay ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
 
 
 
-#target_link_libraries (testATRInference -ltensorflow ${OpenCV_LIBS})
 target_link_libraries (videoTest ${MY_LIB} ${OpenCV_LIBS})
 
 
 
 
-
-#SO 
-# add_library(mbATR SHARED    src/InterfaceATR.cpp  src/Object_Detection_API.cpp
-#                             src/Model.cpp src/Tensor.cpp    src/imgUtils.cpp
-#                             src/Object_Detection_Handler.cpp)
-# target_link_libraries (mbATR -ltensorflow ${OpenCV_LIBS})
 

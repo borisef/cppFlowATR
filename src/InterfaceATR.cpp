@@ -77,7 +77,7 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
 {
 
     cout << " RunRGBVector:Internal Run on RGB Vector on ptr*" << endl;
-
+    cout<<"RunRGBVector "<<height << " " <<width << "prt[10]"<< ptr[10] <<endl; 
 
     std::vector<uint8_t > img_data(height*width*3);
     unsigned char* buffer = (unsigned char*)ptr;
