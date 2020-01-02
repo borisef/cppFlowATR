@@ -147,6 +147,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_Cyc
     return OD_ErrorCode::OD_OK;
 
 }
+
 OD_ErrorCode  ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleInput* odIn, OD_CycleOutput* odOut) 
 {
     m_isBusy = true; //LOCK
@@ -216,6 +217,8 @@ OD_ErrorCode  ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleInpu
     m_prevCycleInput = m_curCycleInput; // transfere
     m_curCycleInput = nullptr;
 
+    // string outName = "outRes/out_res3_" + std::to_string(odOut->ImgID_output) + "_in.png";
+    // this->SaveResultsATRimage(nullptr,odOut, (char*)outName.c_str(),false);
 
 
     cout<<"###UnLocked"<<endl;
@@ -230,10 +233,9 @@ bool  ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleInput *ci, OD_C
     {
         cout<<"No m_prevCycleInput data, skipping"<<endl;
         return false;
-
     }
     float drawThresh = 0;//if 0 draw all
-    //TODO:
+    //TODO: make sure m_prevCycleInput->ImgID_input is like co->ImgID
     unsigned int fi = m_prevCycleInput->ImgID_input;
     unsigned int h = m_initParams->supportData.imageHeight;
     unsigned int w = m_initParams->supportData.imageWidth;
@@ -241,10 +243,10 @@ bool  ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleInput *ci, OD_C
     e_OD_ColorImageType colortype = m_initParams->supportData.colorType;
     cv::Mat *myRGB = nullptr;
     unsigned char *buffer = (unsigned char *)(m_prevCycleInput->ptr);
-    std::vector<uint8_t> img_data(h * w * 2);
+  
     if (colortype == e_OD_ColorImageType::YUV422) // if raw
     {
-
+        std::vector<uint8_t> img_data(h * w * 2);
         for (int i = 0; i < h * w * 2; i++)//TODO: without for loop
             img_data[i] = buffer[i];
 

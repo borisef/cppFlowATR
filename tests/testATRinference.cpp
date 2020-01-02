@@ -223,7 +223,7 @@ int main()
 
     vector<String> ff = GetFileNames();
     int N = ff.size();
-    N = min(20,N);
+    N = min(50,N);
     lastReadyFrame = 0;
     co->ImgID_output = 0;
     int temp = 0;
@@ -242,7 +242,7 @@ int main()
 
             ptrTif = ParseImage(ff[i]);
             ci->ptr = ptrTif;
-            if(i2 >= 0 && i2 <=3) {//Check null ptrs 
+            if(i2 >= 2 && i2 <=3) {//Check null ptrs 
                 ci->ptr = nullptr;
                 cout<<"!!!!!!!!!----------> !!!!!!!!!!!!  Test with ci->ptr = nullptr !!!!!!!!!!"<<endl;
             }
@@ -252,10 +252,10 @@ int main()
                 cout << " Detected new results for frame " << co->ImgID_output << endl;
                 string outName = "outRes/out_res3_" + std::to_string(co->ImgID_output) + ".png";
                 lastReadyFrame = co->ImgID_output;
-                atrManager->SaveResultsATRimage(ci, co, (char *)outName.c_str(), true);
+                atrManager->SaveResultsATRimage(ci, co, (char *)outName.c_str(), false);
             }
 
-            MyWait("Small pause", 10.0);
+            //MyWait("Small pause", 10.0);
             delete ptrTif;
             }
         }
@@ -295,7 +295,7 @@ unsigned char* ParseImage(String path)
     cv::cvtColor(inp1, inp1, CV_BGR2RGB);
 
     //put image in vector
-    std::vector<uint8_t> img_data1;
+    std::vector<uint8_t> img_data1(inp1.rows*inp1.cols*inp1.channels());
     img_data1.assign(inp1.data, inp1.data + inp1.total() * inp1.channels());
 
     unsigned char *ptrTif = new unsigned char[img_data1.size()];
