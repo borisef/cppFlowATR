@@ -4,8 +4,11 @@
 #include <iomanip>
 #include <chrono>
 #include <thread>
+#include <mutex>
+
 using namespace std;
 using namespace std::chrono;
+
 
 
 class Runner
@@ -15,6 +18,7 @@ class Runner
     virtual int Operate() = 0;
 	
 	std::future<int> result;
+    
     int countR1 = 0;
     int countR2 = 0;
     
@@ -43,6 +47,7 @@ class RunnerHandler:public Runner
 {
     public: 
     bool m_isBusy = false;
+    std::mutex m_mutex;
     int Operate()
     {
         m_isBusy = true;

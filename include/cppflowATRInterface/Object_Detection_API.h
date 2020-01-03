@@ -43,10 +43,10 @@ class DECLARE_API_FUNCTION ObjectDetectionManager
 
 	public:
 		virtual OD_ErrorCode InitObjectDetection( OD_InitParams* input) = 0 ;
-		virtual OD_ErrorCode  OperateObjectDetection( OD_CycleInput* CycleInput, OD_CycleOutput* CycleOutput) = 0;
+		//virtual OD_ErrorCode  OperateObjectDetection( OD_CycleInput* CycleInput, OD_CycleOutput* CycleOutput) = 0;
 		
 		
-		bool SaveResultsATRimage(OD_CycleInput* ci,OD_CycleOutput* co, char* imgName, bool show);
+		bool SaveResultsATRimage(OD_CycleOutput* co, char* imgName, bool show);
 		
 		//constructors
 		ObjectDetectionManager(OD_InitParams* ip);

@@ -72,13 +72,13 @@ OD_ErrorCode OperateObjectDetectionAPI(ObjectDetectionManager *odm, OD_CycleInpu
     OD_ErrorCode ec = OD_ErrorCode::OD_OK;
     ObjectDetectionManagerHandler *odmHandler = (ObjectDetectionManagerHandler *)odm;
 
-    OD_ErrorCode prepOD = odmHandler->PrepareOperateObjectDetection(odIn, odOut); // run synchroniusly
+    OD_ErrorCode prepOD = odmHandler->PrepareOperateObjectDetection(odIn); // run synchroniusly
 
     if (prepOD == OD_ErrorCode::OD_OK && !odmHandler->IsBusy())
     {
         cout << "+++Can  Operate OD... Free for step " << odIn->ImgID_input << endl;
         //ec = odmHandler->OperateObjectDetection(odIn, odOut); // synchroniously
-        odmHandler->m_result = std::async(std::launch::async, &ObjectDetectionManagerHandler::OperateObjectDetection, odmHandler,odIn,  odOut);
+        odmHandler->m_result = std::async(std::launch::async, &ObjectDetectionManagerHandler::OperateObjectDetection, odmHandler, odOut);
     }
     else
     {
@@ -88,9 +88,9 @@ OD_ErrorCode OperateObjectDetectionAPI(ObjectDetectionManager *odm, OD_CycleInpu
     return ec; // TODO: not always ok
 }
 
-bool ObjectDetectionManager::SaveResultsATRimage(OD_CycleInput *ci, OD_CycleOutput *co, char *imgNam, bool show)
+bool ObjectDetectionManager::SaveResultsATRimage(OD_CycleOutput *co, char *imgNam, bool show)
 {
-    return ((ObjectDetectionManagerHandler *)this)->SaveResultsATRimage(ci, co, imgNam, show);
+    return ((ObjectDetectionManagerHandler *)this)->SaveResultsATRimage(co, imgNam, show);
 }
 
 DECLARE_API_FUNCTION OD_ErrorCode ResetObjectDetection(ObjectDetectionManager *odm);
