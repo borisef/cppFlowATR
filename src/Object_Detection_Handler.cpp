@@ -64,7 +64,6 @@ void ObjectDetectionManagerHandler::setParams(OD_InitParams *ip)
 
 bool ObjectDetectionManagerHandler::IsBusy()
 {
-    // return m_isBusy;
     if (m_result.valid())
     {
         return !(m_result.wait_for(std::chrono::seconds(0)) == std::future_status::ready);
@@ -81,7 +80,6 @@ ObjectDetectionManagerHandler::ObjectDetectionManagerHandler()
     m_prevCycleInput = nullptr;
     m_nextCycleInput = nullptr;
     m_curCycleInput = nullptr;
-    //m_cycleInput.ptr = nullptr;
 }
 ObjectDetectionManagerHandler::ObjectDetectionManagerHandler(OD_InitParams *ip) : ObjectDetectionManagerHandler()
 {
@@ -90,14 +88,6 @@ ObjectDetectionManagerHandler::ObjectDetectionManagerHandler(OD_InitParams *ip) 
 
 ObjectDetectionManagerHandler::~ObjectDetectionManagerHandler()
 {
-    //   std::future_status fstatus = m_result.wait_for(std::chrono::seconds(0));
-    //   if(fstatus == future_status::ready)
-    //     cout<<"(ATR thread) future_status Ready"<<endl;
-    //   if(fstatus == future_status::deferred)
-    //     cout<<"(ATR thread) future_status Deferred"<<endl;
-    //   if(fstatus == future_status::timeout)
-    //     cout<<"(ATR thread) future_status Timeout"<<endl;
-
     WaitForThread();
     DeleteAllInnerCycleInputs();
 
@@ -202,13 +192,11 @@ OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_Cyc
             if (cycleInput->ImgID_input != m_nextCycleInput->ImgID_input)
             { // not same frame#
                 //replace next
-                // m_mutexOnNext.lock();
                 tempCycleInput = m_nextCycleInput;
 
                 m_nextCycleInput = NewCopyCycleInput(cycleInput, m_numPtrPixels);
 
                 DeleteCycleInput(tempCycleInput); //delete old "next"
-                // m_mutexOnNext.unlock();
             }
             else // same next frame
             {
@@ -236,7 +224,6 @@ OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_Cyc
 OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutput *odOut)
 {
 
-    m_isBusy = true; //LOCK
     cout << "^^^Locked" << endl;
 
     if (m_nextCycleInput && m_nextCycleInput->ptr)
@@ -274,7 +261,6 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
         cout << "###UnLocked" << endl;
         DeleteCycleInput(m_curCycleInput);
         m_curCycleInput = nullptr;
-        m_isBusy = false; //RELEASE
 
         return OD_ErrorCode::OD_OK;
     }
@@ -318,7 +304,6 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     // this->SaveResultsATRimage(nullptr,odOut, (char*)outName.c_str(),false);
 
     cout << "###UnLocked" << endl;
-    m_isBusy = false; //RELEASE
     
     //Recoursive call 
     if(m_nextCycleInput) 
@@ -340,7 +325,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
     }
     else
     {
-        //TODO: deep copy m_prevCycleInput for safety
+        // deep copy m_prevCycleInput 
         tempci = NewCopyCycleInput(m_prevCycleInput, this->m_numPtrPixels);
     }
     m_mutexOnPrev.unlock();
@@ -397,7 +382,6 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
 
             cv::rectangle(*myRGB, {(int)x, (int)y}, {(int)right, (int)bottom}, {125, 255, 51}, 2);
             cv::putText(*myRGB, string("Label:") + std::to_string(classId) + ";" + std::to_string(int(score * 100)) + "%", cv::Point(x, y - 10), 1, 2, Scalar(124, 200, 10), 3);
-            //cv::putText(*myRGB, string("Label:") + std::to_string(classId) , cv::Point(x,y + 5),1, 2, Scalar(124,100,0),3);
         }
     }
     cout << " Done reading targets" << endl;
@@ -415,7 +399,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
     if (myRGB != nullptr)
     {
         myRGB->release();
-        delete myRGB; // TODO
+        delete myRGB; 
     }
     cout << " Done cleaning image" << endl;
     DeleteCycleInput(tempci);
@@ -446,7 +430,6 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
             break;
         }
 
-        // odi[i].tarBoundingBox = {bbox_data[i * 4], bbox_data[i * 4 + 1], bbox_data[i * 4 + 2], bbox_data[i * 4 + 3]};
         odi[i].tarBoundingBox = {bbox_data[i * 4 + 1] * w, bbox_data[i * 4 + 3] * w, bbox_data[i * 4] * h, bbox_data[i * 4 + 2] * h};
     }
 

@@ -25,13 +25,13 @@ class ObjectDetectionManagerHandler:public ObjectDetectionManager
         OD_InitParams* getParams();
 		void setParams(OD_InitParams* ip);
         bool IsBusy();
-        bool m_isBusy = false;
+        //bool m_isBusy = false;
        
         std::future<OD_ErrorCode> m_result;
        
         ObjectDetectionManagerHandler();
         ObjectDetectionManagerHandler(OD_InitParams*   ip);
-        bool WaitUntilForThread(int sec);
+        bool WaitUntilForThread(int sec);//not in use 
         bool WaitForThread();
 
         ~ObjectDetectionManagerHandler();
