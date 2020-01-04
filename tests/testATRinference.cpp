@@ -259,7 +259,7 @@ int main()
                 cout << " Detected new results for frame " << co->ImgID_output << endl;
                 string outName = "outRes/out_res3_" + std::to_string(co->ImgID_output) + ".png";
                 lastReadyFrame = co->ImgID_output;
-                atrManager->SaveResultsATRimage(co, (char *)outName.c_str(), false);
+                atrManager->SaveResultsATRimage(co, (char *)outName.c_str(), true);
             }
           //  MyWait("Small pause", 10.0);
             delete ptrTif;

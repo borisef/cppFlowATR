@@ -390,6 +390,9 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
         cv::Mat imgS;
         cv::resize(*myRGB, imgS, cv::Size(1365, 720));
         cv::imshow("Image", imgS);
+
+        char c = (char)cv::waitKey(25);
+       
         // cv::waitKey(0);
     }
     cv::Mat bgr(h, w, CV_8UC3);
