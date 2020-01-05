@@ -9,6 +9,12 @@
 #ifndef OBJECT_DETECTION_TYPES_H
 #define OBJECT_DETECTION_TYPES_H
 
+
+#pragma once
+#pragma pack(1)
+
+namespace OD{
+
 enum OD_ErrorCode{
 		OD_OK                    = 0,    
 		OD_FAILURE               = 1,
@@ -167,5 +173,6 @@ struct OD_CycleOutput
 
 
 };
-
+}//namespace OD
+#pragma pack()
 #endif // OBJECT_DETECTION_TYPES_H

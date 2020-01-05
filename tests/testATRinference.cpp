@@ -17,6 +17,7 @@
 
 using namespace std;
 using namespace std::chrono;
+using namespace OD;
 
 unsigned char *ParseImage(String path);
 vector<String> GetFileNames();
@@ -110,8 +111,10 @@ int main()
     // ci->ImgID_input = 42;
     ci->ptr = ptrTif;
 
+   OD_ErrorCode statusCycle;
+    
     OD_CycleOutput *co = new OD_CycleOutput(); // allocate empty cycle output buffer
-    OD_ErrorCode statusCycle;
+   
 
     co->maxNumOfObjects = 350;
     co->ImgID_output = 0;
@@ -145,7 +148,7 @@ int main()
             atrManager->SaveResultsATRimage(co, (char *)outName.c_str(), false);
         }
 
-      // MyWait("Small pause", 50.0);
+     // MyWait("Small pause", 1000.0);
     }
 
     //MyWait("Long pause", 1000.0);
@@ -198,10 +201,10 @@ int main()
             cout << " Detected new results for frame " << co->ImgID_output << endl;
             string outName = "outRes/out_res2_" + std::to_string(co->ImgID_output) + ".png";
             lastReadyFrame = co->ImgID_output;
-            atrManager->SaveResultsATRimage(co, (char *)outName.c_str(), false);
+            atrManager->SaveResultsATRimage(co, (char *)outName.c_str(), true);
         }
 
-       // MyWait("Small pause", 10.0);
+       MyWait("Small pause", 100.0);
     }
     //atrManager->SaveResultsATRimage(ci, co, (char *)"out_res2.tif", false);
    // MyWait("Long pause", 1000.0);
@@ -261,7 +264,7 @@ int main()
                 lastReadyFrame = co->ImgID_output;
                 atrManager->SaveResultsATRimage(co, (char *)outName.c_str(), true);
             }
-          //  MyWait("Small pause", 10.0);
+           // MyWait("Small pause", 10.0);
             delete ptrTif;
         }
     }

@@ -65,11 +65,20 @@ void ObjectDetectionManagerHandler::setParams(OD_InitParams *ip)
 bool ObjectDetectionManagerHandler::IsBusy()
 {
     if (m_result.valid())
-    {
+    {   
+        bool temp = !(m_result.wait_for(std::chrono::seconds(0)) == std::future_status::ready);
+        if(temp)
+            cout<<" IsBusy? Yes"<<endl;
+        else
+        {
+            cout<<" IsBusy? No"<<endl;
+        }
+        
         return !(m_result.wait_for(std::chrono::seconds(0)) == std::future_status::ready);
     }
     else
     {
+        cout<<" IsBusy? Not valid"<<endl;
         return false;
     }
 }
@@ -186,7 +195,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_Cyc
 
         OD_CycleInput *tempCycleInput = nullptr;
         cout << "Replace old next cycle input" << endl;
-        m_mutexOnNext.lock();
+       m_mutexOnNext.lock();
         if (m_nextCycleInput) //my next not null
         {
             if (cycleInput->ImgID_input != m_nextCycleInput->ImgID_input)
@@ -249,7 +258,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
         return OD_ErrorCode::OD_FAILURE;
     }
     // deep copy next into current, next is not null here
-    m_mutexOnNext.lock();
+   m_mutexOnNext.lock();
     m_curCycleInput = SafeNewCopyCycleInput(m_nextCycleInput, m_numPtrPixels); // safe take care of NULL
     DeleteCycleInput(m_nextCycleInput); //just to allow recursive call of OperateObjectDetection
     m_nextCycleInput = nullptr; 
@@ -294,7 +303,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     OD_CycleInput *tempCI = m_prevCycleInput;
     m_prevCycleInput = m_curCycleInput; // transfere
 
-    m_mutexOnPrev.lock();
+   m_mutexOnPrev.lock();
     DeleteCycleInput(tempCI);
     m_mutexOnPrev.unlock();
 
