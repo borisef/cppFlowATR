@@ -33,7 +33,7 @@ void MyWait(string s, float ms)
 int main()
 {
 
-    int numInf1 = 100;
+    int numInf1 = 500;
     int numInf2 = 100;
     bool SHOW = false;
     float numIter = 3.0;
@@ -123,7 +123,7 @@ int main()
     co->ObjectsArr = new OD_DetectionItem[co->maxNumOfObjects];
 
     // RUN ONE EMPTY CYCLE
-    statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
+    //statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
 
     //  MyWait("Empty wait", 15000.0);
 
@@ -135,6 +135,7 @@ int main()
         // std::copy(begin(img_data1), end(img_data1), ptrTif);
         // ci->ptr = ptrTif;
 
+        
         cout << " ***  Run inference on RGB image  ***  step " << i << endl;
 
         statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
@@ -146,10 +147,10 @@ int main()
             cout << " Detected new results for frame " << co->ImgID_output << endl;
             string outName = "outRes/out_res1_" + std::to_string(co->ImgID_output) + ".png";
             lastReadyFrame = co->ImgID_output;
-            atrManager->SaveResultsATRimage(co, (char *)outName.c_str(), false);
+            atrManager->SaveResultsATRimage(co, (char *)outName.c_str(), true);
         }
 
-        // MyWait("Small pause", 1000.0);
+         MyWait("Small pause", 50.0);
     }
 
     //MyWait("Long pause", 1000.0);
@@ -188,7 +189,7 @@ int main()
     lastReadyFrame = 0;
     co->ImgID_output = 0;
 
-    for (int i = 0; i < numInf2; i++)
+    for (int i = 1; i < numInf2; i++)
     {
         ci->ImgID_input = 0 + i;
         cout << " ***  Run inference on RAW image  ***  " << endl;

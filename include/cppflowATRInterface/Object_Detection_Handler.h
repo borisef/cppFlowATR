@@ -25,7 +25,7 @@ class ObjectDetectionManagerHandler:public ObjectDetectionManager
         OD_InitParams* getParams();
 		void setParams(OD_InitParams* ip);
         bool IsBusy();
-        //bool m_isBusy = false;
+        void IdleRun();
        
         std::future<OD_ErrorCode> m_result;
        

@@ -61,6 +61,9 @@ OD_ErrorCode InitObjectDetection(ObjectDetectionManager *odm, OD_InitParams *odI
 
     OD_ErrorCode ec = odmHandler->InitObjectDetection(odInitParams);
 
+    //TODO: Idle Run  
+
+
     cout << "Finished InitObjectDetection" << endl;
 
     return ec;

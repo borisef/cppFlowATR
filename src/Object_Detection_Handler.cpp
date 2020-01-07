@@ -184,6 +184,8 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
 
     setParams(odInitParams);
 
+    IdleRun();
+
     return OD_ErrorCode::OD_OK;
 }
 OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_CycleInput *cycleInput)
@@ -229,6 +231,20 @@ OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_Cyc
 
     return OD_ErrorCode::OD_OK;
 }
+
+void  ObjectDetectionManagerHandler::IdleRun()
+{
+    cout <<" ObjectDetectionManagerHandler::Idle Run (on neutral)" << endl;
+    
+    uchar* tempPtr = new uchar[m_numImgPixels];  
+    //create temp ptr 
+    this->m_mbATR->RunRGBVector(tempPtr, this->m_initParams->supportData.imageHeight, this->m_initParams->supportData.imageWidth);
+
+    delete tempPtr;
+
+
+}
+
 
 OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutput *odOut)
 {
