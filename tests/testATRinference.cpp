@@ -20,7 +20,9 @@ using namespace std::chrono;
 using namespace OD;
 
 unsigned char *ParseImage(String path);
+unsigned char *ParseRaw(String path);
 vector<String> GetFileNames();
+vector<String> GetFileNames1(const char *nm);
 
 void MyWait(string s, float ms)
 {
@@ -31,8 +33,8 @@ void MyWait(string s, float ms)
 int main()
 {
 
-    int numInf1 = 500;
-    int numInf2 = 1000;
+    int numInf1 = 100;
+    int numInf2 = 100;
     bool SHOW = false;
     float numIter = 3.0;
 #ifdef TEST_MODE
@@ -111,10 +113,9 @@ int main()
     // ci->ImgID_input = 42;
     ci->ptr = ptrTif;
 
-   OD_ErrorCode statusCycle;
-    
+    OD_ErrorCode statusCycle;
+
     OD_CycleOutput *co = new OD_CycleOutput(); // allocate empty cycle output buffer
-   
 
     co->maxNumOfObjects = 350;
     co->ImgID_output = 0;
@@ -124,7 +125,7 @@ int main()
     // RUN ONE EMPTY CYCLE
     statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
 
-  //  MyWait("Empty wait", 15000.0);
+    //  MyWait("Empty wait", 15000.0);
 
     uint lastReadyFrame = 0;
     co->ImgID_output = 0;
@@ -148,7 +149,7 @@ int main()
             atrManager->SaveResultsATRimage(co, (char *)outName.c_str(), false);
         }
 
-     // MyWait("Small pause", 1000.0);
+        // MyWait("Small pause", 1000.0);
     }
 
     //MyWait("Long pause", 1000.0);
@@ -204,10 +205,10 @@ int main()
             atrManager->SaveResultsATRimage(co, (char *)outName.c_str(), true);
         }
 
-       MyWait("Small pause", 100.0);
+        MyWait("Small pause", 100.0);
     }
     //atrManager->SaveResultsATRimage(ci, co, (char *)"out_res2.tif", false);
-   // MyWait("Long pause", 1000.0);
+    // MyWait("Long pause", 1000.0);
     W = 3840;
     H = 2160;
 #ifdef WIN32
@@ -237,9 +238,9 @@ int main()
     co->ImgID_output = 0;
     int temp = 0;
     int flag = 1;
-    for (size_t i1 = 0; i1 < 10; i1++)
+    for (size_t i1 = 0; i1 < 3; i1++)
     {
-      //  MyWait("**** Long pause in-between **** ", 1000.0);
+        //  MyWait("**** Long pause in-between **** ", 1000.0);
 
         for (size_t i = 0; i < N; i++)
         {
@@ -264,13 +265,52 @@ int main()
                 lastReadyFrame = co->ImgID_output;
                 atrManager->SaveResultsATRimage(co, (char *)outName.c_str(), true);
             }
-           // MyWait("Small pause", 10.0);
+            // MyWait("Small pause", 10.0);
             delete ptrTif;
         }
     }
 
-    //MyWait("Long pause", 10000.0);
-    // TODO await instead
+    //
+    W = 4056;
+    H = 3040;
+    // change  support data
+    OD_SupportData supportData4 = {
+        H, W,                        //imageHeight//imageWidth
+        e_OD_ColorImageType::YUV422, //colorType;
+        100,                         //rangeInMeters
+        70.0f,                       //fcameraAngle; //BE
+        0,                           //TEMP:cameraParams[10];//BE
+        0                            //TEMP: float	spare[3];
+    };
+
+    initParams.supportData = supportData4;
+    // new mission because of support data
+    InitObjectDetection(atrManager, &initParams);
+
+    ff = GetFileNames1("media/raw/*");
+    N = ff.size();
+    lastReadyFrame = 0;
+    co->ImgID_output = 0;
+
+    for (size_t i = 0; i < N; i++)
+    {
+        temp++;
+        ci->ImgID_input = 0 + i + temp;
+
+        ptrTif = ParseRaw(ff[i]);
+        ci->ptr = ptrTif;
+
+        statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
+        if (lastReadyFrame != co->ImgID_output)
+        { //draw
+            cout << " Detected new results for frame " << co->ImgID_output << endl;
+            string outName = "outRes/out_res3_" + std::to_string(co->ImgID_output) + ".png";
+            lastReadyFrame = co->ImgID_output;
+            atrManager->SaveResultsATRimage(co, (char *)outName.c_str(), true);
+        }
+        MyWait("Small pause", 1000.0);
+        delete ptrTif;
+    }
 
     delete ptrRaw;
 
@@ -296,6 +336,15 @@ vector<String> GetFileNames()
     return fn;
 }
 
+vector<String> GetFileNames1(const char *nm)
+{
+
+    vector<String> fn;
+    cv::glob(nm, fn, true);
+
+    return fn;
+}
+
 unsigned char *ParseImage(String path)
 {
     cv::Mat inp1 = cv::imread(path, CV_LOAD_IMAGE_COLOR);
@@ -309,4 +358,15 @@ unsigned char *ParseImage(String path)
     std::copy(begin(img_data1), end(img_data1), ptrTif);
 
     return ptrTif;
+}
+
+unsigned char *ParseRaw(String path)
+{
+    //emulate buffer from RAW
+    std::vector<unsigned char> vecFromRaw = readBytesFromFile((char *)path.c_str());
+
+    unsigned char *ptrRaw = new unsigned char[vecFromRaw.size()];
+    std::copy(begin(vecFromRaw), end(vecFromRaw), ptrRaw);
+
+    return ptrRaw;
 }

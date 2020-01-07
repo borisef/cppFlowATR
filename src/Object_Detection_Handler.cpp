@@ -258,7 +258,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
         return OD_ErrorCode::OD_FAILURE;
     }
     // deep copy next into current, next is not null here
-   m_mutexOnNext.lock();
+    m_mutexOnNext.lock();
     m_curCycleInput = SafeNewCopyCycleInput(m_nextCycleInput, m_numPtrPixels); // safe take care of NULL
     DeleteCycleInput(m_nextCycleInput); //just to allow recursive call of OperateObjectDetection
     m_nextCycleInput = nullptr; 
@@ -425,13 +425,17 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
 
     OD_DetectionItem *odi = cycleOutput->ObjectsArr;
 
-    cycleOutput->numOfObjects = m_mbATR->GetResultNumDetections();
+    int N = m_mbATR->GetResultNumDetections();
 
+    cout<<"PopulateCycleOutput: Num detections total "<<N<<endl;
+    
     auto bbox_data = m_mbATR->GetResultBoxes();
     unsigned int w = this->m_initParams->supportData.imageWidth;
     unsigned int h = this->m_initParams->supportData.imageHeight;
-    cycleOutput->numOfObjects = cycleOutput->maxNumOfObjects;
-    for (int i = 0; i < cycleOutput->maxNumOfObjects; i++)
+    
+    //cycleOutput->numOfObjects = cycleOutput->maxNumOfObjects;
+    cycleOutput->numOfObjects = N;
+    for (int i = 0; i < N; i++)
     {
         e_OD_TargetClass aa = e_OD_TargetClass(1);
         odi[i].tarClass = e_OD_TargetClass(m_mbATR->GetResultClasses(i));
@@ -439,6 +443,7 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
         if (odi[i].tarScore < LOWER_SCORE_THRESHOLD)
         {
             cycleOutput->numOfObjects = i;
+            cout<<"Taking only " << cycleOutput->numOfObjects << endl;
             break;
         }
 
