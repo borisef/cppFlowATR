@@ -468,3 +468,19 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
 
     return cycleOutput->numOfObjects;
 }
+
+bool ObjectDetectionManagerHandler::GetTargetFromGzir(const char* imgName)
+{
+    //TODO: create set of possible augmentations
+    
+    int pixelGap = 50; // gap between images 
+     
+
+
+
+
+
+
+
+
+}
