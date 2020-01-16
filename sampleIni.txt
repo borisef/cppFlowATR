@@ -1,0 +1,112 @@
+ ; Test config file for ini_example.c and INIReaderTest.cpp
+
+[protocol]             ; Protocol configuration
+version=0              ; 
+
+
+[model]
+Task = ATR	; string ATR/COLOR
+FileType = .pb	; string
+Mission = 0 	; 0/1/2 int
+LoadPath = /home/borisef/projects/MB2/TrainedModels/frozen_1102k_many_targets/frozen_inference_graph.pb		;string
+Nickname = Default		; string
+MaxObjects = 300		;int
+Accuracy = 5			;int
+Speed = 5
+Targets = ALL	; ALL/HUMANS/CARS etc 	 string
+sizeW = 0 			;int
+sizeH = 0			;int
+MaxBatchSize = 1		;int
+ImageFormat = RGB		; string
+Resolution = 5			;int
+Additional = "-nms 0 -opp 3" 	; string
+ID = 1				;int
+
+[model]
+Task = ATR	; string ATR/COLOR
+FileType = .pb	; string
+Mission = 0 	; 0/1/2 int
+LoadPath = /home/borisef/projects/MB2/TrainedModels/frozen_1102k_many_targets/frozen_inference_graph_humans.pb		;string
+Nickname = Default		; string
+MaxObjects = 300		;int
+Accuracy = 5			;int
+Speed = 5
+Targets = HUMANS	; ALL/HUMANS/CARS etc 	 string
+sizeW = 0 			;int
+sizeH = 0			;int
+MaxBatchSize = 1		;int
+ImageFormat = RGB		; string
+Resolution = 5			;int
+Additional = "-nms 0 -opp 3" 	; string
+ID = 10			;int
+
+[model]
+Task = ATR	; string ATR/COLOR
+FileType = .pb	; string
+Mission = 0 	; 0/1/2 int
+LoadPath = /home/borisef/projects/MB2/TrainedModels/frozen_1102k_many_targets/frozen_inference_graph_humans.pb		;string
+Nickname = Default		; string
+MaxObjects = 300		;int
+Accuracy = 5			;int
+Speed = 5
+Targets = CARS			; ALL/HUMANS/CARS etc 	 string
+sizeW = 0 			;int
+sizeH = 0			;int
+MaxBatchSize = 1		;int
+ImageFormat = RGB		; string
+Resolution = 5			;int
+Additional = "-nms 0 -opp 3" 	; string
+ID = 11			;int
+
+[model]
+Task = COLOR	; string ATR/COLOR
+FileType = .h5	; string
+Mission = 0 	; 0/1/2 int
+LoadPath = /home/borisef/projects/MB2/TrainedModels/???.H5		;string
+Nickname = Nizan		; string
+MaxObjects = 1			;int
+Accuracy = 9			;int
+Speed = 5
+Targets = CARS	; ALL/HUMANS/CARS etc 	 string
+sizeW = 128 			;int
+sizeH = 128			;int
+MaxBatchSize = 100		;int
+ImageFormat = RGB		; string
+Resolution = 5			;int
+Additional = "-preproc 1" 	; string
+ID = 2				;int
+
+
+[model]
+Task = COLOR	; string ATR/COLOR
+FileType = .h5	; string
+Mission = 0 	; 0/1/2 int
+LoadPath = /home/borisef/projects/MB2/TrainedModels/???.H5		;string
+Nickname = Super		; string
+MaxObjects = 1			;int
+Accuracy = 9			;int
+Speed = 5
+Targets = CARS	; ALL/HUMANS/CARS etc 	 string
+sizeW = 128 			;int
+sizeH = 128			;int
+MaxBatchSize = 100		;int
+ImageFormat = RGB		; string
+Resolution = 5			;int
+Additional = "-preproc 1" 	; string
+ID = 3				;int
+
+[algorithm]
+logFilePath = "\home\temp\log.txt"
+Speed = 5
+Accuracy = 5
+MaxThreads = 2
+DebugMode = FALSE
+Additional = "-in aaa -stam 33"
+ID = 4
+
+
+
+
+
+
+
