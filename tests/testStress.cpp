@@ -14,9 +14,11 @@
 #include <cppflowATRInterface/Object_Detection_API.h>
 #include <cppflowATRInterface/Object_Detection_Types.h>
 #include <utils/imgUtils.h>
+#include <cppflowATRInterface/Object_Detection_Handler.h>
 
 using namespace std;
 using namespace std::chrono;
+using namespace OD;
 
 unsigned char *ParseImage(String path);
 vector<String> GetFileNames();
@@ -80,10 +82,11 @@ struct OneRunStruct
 #endif
 
     bool toDeleteATRM = true;
+    bool doNotInit = false;
     int startFrameID = 1;
 };
 
-void OneRun(OD::ObjectDetectionManager *atrManager, OneRunStruct ors)
+OD::ObjectDetectionManager * OneRun(OD::ObjectDetectionManager *atrManager, OneRunStruct ors)
 {
     // Mission
     MB_Mission mission = {
@@ -109,14 +112,20 @@ void OneRun(OD::ObjectDetectionManager *atrManager, OneRunStruct ors)
             supportData,
             mission};
 
-    // // Creation of ATR manager + new mission
-    if (!atrManager)
-        atrManager = OD::CreateObjectDetector(&initParams); //first mission
+    if (ors.doNotInit == false)
+    {
+        // // Creation of ATR manager + new mission
+        if (!atrManager)
+            atrManager = OD::CreateObjectDetector(&initParams); //first mission
 
-    cout << " ***  ObjectDetectionManager created  *** " << endl;
+        cout << " ***  ObjectDetectionManager created  *** " << endl;
 
-    // // new mission
-    OD::InitObjectDetection(atrManager, &initParams);
+        // // new mission
+        OD::InitObjectDetection(atrManager, &initParams);
+          ((ObjectDetectionManagerHandler*)atrManager)->WaitForThread();
+    }
+
+    //((ObjectDetectionManagerHandler*)atrManager)->WaitForThread();
 
     OD_CycleInput *ci = new OD_CycleInput();
     OD_CycleOutput *co = new OD_CycleOutput(); // allocate empty cycle output buffer
@@ -159,14 +168,19 @@ void OneRun(OD::ObjectDetectionManager *atrManager, OneRunStruct ors)
         }
     }
     //at the end
-    OD::TerminateObjectDetection(atrManager);
-    atrManager = nullptr;
+     ((ObjectDetectionManagerHandler*)atrManager)->WaitForThread();
+    if(ors.toDeleteATRM){
+        OD::TerminateObjectDetection(atrManager);
+        atrManager = nullptr;
+    }
     //release OD_CycleInput
     delete ci;
 
     //release OD_CycleOutput
     delete co->ObjectsArr;
     delete co;
+
+    return atrManager;
 }
 
 int main()
@@ -178,37 +192,62 @@ int main()
     ors4.H = 3040;
     ors4.splicePath = "media/raw/*";
     ors4.imType = e_OD_ColorImageType::YUV422;
-    ors4.numRepetiotions = 400;
-    ors4.minDelay = 50;
+    ors4.numRepetiotions = 1;
+    ors4.minDelay = 5;
     ors4.startFrameID = 100000;
-    OneRun(atrManager, ors4);
+    atrManager = OneRun(atrManager, ors4);
 
     OneRunStruct ors1;
     ors1.H = 1080;
     ors1.W = 1920;
     ors1.splicePath = "media/spliced/*";
-    ors1.numRepetiotions = 2;
-    ors1.minDelay = 10;
+    ors1.numRepetiotions = 1;
+    ors1.minDelay = 0;
     ors1.startFrameID = 1;
-    OneRun(atrManager, ors1);
+    atrManager = OneRun(atrManager, ors1);
 
     OneRunStruct ors2;
     ors2.H = 1071;
     ors2.W = 1904;
     ors2.splicePath = "media/filter/*";
-    ors2.numRepetiotions = 30;
+    ors2.numRepetiotions = 1;
     ors2.minDelay = 0;
     ors2.startFrameID = 1000;
-    OneRun(atrManager, ors2);
+    atrManager = OneRun(atrManager, ors2);
 
     OneRunStruct ors3;
     ors3.W = 2393;
     ors3.H = 1867;
     ors3.splicePath = "media/filterUCLA/*";
-    ors3.numRepetiotions = 30;
+    ors3.numRepetiotions = 1;
     ors3.minDelay = 0;
     ors3.startFrameID = 100000;
-    OneRun(atrManager, ors3);
+    ors3.toDeleteATRM = false;
+    atrManager = OneRun(atrManager, ors3);
 
+    OD::ObjectDetectionManager *atrManagerAnother = nullptr;
+    OneRunStruct ors5;
+    ors5.H = 1080;
+    ors5.W = 1920;
+    ors5.splicePath = "media/spliced/*";
+    ors5.numRepetiotions = 1;
+    ors5.minDelay = 10;
+    ors5.startFrameID = 500000;
+    ors5.toDeleteATRM = false;
+
+    atrManagerAnother = OneRun(atrManagerAnother, ors5); // will create 2 at the same time
+
+    ors3.doNotInit = true;
+    ors5.doNotInit = true;
+
+    atrManager = OneRun(atrManager, ors3);
+    atrManagerAnother = OneRun(atrManagerAnother, ors5);
+    atrManager = OneRun(atrManager, ors3);
+    atrManagerAnother = OneRun(atrManagerAnother, ors5);
+    atrManager = OneRun(atrManager, ors3);
+
+    OD::TerminateObjectDetection(atrManager);
+    OD::TerminateObjectDetection(atrManagerAnother);
+    cout<<"Ended StressTest Normally"<<endl;
     return 0;
 }

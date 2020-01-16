@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 project(cppFlowATR)
 set(CMAKE_CXX_STANDARD 17)
 
+AUX_SOURCE_DIRECTORY(src SRC)
+
 add_definitions(-DTEST_MODE)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTEST_MODE")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTEST_MODE")
@@ -49,7 +51,13 @@ add_executable(testATRInference  tests/testATRinference.cpp src/Model.cpp src/Te
 #target_link_libraries (testATRInference ${MY_LIB})
 target_link_libraries (testATRInference opencv_world343d.lib tensorflow.dll )
 
-# test threads
-add_executable(testThread  tests/testThread.cpp)
+
+add_executable(stressTest tests/testStress.cpp ${SRC})
+target_link_libraries (stressTest opencv_world343d.lib tensorflow.dll )
 
 
+# # test threads
+# add_executable(testThread  tests/testThread.cpp)
+
+add_executable(testTileImages tests/testTileImages.cpp src/imgUtils.cpp)
+target_link_libraries (testTileImages  opencv_world343d.lib)

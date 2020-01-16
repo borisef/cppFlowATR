@@ -12,6 +12,8 @@ using namespace OD;
 OD_CycleInput* NewCopyCycleInput(OD_CycleInput*, uint);
 OD_CycleInput* SafeNewCopyCycleInput(OD_CycleInput* ,uint) ;
 void DeleteCycleInput(OD_CycleInput* );
+static std::mutex glob_mutexOnNext;
+static std::mutex glob_mutexOnPrev;
 
 class ObjectDetectionManagerHandler:public ObjectDetectionManager
 {
@@ -46,8 +48,8 @@ class ObjectDetectionManagerHandler:public ObjectDetectionManager
        uint m_numImgPixels = 0;
        uint m_numPtrPixels = 0; 
 
-       std::mutex m_mutexOnNext;
-       std::mutex m_mutexOnPrev;
+      std::mutex m_mutexOnNext;
+      std::mutex m_mutexOnPrev;
 
 };
 

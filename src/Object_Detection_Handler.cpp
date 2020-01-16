@@ -198,6 +198,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_Cyc
         OD_CycleInput *tempCycleInput = nullptr;
         cout << "Replace old next cycle input" << endl;
        m_mutexOnNext.lock();
+       //glob_mutexOnNext.lock();
         if (m_nextCycleInput) //my next not null
         {
             if (cycleInput->ImgID_input != m_nextCycleInput->ImgID_input)
@@ -219,6 +220,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_Cyc
             m_nextCycleInput = NewCopyCycleInput(cycleInput, m_numPtrPixels);
         }
         m_mutexOnNext.unlock();
+        //glob_mutexOnNext.unlock();
     }
     else
     {
@@ -275,10 +277,12 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     }
     // deep copy next into current, next is not null here
     m_mutexOnNext.lock();
+    // glob_mutexOnNext.lock();
     m_curCycleInput = SafeNewCopyCycleInput(m_nextCycleInput, m_numPtrPixels); // safe take care of NULL
     DeleteCycleInput(m_nextCycleInput); //just to allow recursive call of OperateObjectDetection
     m_nextCycleInput = nullptr; 
     m_mutexOnNext.unlock();
+    //glob_mutexOnNext.unlock();
 
     if (!(m_curCycleInput && m_curCycleInput->ptr)) // former next (current ) cycle or buffer is null
     {
@@ -320,8 +324,10 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     m_prevCycleInput = m_curCycleInput; // transfere
 
    m_mutexOnPrev.lock();
+   //glob_mutexOnPrev.lock();
     DeleteCycleInput(tempCI);
     m_mutexOnPrev.unlock();
+    //glob_mutexOnPrev.unlock();
 
     m_curCycleInput = nullptr;
 
@@ -343,6 +349,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
 {
     OD_CycleInput *tempci = nullptr;
     m_mutexOnPrev.lock();
+    //glob_mutexOnPrev.lock();
     if (!(m_prevCycleInput && m_prevCycleInput->ptr))
     {
         cout << "No m_prevCycleInput data, skipping" << endl;
@@ -354,6 +361,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
         tempci = NewCopyCycleInput(m_prevCycleInput, this->m_numPtrPixels);
     }
     m_mutexOnPrev.unlock();
+    //glob_mutexOnPrev.unlock();
 
     float drawThresh = 0; //if 0 draw all
     //TODO: make sure m_prevCycleInput->ImgID_input is like co->ImgID
