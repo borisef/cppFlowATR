@@ -28,7 +28,7 @@ class ObjectDetectionManagerHandler:public ObjectDetectionManager
 		void setParams(OD_InitParams* ip);
         bool IsBusy();
         void IdleRun();
-        bool GetTargetFromGzir(const char* imgName);
+        OD_ErrorCode GetTargetFromGzir(const char* imgName, OD_CycleOutput* CycleOutput);
        
         std::future<OD_ErrorCode> m_result;
        

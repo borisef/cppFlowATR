@@ -32,7 +32,8 @@ enum e_OD_ColorImageType
 	YUV422 = 2,
 	RGB = 3,
 	BGR = 4, 
-	YUV = 5
+	YUV = 5, 
+	RGB_GZIR = 6
 };
 
 enum MB_MissionType //BE

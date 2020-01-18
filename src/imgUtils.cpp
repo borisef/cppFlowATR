@@ -3,6 +3,16 @@
 using namespace cv;
 using namespace std;
 
+
+Mat rotate(Mat src, double angle)
+{
+    Mat dst;
+    Point2f pt(src.cols/2., src.rows/2.);    
+    Mat r = getRotationMatrix2D(pt, angle, 1.0);
+    warpAffine(src, dst, r, Size(src.cols, src.rows));
+    return dst;
+}
+
 std::vector<unsigned char> readBytesFromFile(const char* filename)
 {
     std::vector<unsigned char> result;
@@ -184,4 +194,110 @@ void balance_white(cv::Mat mat) {
       }
     }
   }
+}
+
+cv::Mat CreateTiledGzir(const char* imname, uint W, uint H)
+{
+    uint gap = 100;
+    float whiteBalanceProb = 0.1;
+    float rotAngleMax = 90;
+    float rotAngleProb = 0.1;
+    float flipLRprob = 0.1;
+    float flipUDprob = 0.1;
+    float resizeFactor[2]={0.5, 2.0};
+    float resizeProb = 0.25;
+    float histoEqProb = 0.1;
+
+
+    uint gapX=gap, gapY = gap;
+    bool flag = true;
+    uint maxX = 0;
+    uint maxY = 0;
+    uint topX = 10;
+    uint topY = 10;
+
+    cv::Mat bigImg(H, W, CV_8UC3);
+    cv::Mat im = cv::imread(imname, CV_LOAD_IMAGE_COLOR);
+    list <float*> trueTargets;
+    
+    uint nextYline = 0;
+   
+    while (flag)
+    {
+      cv::Mat im0 = im.clone();
+    
+     
+      // all possible augmentations based on probabilities on im 
+      bool doWB = ((double) rand() / (RAND_MAX)) < whiteBalanceProb;
+      bool doRot = ((double) rand() / (RAND_MAX)) < rotAngleProb;
+      double randAngle = ((double) rand() / (RAND_MAX) - 0.5) * 2 * rotAngleMax;
+      bool doFlipLR = ((double) rand() / (RAND_MAX)) < rotAngleProb;
+      bool doFlipUD = ((double) rand() / (RAND_MAX)) < rotAngleProb;
+      bool doResize = ((double) rand() / (RAND_MAX)) < resizeProb;
+      double randResize = resizeFactor[0] + ((double) rand() / (RAND_MAX))*(resizeFactor[1] - resizeFactor[0] );
+      
+
+      if(doWB) 
+         balance_white(im0);
+
+      
+      Scalar v( 100, 100, 100 ); // color for padding 
+
+      int top = max(im0.cols - im0.rows, 0)/2 + 10;
+      int lef = max(im0.rows - im0.cols, 0)/2 + 10;
+
+
+      copyMakeBorder( im0, im0, top, top,  lef, lef, BORDER_CONSTANT, v );
+
+       if(doFlipLR)
+        {
+          cv::flip(im0, im0, 1);
+        }
+        if(doFlipUD)
+        {
+          cv::flip(im0, im0, 0);
+        }
+
+    if(!doRot)
+          randAngle = 0;
+
+        Mat im1 = rotate(im0, randAngle);
+
+        
+
+       
+        if(doResize)
+        {
+           cv::resize(im1, im1, cv::Size(int(im1.cols*randResize), int(im1.rows*randResize)));
+        }
+
+
+        if(topX+im1.cols>W - gapX)
+            {
+                topX = 10;
+                topY = nextYline + gapY;
+            }
+        
+        if(topY+im1.cols>H-gapY)
+            break;
+    
+        
+        int offX = rand()%gapX;
+        int offY = rand()%gapY;
+
+        im1.copyTo(bigImg(cv::Rect(topX + offX,topY + offY,im1.cols, im1.rows)));
+
+        float* cXcY = new float[2];
+         cXcY[0] = topX + offX + im1.cols*0.5;
+         cXcY[1] = topY + offY + im1.rows*0.5;
+
+        trueTargets.push_back(cXcY);
+
+        nextYline = max(nextYline, topY + im1.rows);
+        topX = topX + im1.cols + gapX;
+       
+    }
+    cv::imwrite("bigTiled.tif", bigImg);
+    //TODO: return trueTargets;
+    return bigImg;
 }

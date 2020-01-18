@@ -477,18 +477,23 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
     return cycleOutput->numOfObjects;
 }
 
-bool ObjectDetectionManagerHandler::GetTargetFromGzir(const char* imgName)
+
+OD_ErrorCode ObjectDetectionManagerHandler::GetTargetFromGzir(const char* imgName, OD_CycleOutput* CycleOutput)
 {
-    //TODO: create set of possible augmentations
+    uint bigH = 2160;
+    uint bigW = 4096;
+
+    //TODO: create tiled image 
     
-    int pixelGap = 50; // gap between images 
+
+
+    //TODO: run OD on one tiled image 
+
+
+
+    //TODO: analyze results and populate output
      
 
-
-
-
-
-
-
+    return OD_ErrorCode::OD_OK;
 
 }
