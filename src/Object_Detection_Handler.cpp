@@ -478,22 +478,3 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
 }
 
 
-OD_ErrorCode ObjectDetectionManagerHandler::GetTargetFromGzir(const char* imgName, OD_CycleOutput* CycleOutput)
-{
-    uint bigH = 2160;
-    uint bigW = 4096;
-
-    //TODO: create tiled image 
-    
-
-
-    //TODO: run OD on one tiled image 
-
-
-
-    //TODO: analyze results and populate output
-     
-
-    return OD_ErrorCode::OD_OK;
-
-}

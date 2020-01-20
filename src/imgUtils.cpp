@@ -3,6 +3,33 @@
 using namespace cv;
 using namespace std;
 
+float IoU(float* box1, float* box2)
+{
+  float minx1 = box1[0];
+	float maxx1 = box1[2];
+	float miny1 = box1[1];
+	float maxy1 = box1[3];
+
+	float minx2 = box2[0];
+	float maxx2 = box2[2];
+	float miny2 = box2[1];
+	float maxy2 = box2[3];
+
+	if (minx1 > maxx2 || maxx1 < minx2 || miny1 > maxy2 || maxy1 < miny2)
+		return 0.0f;
+	else
+	{
+		float dx = std::min(maxx2, maxx1) - std::max(minx2, minx1);
+		float dy = std::min(maxy2, maxy1) - std::max(miny2, miny1);
+		float area1 = (maxx1 - minx1)*(maxy1 - miny1);
+		float area2 = (maxx2 - minx2)*(maxy2 - miny2);
+		float inter = dx*dy; // Intersection
+		float uni = area1 + area2 - inter; // Union
+		float IoU = inter / uni;
+		return IoU;
+	}
+
+}
 
 Mat rotate(Mat src, double angle)
 {
@@ -196,17 +223,62 @@ void balance_white(cv::Mat mat) {
   }
 }
 
-cv::Mat CreateTiledGzir(const char* imname, uint W, uint H)
+unsigned char *ParseCvMat(cv::Mat inp1)
 {
-    uint gap = 100;
-    float whiteBalanceProb = 0.1;
+    //cv::Mat inp1 = cv::imread(path, CV_LOAD_IMAGE_COLOR);
+    cv::cvtColor(inp1, inp1, CV_BGR2RGB);
+
+    //put image in vector
+    std::vector<uint8_t> img_data1(inp1.rows * inp1.cols * inp1.channels());
+    img_data1.assign(inp1.data, inp1.data + inp1.total() * inp1.channels());
+
+    unsigned char *ptrTif = new unsigned char[img_data1.size()];
+    std::copy(begin(img_data1), end(img_data1), ptrTif);
+
+    return ptrTif;
+}
+
+unsigned char *ParseImage(String path)
+{
+    cv::Mat inp1 = cv::imread(path, CV_LOAD_IMAGE_COLOR);
+    cv::cvtColor(inp1, inp1, CV_BGR2RGB);
+
+    //put image in vector
+    std::vector<uint8_t> img_data1(inp1.rows * inp1.cols * inp1.channels());
+    img_data1.assign(inp1.data, inp1.data + inp1.total() * inp1.channels());
+
+    unsigned char *ptrTif = new unsigned char[img_data1.size()];
+    std::copy(begin(img_data1), end(img_data1), ptrTif);
+
+    return ptrTif;
+}
+
+unsigned char *ParseRaw(String path)
+{
+
+    //emulate buffer from RAW
+    std::vector<unsigned char> vecFromRaw = readBytesFromFile((char *)path.c_str());
+
+    unsigned char *ptrRaw = new unsigned char[vecFromRaw.size()];
+    std::copy(begin(vecFromRaw), end(vecFromRaw), ptrRaw);
+
+    return ptrRaw;
+}
+
+
+
+
+bool CreateTiledGzir(const char* imname, uint W, uint H, cv::Mat *bigImg, list <float*> *trueTargets)
+{
+    uint gap = 80;
+    float whiteBalanceProb = 0.05;
     float rotAngleMax = 90;
-    float rotAngleProb = 0.1;
+    float rotAngleProb = 0.2;
     float flipLRprob = 0.1;
     float flipUDprob = 0.1;
-    float resizeFactor[2]={0.5, 2.0};
-    float resizeProb = 0.25;
-    float histoEqProb = 0.1;
+    float resizeFactor[2]={0.6, 1.8};
+    float resizeProb = 0.5;
+    float histoEqProb = 0.1; // not in use
 
 
     uint gapX=gap, gapY = gap;
@@ -216,9 +288,9 @@ cv::Mat CreateTiledGzir(const char* imname, uint W, uint H)
     uint topX = 10;
     uint topY = 10;
 
-    cv::Mat bigImg(H, W, CV_8UC3);
+    
+
     cv::Mat im = cv::imread(imname, CV_LOAD_IMAGE_COLOR);
-    list <float*> trueTargets;
     
     uint nextYline = 0;
    
@@ -285,19 +357,20 @@ cv::Mat CreateTiledGzir(const char* imname, uint W, uint H)
         int offX = rand()%gapX;
         int offY = rand()%gapY;
 
-        im1.copyTo(bigImg(cv::Rect(topX + offX,topY + offY,im1.cols, im1.rows)));
+        im1.copyTo((*bigImg)(cv::Rect(topX + offX,topY + offY,im1.cols, im1.rows)));
 
-        float* cXcY = new float[2];
-         cXcY[0] = topX + offX + im1.cols*0.5;
-         cXcY[1] = topY + offY + im1.rows*0.5;
+        float* cXcY = new float[4];
+         cXcY[0] = topX + offX ;
+         cXcY[1] = topY + offY ;
+         cXcY[2] = topX + offX + im1.cols;
+         cXcY[3] = topY + offY + im1.rows;
 
-        trueTargets.push_back(cXcY);
+        trueTargets->push_back(cXcY);
 
         nextYline = max(nextYline, topY + im1.rows);
         topX = topX + im1.cols + gapX;
        
     }
-    cv::imwrite("bigTiled.tif", bigImg);
-    //TODO: return trueTargets;
-    return bigImg;
+   
+    return true;
 }

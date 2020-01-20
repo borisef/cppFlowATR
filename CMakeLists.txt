@@ -59,5 +59,5 @@ target_link_libraries (stressTest opencv_world343d.lib tensorflow.dll )
 # # test threads
 # add_executable(testThread  tests/testThread.cpp)
 
-add_executable(testTileImages tests/testTileImages.cpp src/imgUtils.cpp)
-target_link_libraries (testTileImages  opencv_world343d.lib)
+add_executable(testTileImages tests/testTileImages.cpp ${SRC})
+target_link_libraries (testTileImages  opencv_world343d.lib tensorflow.dll)

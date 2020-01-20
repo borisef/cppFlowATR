@@ -19,8 +19,8 @@ using namespace std;
 using namespace std::chrono;
 using namespace OD;
 
-unsigned char *ParseImage(String path);
-unsigned char *ParseRaw(String path);
+// unsigned char *ParseImage(String path);
+// unsigned char *ParseRaw(String path);
 vector<String> GetFileNames();
 vector<String> GetFileNames1(const char *nm);
 
@@ -346,28 +346,28 @@ vector<String> GetFileNames1(const char *nm)
     return fn;
 }
 
-unsigned char *ParseImage(String path)
-{
-    cv::Mat inp1 = cv::imread(path, CV_LOAD_IMAGE_COLOR);
-    cv::cvtColor(inp1, inp1, CV_BGR2RGB);
+// unsigned char *ParseImage(String path)
+// {
+//     cv::Mat inp1 = cv::imread(path, CV_LOAD_IMAGE_COLOR);
+//     cv::cvtColor(inp1, inp1, CV_BGR2RGB);
 
-    //put image in vector
-    std::vector<uint8_t> img_data1(inp1.rows * inp1.cols * inp1.channels());
-    img_data1.assign(inp1.data, inp1.data + inp1.total() * inp1.channels());
+//     //put image in vector
+//     std::vector<uint8_t> img_data1(inp1.rows * inp1.cols * inp1.channels());
+//     img_data1.assign(inp1.data, inp1.data + inp1.total() * inp1.channels());
 
-    unsigned char *ptrTif = new unsigned char[img_data1.size()];
-    std::copy(begin(img_data1), end(img_data1), ptrTif);
+//     unsigned char *ptrTif = new unsigned char[img_data1.size()];
+//     std::copy(begin(img_data1), end(img_data1), ptrTif);
 
-    return ptrTif;
-}
+//     return ptrTif;
+// }
 
-unsigned char *ParseRaw(String path)
-{
-    //emulate buffer from RAW
-    std::vector<unsigned char> vecFromRaw = readBytesFromFile((char *)path.c_str());
+// unsigned char *ParseRaw(String path)
+// {
+//     //emulate buffer from RAW
+//     std::vector<unsigned char> vecFromRaw = readBytesFromFile((char *)path.c_str());
 
-    unsigned char *ptrRaw = new unsigned char[vecFromRaw.size()];
-    std::copy(begin(vecFromRaw), end(vecFromRaw), ptrRaw);
+//     unsigned char *ptrRaw = new unsigned char[vecFromRaw.size()];
+//     std::copy(begin(vecFromRaw), end(vecFromRaw), ptrRaw);
 
-    return ptrRaw;
-}
+//     return ptrRaw;
+// }

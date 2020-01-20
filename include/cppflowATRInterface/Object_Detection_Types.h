@@ -33,14 +33,15 @@ enum e_OD_ColorImageType
 	RGB = 3,
 	BGR = 4, 
 	YUV = 5, 
-	RGB_GZIR = 6
+	RGB_IMG_PATH = 6
 };
 
 enum MB_MissionType //BE
 {
 	MATMON	= 0,
 	STATIC_CHASER = 1,
-	DYNAMIC_CHASER = 2
+	DYNAMIC_CHASER = 2, 
+	ANALYZE_SAMPLE = 3
 
 };
 
