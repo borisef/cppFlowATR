@@ -309,6 +309,11 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
         cout << " Internal Run on RGB buffer " << endl;
         this->m_mbATR->RunRGBVector(m_curCycleInput->ptr, h, w);
     }
+    else if (colortype == e_OD_ColorImageType::RGB_IMG_PATH)//path
+    {
+        cout << " Internal Run on RGB_IMG_PATH " << endl;
+        this->m_mbATR->RunRGBImgPath(m_curCycleInput->ptr);
+    }
     else
     {
         return OD_ErrorCode::OD_ILEGAL_INPUT;

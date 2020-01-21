@@ -11,7 +11,7 @@ bool convertYUV420toVector(vector <unsigned char> raw, int width, int height, st
 bool convertCvMatToVector(cv::Mat* inBGR, std::vector<uint8_t>* outVec );
 
 Mat rotate(Mat src, double angle);
-bool CreateTiledGzir(const char* filename, uint W, uint H, cv::Mat* bigImg, list <float*> *trueTargets);
+bool CreateTiledImage(const char* filename, uint W, uint H, cv::Mat* bigImg, list <float*> *trueTargets);
 
 
 void balance_white(cv::Mat mat);

@@ -268,7 +268,7 @@ unsigned char *ParseRaw(String path)
 
 
 
-bool CreateTiledGzir(const char* imname, uint W, uint H, cv::Mat *bigImg, list <float*> *trueTargets)
+bool CreateTiledImage(const char* imname, uint W, uint H, cv::Mat *bigImg, list <float*> *trueTargets)
 {
     uint gap = 80;
     float whiteBalanceProb = 0.05;

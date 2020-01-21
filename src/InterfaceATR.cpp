@@ -72,7 +72,14 @@ int mbInterfaceATR::RunRGBimage(cv::Mat inp)
 
     return 1;
 }
+int mbInterfaceATR::RunRGBImgPath(const unsigned char *ptr)
+{
+    cv::Mat inp1 = cv::imread(string((const char*)ptr), CV_LOAD_IMAGE_COLOR);
+    cv::cvtColor(inp1, inp1, CV_BGR2RGB);
 
+    return RunRGBimage(inp1);
+
+}
 int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width)
 {
 
