@@ -22,6 +22,7 @@ class ObjectDetectionManagerHandler:public ObjectDetectionManager
         OD_ErrorCode InitObjectDetection(OD_InitParams* input) ;
         OD_ErrorCode  OperateObjectDetection(OD_CycleOutput* CycleOutput) ;
         OD_ErrorCode PrepareOperateObjectDetection(OD_CycleInput* CycleInput);// run synchroniusly
+        OD_ErrorCode OperateObjectDetectionOnTiledSample(OD_CycleInput *cycleInput, OD_CycleOutput *cycleOutput);
         int  PopulateCycleOutput(OD_CycleOutput *cycleOutput);
         bool SaveResultsATRimage(OD_CycleOutput* co, char* imgName, bool show);
         OD_InitParams* getParams();
@@ -42,6 +43,8 @@ class ObjectDetectionManagerHandler:public ObjectDetectionManager
         mbInterfaceATR* m_mbATR = nullptr;
     protected: 
        void DeleteAllInnerCycleInputs();
+       void AnalyzeTiledSample(OD_CycleOutput *co1, std::list<float *> *tarList, OD_CycleOutput *co2);
+       int CleanWrongTileDetections(OD_CycleOutput *co1, std::list<float *> *tarList);
        OD_CycleInput* m_prevCycleInput = nullptr;
        OD_CycleInput* m_curCycleInput = nullptr;
        OD_CycleInput* m_nextCycleInput = nullptr;

@@ -61,9 +61,6 @@ OD_ErrorCode InitObjectDetection(ObjectDetectionManager *odm, OD_InitParams *odI
 
     OD_ErrorCode ec = odmHandler->InitObjectDetection(odInitParams);
 
-    //TODO: Idle Run  
-
-
     cout << "Finished InitObjectDetection" << endl;
 
     return ec;
@@ -74,6 +71,14 @@ OD_ErrorCode OperateObjectDetectionAPI(ObjectDetectionManager *odm, OD_CycleInpu
 {
     OD_ErrorCode ec = OD_ErrorCode::OD_OK;
     ObjectDetectionManagerHandler *odmHandler = (ObjectDetectionManagerHandler *)odm;
+
+    if(odmHandler->getParams()->mbMission.missionType == OD::MB_MissionType::ANALYZE_SAMPLE)
+        {
+            odmHandler->OperateObjectDetectionOnTiledSample(odIn,odOut);
+            return ec; // TODO: not always ok
+        }
+
+
 
     OD_ErrorCode prepOD = odmHandler->PrepareOperateObjectDetection(odIn); // run synchroniusly
 

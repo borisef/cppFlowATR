@@ -25,7 +25,7 @@ float IoU(float* box1, float* box2)
 		float area2 = (maxx2 - minx2)*(maxy2 - miny2);
 		float inter = dx*dy; // Intersection
 		float uni = area1 + area2 - inter; // Union
-		float IoU = inter / uni;
+		float IoU = inter / (uni + 0.000001);
 		return IoU;
 	}
 

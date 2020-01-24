@@ -45,11 +45,11 @@ link_directories(e:/Installs/opencv/build/x64/vc14/lib e:/Installs/libtensorflow
 # set(SOURCE main.cpp)
 # add_executable(${PROJECT_NAME} ${SOURCE})
 
-add_executable(testATRInference  tests/testATRinference.cpp src/Model.cpp src/Tensor.cpp 
-                                     src/imgUtils.cpp src/Object_Detection_API.cpp src/InterfaceATR.cpp src/Object_Detection_Handler.cpp)
+# add_executable(testATRInference  tests/testATRinference.cpp src/Model.cpp src/Tensor.cpp 
+#                                      src/imgUtils.cpp src/Object_Detection_API.cpp src/InterfaceATR.cpp src/Object_Detection_Handler.cpp)
 
-#target_link_libraries (testATRInference ${MY_LIB})
-target_link_libraries (testATRInference opencv_world343d.lib tensorflow.dll )
+# #target_link_libraries (testATRInference ${MY_LIB})
+# target_link_libraries (testATRInference opencv_world343d.lib tensorflow.dll )
 
 
 add_executable(stressTest tests/testStress.cpp ${SRC})

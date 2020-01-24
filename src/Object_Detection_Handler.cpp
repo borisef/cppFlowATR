@@ -1,5 +1,6 @@
 #include <cppflowATRInterface/Object_Detection_Handler.h>
 #include <utils/imgUtils.h>
+#include <utils/odUtils.h>
 
 #include <iomanip>
 #include <future>
@@ -54,6 +55,7 @@ OD_InitParams *ObjectDetectionManagerHandler::getParams() { return m_initParams;
 void ObjectDetectionManagerHandler::setParams(OD_InitParams *ip)
 {
     m_initParams = ip;
+
     m_numPtrPixels = ip->supportData.imageHeight * ip->supportData.imageWidth;
     m_numImgPixels = ip->supportData.imageHeight * ip->supportData.imageWidth * 3;
     if (ip->supportData.colorType == e_OD_ColorImageType::YUV422)
@@ -65,20 +67,20 @@ void ObjectDetectionManagerHandler::setParams(OD_InitParams *ip)
 bool ObjectDetectionManagerHandler::IsBusy()
 {
     if (m_result.valid())
-    {   
+    {
         bool temp = !(m_result.wait_for(std::chrono::seconds(0)) == std::future_status::ready);
-        if(temp)
-            cout<<" IsBusy? Yes"<<endl;
+        if (temp)
+            cout << " IsBusy? Yes" << endl;
         else
         {
-            cout<<" IsBusy? No"<<endl;
+            cout << " IsBusy? No" << endl;
         }
-        
+
         return !(m_result.wait_for(std::chrono::seconds(0)) == std::future_status::ready);
     }
     else
     {
-        cout<<" IsBusy? Not valid"<<endl;
+        cout << " IsBusy? Not valid" << endl;
         return false;
     }
 }
@@ -181,7 +183,11 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
         m_mbATR = mbATR;
         cout << "Executed LoadNewModel in  InitObjectDetection" << endl;
     }
-
+    if (odInitParams->supportData.colorType == e_OD_ColorImageType::RGB_IMG_PATH)
+    {
+        odInitParams->supportData.imageHeight = 2000;
+        odInitParams->supportData.imageWidth = 4000;
+    }
     setParams(odInitParams);
 
     IdleRun();
@@ -197,8 +203,8 @@ OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_Cyc
 
         OD_CycleInput *tempCycleInput = nullptr;
         cout << "Replace old next cycle input" << endl;
-       m_mutexOnNext.lock();
-       //glob_mutexOnNext.lock();
+        m_mutexOnNext.lock();
+        //glob_mutexOnNext.lock();
         if (m_nextCycleInput) //my next not null
         {
             if (cycleInput->ImgID_input != m_nextCycleInput->ImgID_input)
@@ -234,19 +240,16 @@ OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_Cyc
     return OD_ErrorCode::OD_OK;
 }
 
-void  ObjectDetectionManagerHandler::IdleRun()
+void ObjectDetectionManagerHandler::IdleRun()
 {
-    cout <<" ObjectDetectionManagerHandler::Idle Run (on neutral)" << endl;
-    
-    uchar* tempPtr = new uchar[m_numImgPixels];  
-    //create temp ptr 
+    cout << " ObjectDetectionManagerHandler::Idle Run (on neutral)" << endl;
+
+    uchar *tempPtr = new uchar[m_numImgPixels];
+    //create temp ptr
     this->m_mbATR->RunRGBVector(tempPtr, this->m_initParams->supportData.imageHeight, this->m_initParams->supportData.imageWidth);
 
     delete tempPtr;
-
-
 }
-
 
 OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutput *odOut)
 {
@@ -279,8 +282,8 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     m_mutexOnNext.lock();
     // glob_mutexOnNext.lock();
     m_curCycleInput = SafeNewCopyCycleInput(m_nextCycleInput, m_numPtrPixels); // safe take care of NULL
-    DeleteCycleInput(m_nextCycleInput); //just to allow recursive call of OperateObjectDetection
-    m_nextCycleInput = nullptr; 
+    DeleteCycleInput(m_nextCycleInput);                                        //just to allow recursive call of OperateObjectDetection
+    m_nextCycleInput = nullptr;
     m_mutexOnNext.unlock();
     //glob_mutexOnNext.unlock();
 
@@ -309,7 +312,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
         cout << " Internal Run on RGB buffer " << endl;
         this->m_mbATR->RunRGBVector(m_curCycleInput->ptr, h, w);
     }
-    else if (colortype == e_OD_ColorImageType::RGB_IMG_PATH)//path
+    else if (colortype == e_OD_ColorImageType::RGB_IMG_PATH) //path
     {
         cout << " Internal Run on RGB_IMG_PATH " << endl;
         this->m_mbATR->RunRGBImgPath(m_curCycleInput->ptr);
@@ -328,8 +331,8 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     OD_CycleInput *tempCI = m_prevCycleInput;
     m_prevCycleInput = m_curCycleInput; // transfere
 
-   m_mutexOnPrev.lock();
-   //glob_mutexOnPrev.lock();
+    m_mutexOnPrev.lock();
+    //glob_mutexOnPrev.lock();
     DeleteCycleInput(tempCI);
     m_mutexOnPrev.unlock();
     //glob_mutexOnPrev.unlock();
@@ -340,11 +343,11 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     // this->SaveResultsATRimage(nullptr,odOut, (char*)outName.c_str(),false);
 
     cout << "###UnLocked" << endl;
-    
-    //Recoursive call 
-    if(m_nextCycleInput) 
+
+    //Recoursive call
+    if (m_nextCycleInput)
     {
-        cout<<"+++++++++++++++++++++++++++++++++Call OperateObjectDetection again automatically"<<endl;
+        cout << "+++++++++++++++++++++++++++++++++Call OperateObjectDetection again automatically" << endl;
         OperateObjectDetection(odOut);
     }
     return OD_ErrorCode::OD_OK;
@@ -362,7 +365,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
     }
     else
     {
-        // deep copy m_prevCycleInput 
+        // deep copy m_prevCycleInput
         tempci = NewCopyCycleInput(m_prevCycleInput, this->m_numPtrPixels);
     }
     m_mutexOnPrev.unlock();
@@ -387,7 +390,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
         myRGB = new cv::Mat(h, w, CV_8UC3);
         convertYUV420toRGB(img_data, w, h, myRGB);
     }
-    else if (colortype == e_OD_ColorImageType::RGB) // if rgb
+    else if (colortype == e_OD_ColorImageType::RGB || colortype == e_OD_ColorImageType::RGB_IMG_PATH) // if rgb
     {
         myRGB = new cv::Mat(h, w, CV_8UC3);
         //myRGB->data = buffer;// NOT safe if we going to use buffer later
@@ -430,7 +433,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
         cv::imshow("Image", imgS);
 
         char c = (char)cv::waitKey(25);
-       
+
         // cv::waitKey(0);
     }
     cv::Mat bgr(h, w, CV_8UC3);
@@ -440,7 +443,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
     if (myRGB != nullptr)
     {
         myRGB->release();
-        delete myRGB; 
+        delete myRGB;
     }
     cout << " Done cleaning image" << endl;
     DeleteCycleInput(tempci);
@@ -456,12 +459,12 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
 
     int N = m_mbATR->GetResultNumDetections();
 
-    cout<<"PopulateCycleOutput: Num detections total "<<N<<endl;
-    
+    cout << "PopulateCycleOutput: Num detections total " << N << endl;
+
     auto bbox_data = m_mbATR->GetResultBoxes();
     unsigned int w = this->m_initParams->supportData.imageWidth;
     unsigned int h = this->m_initParams->supportData.imageHeight;
-    
+
     //cycleOutput->numOfObjects = cycleOutput->maxNumOfObjects;
     cycleOutput->numOfObjects = N;
     for (int i = 0; i < N; i++)
@@ -472,7 +475,7 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
         if (odi[i].tarScore < LOWER_SCORE_THRESHOLD)
         {
             cycleOutput->numOfObjects = i;
-            cout<<"Taking only " << cycleOutput->numOfObjects << endl;
+            cout << "Taking only " << cycleOutput->numOfObjects << endl;
             break;
         }
 
@@ -482,4 +485,146 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
     return cycleOutput->numOfObjects;
 }
 
+OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(OD_CycleInput *cycleInput, OD_CycleOutput *cycleOutput)
+{
+    cycleOutput->numOfObjects = 0;
+    
+    uint bigH = m_initParams->supportData.imageHeight;
+    uint bigW = m_initParams->supportData.imageWidth;
 
+    const char *imgName = (const char *)cycleInput->ptr;
+
+    //create tiled image
+    cv::Mat *bigIm = new cv::Mat(bigH, bigW, CV_8UC3);
+    std::list<float *> *tarList = new list<float *>(0);
+    CreateTiledImage(imgName, bigW, bigH, bigIm, tarList);
+    unsigned char *ptrTif = ParseCvMat(*bigIm); // has new inside
+    //run operate part without sync stuff etc.
+    cout << " Internal Run on RGB buffer " << endl;
+    this->m_mbATR->RunRGBVector(ptrTif, bigH, bigW);
+
+    OD_CycleOutput *tempCycleOutput = NewOD_CycleOutput(350);
+    this->PopulateCycleOutput(tempCycleOutput);
+
+    //DEBUG
+    m_prevCycleInput = new OD_CycleInput();
+    m_prevCycleInput->ptr = ptrTif;
+    this->SaveResultsATRimage(tempCycleOutput, "tiles1.png", false);
+
+    // analyze results and populate output
+    AnalyzeTiledSample(tempCycleOutput, tarList, cycleOutput);
+
+    // clean
+    delete bigIm;
+    std::list<float *>::iterator it;
+    for (it = tarList->begin(); it != tarList->end(); ++it)
+        delete (*it);
+    delete tarList;
+    delete ptrTif;
+    delete tempCycleOutput->ObjectsArr;
+    delete tempCycleOutput;
+
+    //TODO: take care of nothing detected
+    return OD_ErrorCode::OD_OK;
+}
+int ObjectDetectionManagerHandler::CleanWrongTileDetections(OD_CycleOutput *co1, std::list<float *> *tarList)
+{
+    int numRemoved = 0;    
+    int numTrueTargets = tarList->size();
+    float objBB[4];
+
+
+    for (size_t d = 0; d < co1->numOfObjects; d++)
+    {
+        //object bb
+        objBB[0]=co1->ObjectsArr[d].tarBoundingBox.x1;
+        objBB[2]=co1->ObjectsArr[d].tarBoundingBox.x2;
+        objBB[1]=co1->ObjectsArr[d].tarBoundingBox.y1;
+        objBB[3]=co1->ObjectsArr[d].tarBoundingBox.y2;
+        bool foundTarget = false;
+
+       std::list<float *>::iterator it;
+         for (it = tarList->begin(); it != tarList->end(); ++it)
+        {
+            //target bb
+            float* targetBB = *it;
+            float iou = IoU(targetBB,objBB);
+            if (iou > 0.1) //found target 
+            {
+                foundTarget = 1;
+                break;
+
+            }
+           
+        }
+        if(!foundTarget)
+        {//TODO: remove object 
+           co1->ObjectsArr[d].tarScore = 0; 
+           numRemoved++;
+        }
+    }
+    return numRemoved; 
+}
+void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std::list<float *> *tarList, OD_CycleOutput *co2)
+{
+    int MAX_TILES_CONSIDER = 3;
+
+      // make sure co1->ObjectsArr[i] is one of tarList[j] by IoU
+        int nr = CleanWrongTileDetections(co1,tarList);
+        cout << " CleanWrongTileDetections removed "<< nr << " objects"<<endl;
+        co1->numOfObjects = co1->numOfObjects - nr;
+        int co1NumOfObjectsWithSkips = co1->numOfObjects + nr;
+
+    for (size_t i = 0; i < co1NumOfObjectsWithSkips; i++)
+    {
+        cout << co1->ObjectsArr[i].tarClass << endl;
+        cout << co1->ObjectsArr[i].tarSubClass << endl;
+        cout << co1->ObjectsArr[i].tarColor << endl;
+         cout << co1->ObjectsArr[i].tarScore << endl;
+        if(co1->ObjectsArr[i].tarScore < 0.2)
+            continue;
+
+      
+        // if already exists increment score
+        int targetSlot = co2->numOfObjects;
+        for (size_t i1 = 0; i1 < co2->numOfObjects; i1++)
+        {
+            if (co1->ObjectsArr[i].tarClass == co2->ObjectsArr[i1].tarClass)
+                if (co1->ObjectsArr[i].tarSubClass == co2->ObjectsArr[i1].tarSubClass)
+                    if (co1->ObjectsArr[i].tarColor == co2->ObjectsArr[i1].tarColor)
+                    {
+                        targetSlot = i1;
+                        break;
+                    }
+        }
+
+        // if not add element co2->numOfObjects, co2->numOfObjects++
+        if (targetSlot == co2->numOfObjects)
+        {
+            if (co2->maxNumOfObjects <= co2->numOfObjects) //jic
+                continue;
+            co2->numOfObjects = co2->numOfObjects + 1;
+            co2->ObjectsArr[targetSlot].tarScore = 0;
+        }
+        co2->ObjectsArr[targetSlot].tarClass = co1->ObjectsArr[i].tarClass;
+        co2->ObjectsArr[targetSlot].tarSubClass = co1->ObjectsArr[i].tarSubClass;
+        co2->ObjectsArr[targetSlot].tarColor = co1->ObjectsArr[i].tarColor;
+        co2->ObjectsArr[targetSlot].tarScore += 1.0 / (co1->numOfObjects+ 0.000001);
+    }
+
+    // sort co2->ObjectsArr[i2] by score
+    bubbleSort_OD_DetectionItem(co2->ObjectsArr, co2->numOfObjects);
+
+    // trim num objects
+    if (co2->numOfObjects > MAX_TILES_CONSIDER)
+        co2->numOfObjects = MAX_TILES_CONSIDER;
+
+    //re-normalize score
+    float totalScores = 0;
+    for (size_t i2 = 0; i2 < co2->numOfObjects; i2++)
+        totalScores = totalScores + co2->ObjectsArr[i2].tarScore;
+    for (size_t i2 = 0; i2 < co2->numOfObjects; i2++)
+        co2->ObjectsArr[i2].tarScore = co2->ObjectsArr[i2].tarScore / (totalScores + 0.00001);
+
+    //TODO: compute scores based on Binomial distribution
+}
