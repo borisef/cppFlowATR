@@ -61,3 +61,7 @@ target_link_libraries (stressTest opencv_world343d.lib tensorflow.dll )
 
 add_executable(testTileImages tests/testTileImages.cpp ${SRC})
 target_link_libraries (testTileImages  opencv_world343d.lib tensorflow.dll)
+
+
+add_executable(testLikeMnist tests/testLikeMnist.cpp ${SRC})
+target_link_libraries (testLikeMnist  opencv_world343d.lib tensorflow.dll)
