@@ -496,8 +496,15 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
 
     //create tiled image
     cv::Mat *bigIm = new cv::Mat(bigH, bigW, CV_8UC3);
+    bigIm->setTo(Scalar(0, 0, 0));
+
     std::list<float *> *tarList = new list<float *>(0);
+   
     CreateTiledImage(imgName, bigW, bigH, bigIm, tarList);
+
+    // cv::imwrite("smallImg.tif",cv::imread(imgName));
+    // cv::imwrite("bigImg.tif",*bigIm);
+
     unsigned char *ptrTif = ParseCvMat(*bigIm); // has new inside
     //run operate part without sync stuff etc.
     cout << " Internal Run on RGB buffer " << endl;
@@ -509,12 +516,14 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
     //DEBUG
     m_prevCycleInput = new OD_CycleInput();
     m_prevCycleInput->ptr = ptrTif;
-    this->SaveResultsATRimage(tempCycleOutput, "tiles1.png", false);
+    
+    SaveResultsATRimage(tempCycleOutput, (char*)"tiles1.png", false);
 
     // analyze results and populate output
     AnalyzeTiledSample(tempCycleOutput, tarList, cycleOutput);
 
     // clean
+    bigIm->release();
     delete bigIm;
     std::list<float *>::iterator it;
     for (it = tarList->begin(); it != tarList->end(); ++it)
@@ -530,6 +539,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
 int ObjectDetectionManagerHandler::CleanWrongTileDetections(OD_CycleOutput *co1, std::list<float *> *tarList)
 {
     int numRemoved = 0;    
+    float thresh = 0.01;
     int numTrueTargets = tarList->size();
     float objBB[4];
 
@@ -549,7 +559,7 @@ int ObjectDetectionManagerHandler::CleanWrongTileDetections(OD_CycleOutput *co1,
             //target bb
             float* targetBB = *it;
             float iou = IoU(targetBB,objBB);
-            if (iou > 0.1) //found target 
+            if (iou > thresh) //found target 
             {
                 foundTarget = 1;
                 break;
@@ -577,10 +587,10 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
 
     for (size_t i = 0; i < co1NumOfObjectsWithSkips; i++)
     {
-        cout << co1->ObjectsArr[i].tarClass << endl;
-        cout << co1->ObjectsArr[i].tarSubClass << endl;
-        cout << co1->ObjectsArr[i].tarColor << endl;
-         cout << co1->ObjectsArr[i].tarScore << endl;
+        // cout << co1->ObjectsArr[i].tarClass << endl;
+        // cout << co1->ObjectsArr[i].tarSubClass << endl;
+        // cout << co1->ObjectsArr[i].tarColor << endl;
+        // cout << co1->ObjectsArr[i].tarScore << endl;
         if(co1->ObjectsArr[i].tarScore < 0.2)
             continue;
 

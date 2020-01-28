@@ -76,7 +76,9 @@ int main()
 #ifdef WIN32
             (char *)"graphs/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_frozen_inference_graph.pb",
 #else
-            (char *)"graphs/frozen_inference_graph_humans.pb",
+            //works bad performance
+            (char *)"/home/borisef/projects/MB2/TrainedModels/ckpts_along_the_train_process/local_frozen_1_2M/frozen_inference_graph.pb", 
+
 #endif
             350, // max number of items to be returned
             supportData1,

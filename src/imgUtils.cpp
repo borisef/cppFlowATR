@@ -354,7 +354,7 @@ bool CreateTiledImage(const char* imname, uint W, uint H, cv::Mat *bigImg, list 
             break;
     
         
-        int offX = rand()%gapX;
+        int offX = rand()%gapX ;
         int offY = rand()%gapY;
 
         im1.copyTo((*bigImg)(cv::Rect(topX + offX,topY + offY,im1.cols, im1.rows)));
