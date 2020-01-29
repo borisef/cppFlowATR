@@ -104,7 +104,9 @@ DebugMode = FALSE
 Additional = "-in aaa -stam 33"
 ID = 4
 
-
+[general]
+key1="someth1"
+key2="someth2"
 
 
 

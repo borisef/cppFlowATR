@@ -26,6 +26,7 @@ void PrintCO(OD::OD_CycleOutput *co1)
         cout << "tarSubClass :" << co1->ObjectsArr[i].tarSubClass << endl;
         cout << "tarColor :" << co1->ObjectsArr[i].tarColor << endl;
         cout << "tarScore :" << co1->ObjectsArr[i].tarScore << endl;
+        cout << "-     -     -      - " << endl;
         if (i == 0)
             cout << "-----------------------------" << endl;
     }
@@ -35,13 +36,15 @@ void PrintCO(OD::OD_CycleOutput *co1)
 int main()
 {
     
-    const char *tiles[7] = {"media/gzir/gzir001.jpg",
+    const char *tiles[9] = {"media/gzir/gzir001.jpg",
                             "media/gzir/gzir002.jpg", 
                             "media/gzir/gzir003.jpg", 
                             "media/gzir/gzir004.jpg", 
                             "media/gzir/gzir005.jpg",
                             "media/gzir/gzir006.jpg", 
-                            "media/gzir/gzir007.jpg"};
+                            "media/gzir/gzir007.jpg",
+                            "media/gzir/gzir008.jpg", 
+                            "media/gzir/gzir009.jpg"};
 
 #ifdef WIN32
     string graph = (char *)"graphs/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_frozen_inference_graph.pb";
@@ -83,7 +86,7 @@ int main()
     OD_ErrorCode statusCycle;
 
     // Do it several times
-    for (size_t sample = 0; sample < 7; sample++)
+    for (size_t sample = 7; sample < 9; sample++)
     {
         ci->ptr = (const unsigned char *)tiles[sample];
         statusCycle = OD::OperateObjectDetectionAPI(atrManagerSamples, ci, co);
