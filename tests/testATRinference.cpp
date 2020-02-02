@@ -19,8 +19,6 @@ using namespace std;
 using namespace std::chrono;
 using namespace OD;
 
-// unsigned char *ParseImage(String path);
-// unsigned char *ParseRaw(String path);
 vector<String> GetFileNames();
 vector<String> GetFileNames1(const char *nm);
 
@@ -33,8 +31,10 @@ void MyWait(string s, float ms)
 int main()
 {
 
-    int numInf1 = 500;
-    int numInf2 = 100;
+    int numInf1 = 0;
+    int numInf2 = 0;
+    int numInf3 = 0;
+    bool runInf4 = true;
     bool SHOW = false;
     float numIter = 3.0;
 #ifdef TEST_MODE
@@ -77,8 +77,9 @@ int main()
             (char *)"graphs/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_frozen_inference_graph.pb",
 #else
             //works bad performance
-            (char *)"/home/borisef/projects/MB2/TrainedModels/ckpts_along_the_train_process/local_frozen_1_2M/frozen_inference_graph.pb", 
-
+            //(char *)"/home/borisef/projects/MB2/TrainedModels/ckpts_along_the_train_process/local_frozen_1_2M/frozen_inference_graph.pb", 
+            // (char *)"graphs/frozen_inference_graph_all_size_4096x2160.pb",
+            (char*)"graphs/frozen_inference_graph_all_3040_4056.pb",
 #endif
             350, // max number of items to be returned
             supportData1,
@@ -90,8 +91,10 @@ int main()
 
     cout << " ***  ObjectDetectionManager created  *** " << endl;
 
+
     // new mission
-    OD::InitObjectDetection(atrManager, &initParams);
+    if(numInf1 > 0)
+        OD::InitObjectDetection(atrManager, &initParams);
 
     //emulate buffer from TIF
     cout << " ***  Read tif image to rgb buffer  ***  " << endl;
@@ -124,18 +127,14 @@ int main()
     co->numOfObjects = 0;
     co->ObjectsArr = new OD_DetectionItem[co->maxNumOfObjects];
 
-    // RUN ONE EMPTY CYCLE
-    //statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
 
-    //  MyWait("Empty wait", 15000.0);
 
     uint lastReadyFrame = 0;
     co->ImgID_output = 0;
     for (int i = 1; i < numInf1; i++)
     {
         ci->ImgID_input = 0 + i;
-        // std::copy(begin(img_data1), end(img_data1), ptrTif);
-        // ci->ptr = ptrTif;
+      
 
         
         cout << " ***  Run inference on RGB image  ***  step " << i << endl;
@@ -232,7 +231,8 @@ int main()
 
     initParams.supportData = supportData3;
     // new mission because of support data
-    InitObjectDetection(atrManager, &initParams);
+    if(numInf3 > 0)
+        InitObjectDetection(atrManager, &initParams);
 
     vector<String> ff = GetFileNames();
     int N = ff.size();
@@ -241,7 +241,7 @@ int main()
     co->ImgID_output = 0;
     int temp = 0;
     int flag = 1;
-    for (size_t i1 = 0; i1 < 3; i1++)
+    for (size_t i1 = 0; i1 < numInf3; i1++)
     {
         //  MyWait("**** Long pause in-between **** ", 1000.0);
 
@@ -288,15 +288,18 @@ int main()
 
     initParams.supportData = supportData4;
     // new mission because of support data
-    InitObjectDetection(atrManager, &initParams);
+    if(runInf4)
+        InitObjectDetection(atrManager, &initParams);
 
     ff = GetFileNames1("media/raw/*");
-    N = ff.size();
+    N = ff.size() *((int)runInf4);
     lastReadyFrame = 0;
     co->ImgID_output = 0;
 
-    for (size_t i = 0; i < N; i++)
+    for (size_t i = 0; i < N; i = i+1)
     {
+        if(i%100==0)
+            cout << "Run in folder,  frame " << i << endl;
         temp++;
         ci->ImgID_input = 0 + i + temp;
 
@@ -311,7 +314,7 @@ int main()
             lastReadyFrame = co->ImgID_output;
             atrManager->SaveResultsATRimage(co, (char *)outName.c_str(), true);
         }
-        MyWait("Small pause", 1000.0);
+        MyWait("Small pause", 100.0);
         delete ptrTif;
     }
 
@@ -348,28 +351,3 @@ vector<String> GetFileNames1(const char *nm)
     return fn;
 }
 
-// unsigned char *ParseImage(String path)
-// {
-//     cv::Mat inp1 = cv::imread(path, CV_LOAD_IMAGE_COLOR);
-//     cv::cvtColor(inp1, inp1, CV_BGR2RGB);
-
-//     //put image in vector
-//     std::vector<uint8_t> img_data1(inp1.rows * inp1.cols * inp1.channels());
-//     img_data1.assign(inp1.data, inp1.data + inp1.total() * inp1.channels());
-
-//     unsigned char *ptrTif = new unsigned char[img_data1.size()];
-//     std::copy(begin(img_data1), end(img_data1), ptrTif);
-
-//     return ptrTif;
-// }
-
-// unsigned char *ParseRaw(String path)
-// {
-//     //emulate buffer from RAW
-//     std::vector<unsigned char> vecFromRaw = readBytesFromFile((char *)path.c_str());
-
-//     unsigned char *ptrRaw = new unsigned char[vecFromRaw.size()];
-//     std::copy(begin(vecFromRaw), end(vecFromRaw), ptrRaw);
-
-//     return ptrRaw;
-// }
