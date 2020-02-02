@@ -91,3 +91,8 @@ target_link_libraries (testTileImages ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
 add_executable(stressTest tests/testStress.cpp ${SRC})
 target_link_libraries (stressTest ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
 
+add_executable(testLikeMNIST tests/testLikeMnist.cpp src/Model.cpp src/Tensor.cpp)
+target_link_libraries (testLikeMNIST ${MY_TF_LIB} ${OpenCV_LIBS})
+
+add_executable(testColorNet tests/testColorNet.cpp src/Model.cpp src/Tensor.cpp)
+target_link_libraries (testColorNet ${MY_TF_LIB} ${OpenCV_LIBS}
