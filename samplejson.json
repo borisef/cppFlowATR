@@ -1,0 +1,67 @@
+{
+  "info": {
+    "version": "1",
+    "author": "illuminati945",
+    "date": "2020-03-01T22:00:00.000Z"
+  },
+  "run_params" : {
+    "logfile_path" : "path/to/file.log",
+    "debug_mode" : "false"
+  },
+  "models": [
+    {
+      "id": "1",
+      "task": "ATR",
+      "filetype": ".pb",
+      "mission": "0",
+      "load_path": "/path/to/file.pb",
+      "nickname": "nick",
+      "max_objects": "300",
+      "accuracy": "5",
+      "speed": "5",
+      "targets": "ALL",
+      "width": "0",
+      "height": "0",
+      "max_batch_size": "1",
+      "image_format": "RGB",
+      "resolution": "5",
+      "additional": "-nms 0 -opp 3"
+    },
+    {
+      "id": "1",
+      "task": "ATR",
+      "filetype": ".pb",
+      "mission": "0",
+      "load_path": "/path/to/file.pb",
+      "nickname": "nick",
+      "max_objects": "300",
+      "accuracy": "5",
+      "speed": "5",
+      "targets": "ALL",
+      "width": "0",
+      "height": "0",
+      "max_batch_size": "1",
+      "image_format": "RGB",
+      "resolution": "5",
+      "additional": "-nms 0 -opp 3"
+    },
+    {
+      "id": "1",
+      "task": "ATR",
+      "filetype": ".pb",
+      "mission": "0",
+      "load_path": "/path/to/file.pb",
+      "nickname": "nick",
+      "max_objects": "300",
+      "accuracy": "5",
+      "speed": "5",
+      "targets": "ALL",
+      "width": "0",
+      "height": "0",
+      "max_batch_size": "1",
+      "image_format": "RGB",
+      "resolution": "5",
+      "additional": "-nms 0 -opp 3"
+    }
+  ]
+}
