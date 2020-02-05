@@ -1,56 +1,58 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <json.hpp>
 #include <map>
+#include "InitParams.h"
 #include <cppflowATRInterface/Object_Detection_Types.h>
+
 using namespace OD;
 
-using json = nlohmann::json;
-
-class InitParams
+int main()
 {
-public:
-    InitParams(std::string filepath)
-    {
-        std::ifstream file;
-        file.open(filepath);
-
-        file >> j;
-        file.close();
-
-        if (!j["info"].empty())
-        {
-            info = j["info"].get<std::map<std::string, std::string>>();
-        }
-
-        if (!j["run_params"].empty())
-        {
-            run_params = j["run_params"].get<std::map<std::string, std::string>>();
-        }
-        if (!j["models"].empty())
-        {
-            //models = new std::map<std::string, std::string>[j["models"].size()];
-            for (size_t i = 0; i < j["models"].size(); i++)
-            {
-                models[i] = j["models"][i].get<std::map<std::string, std::string>>();
-            }
-        }
-    }
-    std::map<std::string, std::string> info;
-    std::map<std::string, std::string> run_params;
-    std::map<std::string, std::string> models[64];
-
-protected:
-    json j;
-};
-
-main()
-{
-
     InitParams a("samplejson.json");
     return 0;
 }
+
+
+
+
+// class InitParams
+// {
+// public:
+//     InitParams(std::string filepath)
+//     {
+//         std::ifstream file;
+//         file.open(filepath);
+
+//         file >> j;
+//         file.close();
+
+//         if (!j["info"].empty())
+//         {
+//             info = j["info"].get<std::map<std::string, std::string>>();
+//         }
+
+//         if (!j["run_params"].empty())
+//         {
+//             run_params = j["run_params"].get<std::map<std::string, std::string>>();
+//         }
+//         if (!j["models"].empty())
+//         {
+//             //models = new std::map<std::string, std::string>[j["models"].size()];
+//             for (size_t i = 0; i < j["models"].size(); i++)
+//             {
+//                 models[i] = j["models"][i].get<std::map<std::string, std::string>>();
+//             }
+//         }
+//     }
+//     std::map<std::string, std::string> info;
+//     std::map<std::string, std::string> run_params;
+//     std::map<std::string, std::string> models[64];
+
+// protected:
+//     json j;
+// };
+
 
 // struct Modell
 // {
