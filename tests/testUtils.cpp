@@ -20,12 +20,25 @@ int main()
   cout << "Test utils" << endl;
   //emulate buffer
   cout << "readBytesFromFile raw" << endl;
-  std::vector<unsigned char> rawVec = readBytesFromFile("00006160.raw");
+  std::vector<unsigned char> rawVec = readBytesFromFile("media/00006160.raw");
 
   //
+  //start timer
+  auto start = high_resolution_clock::now();
+  //
+
   cv::Mat *myRGB = new Mat(H, W, CV_8UC3);
   convertYUV420toRGB(rawVec, H, W, myRGB);
   // save JPG for debug
+
+  //end timer
+  auto stop = high_resolution_clock::now();
+  //
+
+  //calculate time difference
+  auto duration = duration_cast<milliseconds>(stop - start);
+  cout << duration.count() << endl;
+  //
 
   //DEBUG
   cv::Mat bgr(H, W, CV_8UC3);
@@ -62,7 +75,7 @@ int main()
   cv::Mat imrgb2(imrgb1.rows, imrgb1.cols, CV_8UC3);
   imrgb2.data = array;
   int ch = imrgb2.channels();
-  cv::imwrite("isrgb2.tif",imrgb2);
+  cv::imwrite("isrgb2.tif", imrgb2);
 
   return 0;
 }
