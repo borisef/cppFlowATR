@@ -1,7 +1,3 @@
-#include <iostream>
-#include <fstream>
-#include <iomanip>
-#include <map>
 #include "InitParams.h"
 #include <cppflowATRInterface/Object_Detection_Types.h>
 
@@ -10,11 +6,17 @@ using namespace OD;
 int main()
 {
     InitParams a("samplejson.json");
+
+    for (auto it = a.info.cbegin(); it != a.info.cend(); ++it)
+    {
+        std::cout << it->first << ": " << it->second << "\n";
+    }
+
+    std::cout << "Found a total of " << a.models.size() << " models" << std::endl;
+
+
     return 0;
 }
-
-
-
 
 // class InitParams
 // {
@@ -52,7 +54,6 @@ int main()
 // protected:
 //     json j;
 // };
-
 
 // struct Modell
 // {
