@@ -71,5 +71,5 @@ add_executable(testLikeMnist tests/testLikeMnist.cpp ${SRC})
 target_link_libraries (testLikeMnist  opencv_world343d.lib  tensorflow.dll)
 
 
-add_executable(testColorNet tests/testColorNet.cpp src/Model.cpp src/Tensor.cpp)
+add_executable(testColorNet tests/testColorNet.cpp ${SRC})
 target_link_libraries (testColorNet opencv_world343d.lib  tensorflow.dll)

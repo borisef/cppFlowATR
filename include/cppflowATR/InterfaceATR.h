@@ -19,9 +19,11 @@ class mbInterfaceATR
     Tensor* m_outTensorClasses;
     Tensor* m_inpName ;
 
-  public:
     
+  public:
+    cv::Mat m_keepImg;
     bool m_show;
+    cv::Mat GetKeepImg(){return m_keepImg;}
   public:
     //constructors
 	  mbInterfaceATR();
@@ -37,4 +39,6 @@ class mbInterfaceATR
     int GetResultClasses(int i);
     float GetResultScores(int i);
     std::vector<float>  GetResultBoxes();
+
+    
 };

@@ -11,3 +11,7 @@ void swap_OD_DetectionItem(OD_DetectionItem* xp, OD_DetectionItem * yp);
   
 void bubbleSort_OD_DetectionItem(OD_DetectionItem* arr, int n) ;
 
+void PrintColor(int color_id);
+
+cv::Scalar GetColor2Draw(OD::e_OD_TargetColor color_id);
+

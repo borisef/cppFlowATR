@@ -1,5 +1,8 @@
 #include "cppflow/Model.h"
 #include "cppflow/Tensor.h"
+#include "cppflowCM/InterfaceCM.h"
+#include "utils/imgUtils.h"
+#include "utils/odUtils.h"
 #include <opencv2/opencv.hpp>
 #include <numeric>
 #include <iomanip>
@@ -11,52 +14,82 @@
 using namespace std;
 using namespace std::chrono;
 
-void PrintColor(int color_id)
+OD::OD_CycleOutput* CreateSynthCO(cv::Mat img, uint numBB);
+
+
+int mainWithInterface()
 {
-    switch (color_id)
+    const char *modelPath = "e:/projects/MB/ColorNitzan/TFexample/output_graph.pb";
+    const char *ckpt = nullptr;
+    const char *inname = "conv2d_input";
+    const char *outname = "dense_1/Softmax";
+
+    const char *inimage = "media/00000018.tif";
+    const char *smallim= "media/color/color001.png";
+
+    OD::OD_BoundingBox sampleBB = OD::OD_BoundingBox({100, 200, 150, 220});
+
+    mbInterfaceCM *myCM = new mbInterfaceCM();
+    if (!myCM->LoadNewModel(modelPath, ckpt, inname, outname))
     {
-    case 0:
-        cout << "Color: white" << endl;
-        break;
-    case 1:
-        cout << "Color: black" << endl;
-        break;
-    case 2:
-        cout << "Color: gray" << endl;
-        break;
-    case 3:
-        cout << "Color: red" << endl;
-        break;
-    case 4:
-        cout << "Color: green" << endl;
-        break;
-    case 5:
-        cout << "Color: blue" << endl;
-        break;
-    case 6:
-        cout << "Color: yellow" << endl;
-        break;
-    }
-}
-uint argmax_color(std::vector<float> prob_vec)
-{
-    float max_val = 0;
-    uint index = 0;
-    uint argmax = 0;
-    for (std::vector<float>::iterator it = prob_vec.begin(); it != prob_vec.end(); ++it)
-    {
-        if (max_val < *it)
-        {
-            max_val = *it;
-            argmax = index;
-        }
-        index++;
+        std::cout << "ooops" << std::endl;
+        return -1;
     }
 
-    return argmax;
+    //load BIG image
+    cv::Mat bigImg = cv::imread(inimage, CV_LOAD_IMAGE_COLOR);
+    //create synthetic cycleoutput
+    OD::OD_CycleOutput* co = CreateSynthCO(bigImg, 10);
+    //load small image
+     cv::Mat smallImg = cv::imread(smallim, CV_LOAD_IMAGE_COLOR);
+
+
+
+    //test on patch
+    std::vector<float> vecScores = myCM->RunImgBB(bigImg, sampleBB);
+    uint color_id = argmax_vector(vecScores);
+    cout << "color id = " << color_id << endl;
+    PrintColor(color_id);
+    cout << "Net score: " << vecScores[color_id] << endl;
+
+    //test on batch
+    std::vector<float> vecScoresAll = myCM->RunImgWithCycleOutput(bigImg, co, 0, (co->numOfObjects -1), true);
+    
+    //test on img name 
+    vecScores = myCM->RunRGBImgPath((const uchar*)inimage);
+    color_id = argmax_vector(vecScores);
+    cout << "color id = " << color_id << endl;
+    PrintColor(color_id);
+    cout << "Net score: " << vecScores[color_id] << endl;
+
+    //test on mat
+    vecScores = myCM->RunRGBimage(smallImg);
+    color_id = argmax_vector(vecScores);
+    cout << "color id = " << color_id << endl;
+    PrintColor(color_id);
+    cout << "Net score: " << vecScores[color_id] << endl;
+
+    //extract last vector of scores
+    vecScores = myCM->GetResultScores();
+    color_id = argmax_vector(vecScores);
+    cout << "color id = " << color_id << endl;
+    PrintColor(color_id);
+    cout << "Net score: " << vecScores[color_id] << endl;
+
+
+
+
+    return 0;
 }
 
 int main()
+{
+    mainWithInterface();
+
+    return 0;
+}
+
+int testMain()
 {
     const char *imges[9] = {"media/color/color001.png",
                             "media/color/color002.png",
@@ -115,7 +148,7 @@ int main()
         input->set_data(img_resized_data, {1, img_resized.rows, img_resized.cols, 3});
         //input->set_data(img_resized_data);
         model.run(input, output);
-        uint color_id = argmax_color(output->get_data<float>());
+        uint color_id = argmax_vector(output->get_data<float>());
         cout << "color id = " << color_id << endl;
 
         auto stop = high_resolution_clock::now();
@@ -158,13 +191,42 @@ int main()
     for (size_t si = 0; si < BS; si++)
     {
         vector<float>::const_iterator first = res.begin() + si * 7;
-        vector<float>::const_iterator last = res.begin() + (si + 1) * 7 ;
+        vector<float>::const_iterator last = res.begin() + (si + 1) * 7;
         vector<float> outRes(first, last);
-        uint color_id = argmax_color(outRes);
+        uint color_id = argmax_vector(outRes);
         cout << "color id = " << color_id << endl;
         PrintColor(color_id);
         cout << "Net score: " << outRes[color_id] << endl;
     }
 
     return 0;
+}
+
+
+
+
+OD::OD_CycleOutput* CreateSynthCO(cv::Mat img, uint numBB)
+{
+
+    OD::OD_CycleOutput* co = new OD::OD_CycleOutput();
+    co->maxNumOfObjects = 350;
+    co->ImgID_output = 0;
+    co->numOfObjects = numBB;
+    co->ObjectsArr = new OD::OD_DetectionItem[co->maxNumOfObjects];
+
+    int x = 10;
+    int y = 10;
+    int w = 100;
+    int h = 70;
+    int step = int((float)img.rows/((float)numBB+1));
+
+    for (size_t i = 0; i < numBB; i++)
+    {
+        co->ObjectsArr[i].tarBoundingBox = OD::OD_BoundingBox({(float)x, (float)x+w, (float)y, (float)y+h});
+
+        x = x + step;
+        y = y + step;
+    }
+
+    return co;
 }
