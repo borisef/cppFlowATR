@@ -50,6 +50,7 @@ protected:
     OD_CycleInput *m_nextCycleInput = nullptr;
     uint m_numImgPixels = 0;
     uint m_numPtrPixels = 0;
+    bool m_withActiveCM = true; 
 
     cv::Mat m_bigImg; 
 

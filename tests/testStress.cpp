@@ -86,8 +86,11 @@ struct OneRunStruct
     int startFrameID = 1;
 };
 
-OD::ObjectDetectionManager * OneRun(OD::ObjectDetectionManager *atrManager, OneRunStruct ors)
+OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRunStruct ors)
 {
+    vector<String> ff = GetFileNames((char *)ors.splicePath.c_str());
+    int N = ff.size();
+
     // Mission
     MB_Mission mission = {
         MB_MissionType::MATMON,       //mission1.missionType
@@ -104,6 +107,14 @@ OD::ObjectDetectionManager * OneRun(OD::ObjectDetectionManager *atrManager, OneR
         0,            //TEMP:cameraParams[10];//BE
         0             //TEMP: float	spare[3];
     };
+
+    // TO Avoid errors
+    if (ors.imType == e_OD_ColorImageType::RGB)
+    {
+        cv::Mat tempim = cv::imread(ff[0]);
+        supportData.imageHeight = tempim.rows;
+        supportData.imageWidth = tempim.cols;
+    }
 
     OD_InitParams initParams =
         {
@@ -122,7 +133,7 @@ OD::ObjectDetectionManager * OneRun(OD::ObjectDetectionManager *atrManager, OneR
 
         // // new mission
         OD::InitObjectDetection(atrManager, &initParams);
-          ((ObjectDetectionManagerHandler*)atrManager)->WaitForThread();
+        ((ObjectDetectionManagerHandler *)atrManager)->WaitForThread();
     }
 
     //((ObjectDetectionManagerHandler*)atrManager)->WaitForThread();
@@ -135,8 +146,6 @@ OD::ObjectDetectionManager * OneRun(OD::ObjectDetectionManager *atrManager, OneR
     co->numOfObjects = 0;
     co->ObjectsArr = new OD_DetectionItem[co->maxNumOfObjects];
 
-    vector<String> ff = GetFileNames((char *)ors.splicePath.c_str());
-    int N = ff.size();
     unsigned char *ptrTif;
     int lastReadyFrame = 0;
     co->ImgID_output = 0;
@@ -168,8 +177,9 @@ OD::ObjectDetectionManager * OneRun(OD::ObjectDetectionManager *atrManager, OneR
         }
     }
     //at the end
-     ((ObjectDetectionManagerHandler*)atrManager)->WaitForThread();
-    if(ors.toDeleteATRM){
+    ((ObjectDetectionManagerHandler *)atrManager)->WaitForThread();
+    if (ors.toDeleteATRM)
+    {
         OD::TerminateObjectDetection(atrManager);
         atrManager = nullptr;
     }
@@ -192,14 +202,14 @@ int main()
     ors4.H = 3040;
     ors4.splicePath = "media/raw/*";
     ors4.imType = e_OD_ColorImageType::YUV422;
-    ors4.numRepetiotions = 1;
-    ors4.minDelay = 5;
+    ors4.numRepetiotions = 85;
+    ors4.minDelay = 10;
     ors4.startFrameID = 100000;
     atrManager = OneRun(atrManager, ors4);
 
     OneRunStruct ors1;
-    ors1.H = 1080;
-    ors1.W = 1920;
+    // ors1.H = 108000;
+    // ors1.W = 192000;
     ors1.splicePath = "media/spliced/*";
     ors1.numRepetiotions = 1;
     ors1.minDelay = 0;
@@ -207,8 +217,8 @@ int main()
     atrManager = OneRun(atrManager, ors1);
 
     OneRunStruct ors2;
-    ors2.H = 1071;
-    ors2.W = 1904;
+    // ors2.H = 1071;
+    // ors2.W = 1904;
     ors2.splicePath = "media/filter/*";
     ors2.numRepetiotions = 1;
     ors2.minDelay = 0;
@@ -216,8 +226,8 @@ int main()
     atrManager = OneRun(atrManager, ors2);
 
     OneRunStruct ors3;
-    ors3.W = 2393;
-    ors3.H = 1867;
+    // ors3.W = 239300;
+    // ors3.H = 186700;
     ors3.splicePath = "media/filterUCLA/*";
     ors3.numRepetiotions = 1;
     ors3.minDelay = 0;
@@ -227,8 +237,8 @@ int main()
 
     OD::ObjectDetectionManager *atrManagerAnother = nullptr;
     OneRunStruct ors5;
-    ors5.H = 1080;
-    ors5.W = 1920;
+    // ors5.H = 1080;
+    // ors5.W = 1920;
     ors5.splicePath = "media/spliced/*";
     ors5.numRepetiotions = 1;
     ors5.minDelay = 10;
@@ -244,10 +254,23 @@ int main()
     atrManagerAnother = OneRun(atrManagerAnother, ors5);
     atrManager = OneRun(atrManager, ors3);
     atrManagerAnother = OneRun(atrManagerAnother, ors5);
+
+    // will create 3 at the same time
+    OD::ObjectDetectionManager *atrManagerAnother2 = nullptr;
+    ors4.toDeleteATRM = false;
+    atrManagerAnother2 = OneRun(atrManagerAnother2, ors4); // will create 3 at the same time
+    ors4.doNotInit = true;
     atrManager = OneRun(atrManager, ors3);
+    atrManagerAnother = OneRun(atrManagerAnother, ors5);
+    atrManagerAnother2 = OneRun(atrManagerAnother2, ors4);
+    // atrManager = OneRun(atrManager, ors3);
+    // atrManagerAnother = OneRun(atrManagerAnother, ors5);
+    // atrManagerAnother2 = OneRun(atrManagerAnother2, ors4);
+    //  OD::TerminateObjectDetection(atrManagerAnother2);
 
     OD::TerminateObjectDetection(atrManager);
     OD::TerminateObjectDetection(atrManagerAnother);
-    cout<<"Ended StressTest Normally"<<endl;
+   
+    cout << "Ended StressTest Normally" << endl;
     return 0;
 }
