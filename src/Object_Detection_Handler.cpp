@@ -8,6 +8,8 @@
 using namespace OD;
 using namespace std;
 
+mbInterfaceCM *ObjectDetectionManagerHandler::m_mbCM = nullptr;
+
 OD_CycleInput *NewCopyCycleInput(OD_CycleInput *tocopy, uint bufferSize)
 {
     OD_CycleInput *newCopy = new OD_CycleInput();
@@ -188,10 +190,22 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
         odInitParams->supportData.imageHeight = 2000;
         odInitParams->supportData.imageWidth = 4000;
     }
+    //create CM
+    bool initCMsuccess = true;
+    m_withActiveCM = true; 
+
+    if (m_mbCM == nullptr && m_withActiveCM)
+    {
+        initCMsuccess = InitCM(odInitParams->iniFilePath);
+        m_withActiveCM = initCMsuccess; 
+    }
+
     setParams(odInitParams);
 
     IdleRun();
-
+    if (m_mbCM != nullptr && m_withActiveCM)
+        m_mbCM->IdleRun();
+    // TODO: check if really OK 
     return OD_ErrorCode::OD_OK;
 }
 OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_CycleInput *cycleInput)
@@ -324,6 +338,11 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     cout << " ObjectDetectionManagerHandler::OperateObjectDetection starts PopulateCycleOutput  " << endl;
     // save results
     this->PopulateCycleOutput(odOut);
+
+    //CM
+    if(odOut->numOfObjects>0 && m_withActiveCM)
+        std::vector<float> vecScoresAll = m_mbCM->RunImgWithCycleOutput(m_mbATR->GetKeepImg(), odOut, 0, (odOut->numOfObjects -1), true);
+
     odOut->ImgID_output = fi;
 
     // copy current into prev
@@ -408,6 +427,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
     for (int i = 0; i < co->numOfObjects; i++)
     {
         int classId = co->ObjectsArr[i].tarClass;
+        OD::e_OD_TargetColor colorId = co->ObjectsArr[i].tarColor;
         float score = co->ObjectsArr[i].tarScore;
         OD_BoundingBox bbox_data = co->ObjectsArr[i].tarBoundingBox;
 
@@ -422,7 +442,10 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
             float bottom = bbox_data.y2;
 
             cv::rectangle(*myRGB, {(int)x, (int)y}, {(int)right, (int)bottom}, {125, 255, 51}, 2);
-            cv::putText(*myRGB, string("Label:") + std::to_string(classId) + ";" + std::to_string(int(score * 100)) + "%", cv::Point(x, y - 10), 1, 2, Scalar(124, 200, 10), 3);
+            cv::Scalar tColor(124, 200, 10);
+            tColor = GetColor2Draw(colorId);
+
+            cv::putText(*myRGB, string("Label:") + std::to_string(classId) + ";" + std::to_string(int(score * 100)) + "%", cv::Point(x, y - 10), 1, 2, tColor, 3);
         }
     }
     cout << " Done reading targets" << endl;
@@ -488,7 +511,7 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
 OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(OD_CycleInput *cycleInput, OD_CycleOutput *cycleOutput)
 {
     cycleOutput->numOfObjects = 0;
-    
+
     uint bigH = m_initParams->supportData.imageHeight;
     uint bigW = m_initParams->supportData.imageWidth;
 
@@ -499,7 +522,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
     bigIm->setTo(Scalar(0, 0, 0));
 
     std::list<float *> *tarList = new list<float *>(0);
-   
+
     CreateTiledImage(imgName, bigW, bigH, bigIm, tarList);
 
     // cv::imwrite("smallImg.tif",cv::imread(imgName));
@@ -513,11 +536,16 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
     OD_CycleOutput *tempCycleOutput = NewOD_CycleOutput(350);
     this->PopulateCycleOutput(tempCycleOutput);
 
+    // color 
+    if(m_withActiveCM && m_mbCM!=nullptr)
+        this->m_mbCM->RunImgWithCycleOutput(*bigIm,tempCycleOutput,0,tempCycleOutput->numOfObjects-1,true);
+
+
     //DEBUG
     m_prevCycleInput = new OD_CycleInput();
     m_prevCycleInput->ptr = ptrTif;
-    
-    SaveResultsATRimage(tempCycleOutput, (char*)"tiles1.png", false);
+
+    SaveResultsATRimage(tempCycleOutput, (char *)"tiles1.png", false);
 
     // analyze results and populate output
     AnalyzeTiledSample(tempCycleOutput, tarList, cycleOutput);
@@ -538,52 +566,49 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
 }
 int ObjectDetectionManagerHandler::CleanWrongTileDetections(OD_CycleOutput *co1, std::list<float *> *tarList)
 {
-    int numRemoved = 0;    
+    int numRemoved = 0;
     float thresh = 0.01;
     int numTrueTargets = tarList->size();
     float objBB[4];
 
-
     for (size_t d = 0; d < co1->numOfObjects; d++)
     {
         //object bb
-        objBB[0]=co1->ObjectsArr[d].tarBoundingBox.x1;
-        objBB[2]=co1->ObjectsArr[d].tarBoundingBox.x2;
-        objBB[1]=co1->ObjectsArr[d].tarBoundingBox.y1;
-        objBB[3]=co1->ObjectsArr[d].tarBoundingBox.y2;
+        objBB[0] = co1->ObjectsArr[d].tarBoundingBox.x1;
+        objBB[2] = co1->ObjectsArr[d].tarBoundingBox.x2;
+        objBB[1] = co1->ObjectsArr[d].tarBoundingBox.y1;
+        objBB[3] = co1->ObjectsArr[d].tarBoundingBox.y2;
         bool foundTarget = false;
 
-       std::list<float *>::iterator it;
-         for (it = tarList->begin(); it != tarList->end(); ++it)
+        std::list<float *>::iterator it;
+        for (it = tarList->begin(); it != tarList->end(); ++it)
         {
             //target bb
-            float* targetBB = *it;
-            float iou = IoU(targetBB,objBB);
-            if (iou > thresh) //found target 
+            float *targetBB = *it;
+            float iou = IoU(targetBB, objBB);
+            if (iou > thresh) //found target
             {
                 foundTarget = 1;
                 break;
-
             }
-           
         }
-        if(!foundTarget)
-        {//TODO: remove object 
-           co1->ObjectsArr[d].tarScore = 0; 
-           numRemoved++;
+        if (!foundTarget)
+        { //TODO: remove object
+            co1->ObjectsArr[d].tarScore = 0;
+            numRemoved++;
         }
     }
-    return numRemoved; 
+    return numRemoved;
 }
 void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std::list<float *> *tarList, OD_CycleOutput *co2)
 {
     int MAX_TILES_CONSIDER = 3;
 
-      // make sure co1->ObjectsArr[i] is one of tarList[j] by IoU
-        int nr = CleanWrongTileDetections(co1,tarList);
-        cout << " CleanWrongTileDetections removed "<< nr << " objects"<<endl;
-        co1->numOfObjects = co1->numOfObjects - nr;
-        int co1NumOfObjectsWithSkips = co1->numOfObjects + nr;
+    // make sure co1->ObjectsArr[i] is one of tarList[j] by IoU
+    int nr = CleanWrongTileDetections(co1, tarList);
+    cout << " CleanWrongTileDetections removed " << nr << " objects" << endl;
+    co1->numOfObjects = co1->numOfObjects - nr;
+    int co1NumOfObjectsWithSkips = co1->numOfObjects + nr;
 
     for (size_t i = 0; i < co1NumOfObjectsWithSkips; i++)
     {
@@ -591,10 +616,9 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
         // cout << co1->ObjectsArr[i].tarSubClass << endl;
         // cout << co1->ObjectsArr[i].tarColor << endl;
         // cout << co1->ObjectsArr[i].tarScore << endl;
-        if(co1->ObjectsArr[i].tarScore < 0.2)
+        if (co1->ObjectsArr[i].tarScore < 0.2)
             continue;
 
-      
         // if already exists increment score
         int targetSlot = co2->numOfObjects;
         for (size_t i1 = 0; i1 < co2->numOfObjects; i1++)
@@ -619,7 +643,7 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
         co2->ObjectsArr[targetSlot].tarClass = co1->ObjectsArr[i].tarClass;
         co2->ObjectsArr[targetSlot].tarSubClass = co1->ObjectsArr[i].tarSubClass;
         co2->ObjectsArr[targetSlot].tarColor = co1->ObjectsArr[i].tarColor;
-        co2->ObjectsArr[targetSlot].tarScore += 1.0 / (co1->numOfObjects+ 0.000001);
+        co2->ObjectsArr[targetSlot].tarScore += 1.0 / (co1->numOfObjects + 0.000001);
     }
 
     // sort co2->ObjectsArr[i2] by score
@@ -637,4 +661,24 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
         co2->ObjectsArr[i2].tarScore = co2->ObjectsArr[i2].tarScore / (totalScores + 0.00001);
 
     //TODO: compute scores based on Binomial distribution
+}
+
+bool ObjectDetectionManagerHandler::InitCM(const char* iniFilePath)
+{
+    const char *modelPath = "graphs/output_graph.pb";
+    const char *ckpt = nullptr;
+    const char *inname = "conv2d_input";
+    const char *outname = "dense_1/Softmax";
+
+    //check file exist
+    if(!file_exists_test(modelPath))
+        return false;
+
+    m_mbCM = new mbInterfaceCM();
+    if (!m_mbCM->LoadNewModel(modelPath, ckpt, inname, outname))
+    {
+        std::cout << "ooops" << std::endl;
+        return false;
+    }
+    return true;
 }

@@ -363,3 +363,21 @@ bool CreateTiledImage(const char *imname, uint W, uint H, cv::Mat *bigImg, list<
 
   return true;
 }
+
+uint argmax_vector(std::vector<float> prob_vec)
+{
+    float max_val = 0;
+    uint index = 0;
+    uint argmax = 0;
+    for (std::vector<float>::iterator it = prob_vec.begin(); it != prob_vec.end(); ++it)
+    {
+        if (max_val < *it)
+        {
+            max_val = *it;
+            argmax = index;
+        }
+        index++;
+    }
+
+    return argmax;
+}
