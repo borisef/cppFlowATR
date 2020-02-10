@@ -192,14 +192,19 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
     }
     //create CM
     bool initCMsuccess = true;
-    if (m_mbCM == nullptr)
+    m_withActiveCM = true; 
+
+    if (m_mbCM == nullptr && m_withActiveCM)
     {
         initCMsuccess = InitCM(odInitParams->iniFilePath);
+        m_withActiveCM = initCMsuccess; 
     }
 
     setParams(odInitParams);
 
     IdleRun();
+    if (m_mbCM != nullptr && m_withActiveCM)
+        m_mbCM->IdleRun();
     // TODO: check if really OK 
     return OD_ErrorCode::OD_OK;
 }
@@ -334,8 +339,8 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     // save results
     this->PopulateCycleOutput(odOut);
 
-    //TODO: CM
-    if(odOut->numOfObjects>0)
+    //CM
+    if(odOut->numOfObjects>0 && m_withActiveCM)
         std::vector<float> vecScoresAll = m_mbCM->RunImgWithCycleOutput(m_mbATR->GetKeepImg(), odOut, 0, (odOut->numOfObjects -1), true);
 
     odOut->ImgID_output = fi;
@@ -532,7 +537,8 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
     this->PopulateCycleOutput(tempCycleOutput);
 
     // color 
-    this->m_mbCM->RunImgWithCycleOutput(*bigIm,tempCycleOutput,0,tempCycleOutput->numOfObjects-1,true);
+    if(m_withActiveCM && m_mbCM!=nullptr)
+        this->m_mbCM->RunImgWithCycleOutput(*bigIm,tempCycleOutput,0,tempCycleOutput->numOfObjects-1,true);
 
 
     //DEBUG
@@ -663,6 +669,11 @@ bool ObjectDetectionManagerHandler::InitCM(const char* iniFilePath)
     const char *ckpt = nullptr;
     const char *inname = "conv2d_input";
     const char *outname = "dense_1/Softmax";
+
+    //check file exist
+    if(!file_exists_test(modelPath))
+        return false;
+
     m_mbCM = new mbInterfaceCM();
     if (!m_mbCM->LoadNewModel(modelPath, ckpt, inname, outname))
     {

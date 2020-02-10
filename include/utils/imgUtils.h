@@ -22,3 +22,12 @@ unsigned char *ParseCvMat(cv::Mat inp1);
 float IoU(float* , float*);
 
 uint argmax_vector(std::vector<float> prob_vec);
+
+inline bool file_exists_test (const std::string& name) {
+    if (FILE *file = fopen(name.c_str(), "r")) {
+        fclose(file);
+        return true;
+    } else {
+        return false;
+    }   
+}

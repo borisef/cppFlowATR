@@ -34,4 +34,5 @@ public:
   std::vector<float> RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, int startInd, int stopInd, bool copyResults = true);
   std::vector<float>  GetResultScores(int i = 0);
   OD::e_OD_TargetColor TargetColor(uint cid);
+  void IdleRun();
 };

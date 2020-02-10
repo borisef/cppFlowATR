@@ -74,6 +74,21 @@ std::vector<float> mbInterfaceCM::RunRGBImgPath(const unsigned char *ptr)
     return(RunRGBimage(img));
 }
 
+void mbInterfaceCM::IdleRun()
+{
+    if(m_model == nullptr)
+        return;
+        
+    int BS = 1;
+    if(m_hardBatchSize > 1)
+        BS = m_hardBatchSize;
+    std::vector<float> inVec(BS * m_patchHeight * m_patchWidth * 3);
+    
+    // Put vector in Tensor
+    this->m_inTensorPatches->set_data(inVec, {BS, m_patchHeight, m_patchWidth, 3});
+    this->m_model->run(m_inTensorPatches, m_outTensorScores);
+}
+
 std::vector<float>  mbInterfaceCM::GetResultScores(int i)
 {   
     //TODO: check if results do exist 
