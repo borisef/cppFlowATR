@@ -41,7 +41,7 @@ public:
     static mbInterfaceCM *m_mbCM;
 
 protected:
-    bool ObjectDetectionManagerHandler::InitCM(const char *iniFilePath);
+    bool InitCM(const char *iniFilePath);
     void DeleteAllInnerCycleInputs();
     void AnalyzeTiledSample(OD_CycleOutput *co1, std::list<float *> *tarList, OD_CycleOutput *co2);
     int CleanWrongTileDetections(OD_CycleOutput *co1, std::list<float *> *tarList);

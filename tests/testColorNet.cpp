@@ -19,7 +19,7 @@ OD::OD_CycleOutput* CreateSynthCO(cv::Mat img, uint numBB);
 
 int mainWithInterface()
 {
-    const char *modelPath = "e:/projects/MB/ColorNitzan/TFexample/output_graph.pb";
+    const char *modelPath = "graphs/output_graph.pb";
     const char *ckpt = nullptr;
     const char *inname = "conv2d_input";
     const char *outname = "dense_1/Softmax";
