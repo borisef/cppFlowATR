@@ -90,6 +90,8 @@ target_link_libraries (testTileImages ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
 add_executable(stressTest tests/testStress.cpp ${SRC})
 target_link_libraries (stressTest ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
 
+add_executable(convertYUVtoRGB_test  tests/convertYUVtoRGB_test.cpp ${SRC})
+target_link_libraries (convertYUVtoRGB_test ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
 
 #color 
 add_executable(testColorNet  tests/testColorNet.cpp ${SRC})
