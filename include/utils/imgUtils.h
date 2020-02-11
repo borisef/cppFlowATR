@@ -7,8 +7,16 @@ using namespace cv;
 
 std::vector<unsigned char> readBytesFromFile(const char* filename);
 bool convertYUV420toRGB(vector <unsigned char> raw, int width, int height, cv::Mat* outRGB);
+inline void fastYUV2RGB(char *raw, int height, int width, cv::Mat *outRGB)
+{
+    cv::Mat yuyv442(cv::Size(height, width), CV_8UC2, raw);
+    cvtColor(yuyv442, *outRGB, COLOR_YUV2RGB_YUYV);
+}
+
+
 bool convertYUV420toVector(vector <unsigned char> raw, int width, int height, std::vector<uint8_t>* outVec );
 bool convertCvMatToVector(cv::Mat* inBGR, std::vector<uint8_t>* outVec );
+
 
 Mat rotate(Mat src, double angle);
 bool CreateTiledImage(const char* filename, uint W, uint H, cv::Mat* bigImg, list <float*> *trueTargets);
@@ -31,3 +39,6 @@ inline bool file_exists_test (const std::string& name) {
         return false;
     }   
 }
+
+char *fastParseRaw(std::string filepath);
+

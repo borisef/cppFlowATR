@@ -43,7 +43,7 @@ bool mbInterfaceATR::LoadNewModel(const char *modelPath)
         delete m_inpName;
     }
 
-    m_model = new Model(modelPath, CreateSessionOptions(0.3));
+    m_model = new Model(modelPath, CreateSessionOptions(0.4));
     m_outTensorNumDetections = new Tensor(*m_model, "num_detections");
     m_outTensorScores = new Tensor(*m_model, "detection_scores");
     m_outTensorBB = new Tensor(*m_model, "detection_boxes");
@@ -88,6 +88,7 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
     cv::Mat tempIm(height, width, CV_8UC3);
     cout << " RunRGBVector:copy buffer to cv::Mat* " << endl;
     tempIm.data = buffer; //risky
+    cv::imwrite("tempim.png",tempIm);
     cv::cvtColor(tempIm, tempIm, cv::COLOR_RGB2BGR);
     tempIm.copyTo(m_keepImg);
     
@@ -123,6 +124,31 @@ int mbInterfaceATR::RunRawImage(const unsigned char *ptr, int height, int width)
     //
     cv::Mat *myRGB = new cv::Mat(height, width, CV_8UC3);
     convertYUV420toRGB(img_data, width, height, myRGB);
+    // save JPG for debug
+    cv::imwrite("debug_yuv420torgb.tif", *myRGB);
+    //std::vector<uint8_t > img_data;
+    img_data.assign(myRGB->data, myRGB->data + myRGB->total() * myRGB->channels());
+    myRGB->copyTo(m_keepImg);
+    delete myRGB; //??? TODO: is it safe?
+    int status = RunRGBVector(img_data, height, width);
+
+    return status;
+}
+
+int mbInterfaceATR::RunRawImageFast(const unsigned char *ptr, int height, int width)
+{
+
+    std::vector<uint8_t> img_data(height * width * 2);
+    unsigned char *buffer = (unsigned char *)ptr;
+
+    // for (int i = 0; i < height * width * 2; i++) //TODO: can we optimize it ?
+    //     img_data[i] = buffer[i];
+
+    //
+    cv::Mat *myRGB = new cv::Mat(height, width, CV_8UC3);
+    //convertYUV420toRGB(img_data, width, height, myRGB);
+    fastYUV2RGB((char*)ptr,width,height,myRGB);
+
     // save JPG for debug
     cv::imwrite("debug_yuv420torgb.tif", *myRGB);
     //std::vector<uint8_t > img_data;

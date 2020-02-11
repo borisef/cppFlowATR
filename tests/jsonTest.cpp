@@ -1,11 +1,11 @@
-#include "InitParams.h"
+#include "cppflowATR/InitParams.h"
 #include <cppflowATRInterface/Object_Detection_Types.h>
 
 using namespace OD;
 
 int main()
 {
-    InitParams a("samplejson.json");
+    InitParams a("config/configATR_Feb2020.json");
 
     for (auto it = a.info.cbegin(); it != a.info.cend(); ++it)
     {

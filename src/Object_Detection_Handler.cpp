@@ -258,11 +258,18 @@ void ObjectDetectionManagerHandler::IdleRun()
 {
     cout << " ObjectDetectionManagerHandler::Idle Run (on neutral)" << endl;
 
-    uchar *tempPtr = new uchar[m_numImgPixels];
+    //TODO: is it continues in memory ? 
+   // unsigned char *tempPtr = new unsigned char[m_numImgPixels];
+    std::vector<uint8_t> *img_data = new std::vector<uint8_t>(m_numImgPixels);//try
     //create temp ptr
-    this->m_mbATR->RunRGBVector(tempPtr, this->m_initParams->supportData.imageHeight, this->m_initParams->supportData.imageWidth);
+   // this->m_mbATR->RunRGBVector(tempPtr, this->m_initParams->supportData.imageHeight, this->m_initParams->supportData.imageWidth);
+    
+    //try
+    this->m_mbATR->RunRGBVector(*img_data,this->m_initParams->supportData.imageHeight, this->m_initParams->supportData.imageWidth);
+    //delete tempPtr;
+    delete img_data;//try
 
-    delete tempPtr;
+
 }
 
 OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutput *odOut)
@@ -320,7 +327,9 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     e_OD_ColorImageType colortype = m_initParams->supportData.colorType;
 
     if (colortype == e_OD_ColorImageType::YUV422) // if raw
-        this->m_mbATR->RunRawImage(m_curCycleInput->ptr, h, w);
+        //this->m_mbATR->RunRawImage(m_curCycleInput->ptr, h, w);
+        this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w);
+        
     else if (colortype == e_OD_ColorImageType::RGB) // if rgb
     {
         cout << " Internal Run on RGB buffer " << endl;
@@ -526,7 +535,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
     CreateTiledImage(imgName, bigW, bigH, bigIm, tarList);
 
     // cv::imwrite("smallImg.tif",cv::imread(imgName));
-    // cv::imwrite("bigImg.tif",*bigIm);
+    cv::imwrite("bigImg.tif",*bigIm);
 
     unsigned char *ptrTif = ParseCvMat(*bigIm); // has new inside
     //run operate part without sync stuff etc.
@@ -537,7 +546,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
     this->PopulateCycleOutput(tempCycleOutput);
 
     // color 
-    if(m_withActiveCM && m_mbCM!=nullptr)
+    if(m_withActiveCM && m_mbCM!=nullptr && tempCycleOutput->numOfObjects>0 )
         this->m_mbCM->RunImgWithCycleOutput(*bigIm,tempCycleOutput,0,tempCycleOutput->numOfObjects-1,true);
 
 

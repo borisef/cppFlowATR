@@ -38,39 +38,13 @@ vector<String> GetFileNames(const char *pa)
     return fn;
 }
 
-// unsigned char *ParseImage(String path)
-// {
-//     cv::Mat inp1 = cv::imread(path, CV_LOAD_IMAGE_COLOR);
-//     cv::cvtColor(inp1, inp1, CV_BGR2RGB);
-
-//     //put image in vector
-//     std::vector<uint8_t> img_data1(inp1.rows * inp1.cols * inp1.channels());
-//     img_data1.assign(inp1.data, inp1.data + inp1.total() * inp1.channels());
-
-//     unsigned char *ptrTif = new unsigned char[img_data1.size()];
-//     std::copy(begin(img_data1), end(img_data1), ptrTif);
-
-//     return ptrTif;
-// }
-
-// unsigned char *ParseRaw(String path)
-// {
-
-//     //emulate buffer from RAW
-//     std::vector<unsigned char> vecFromRaw = readBytesFromFile((char *)path.c_str());
-
-//     unsigned char *ptrRaw = new unsigned char[vecFromRaw.size()];
-//     std::copy(begin(vecFromRaw), end(vecFromRaw), ptrRaw);
-
-//     return ptrRaw;
-// }
 
 struct OneRunStruct
 {
     int H;
     int W;
     string splicePath;
-    int numRepetiotions = 10;
+    int numRepetiotions = 2;
     float minDelay = 0;
     bool toShow = true;
     e_OD_ColorImageType imType = e_OD_ColorImageType::RGB;
@@ -147,6 +121,7 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
     co->ObjectsArr = new OD_DetectionItem[co->maxNumOfObjects];
 
     unsigned char *ptrTif;
+    char *ptrTifnew;
     int lastReadyFrame = 0;
     co->ImgID_output = 0;
     int temp = 0;
@@ -160,7 +135,8 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
                 ptrTif = ParseImage(ff[i]);
             else
             {
-                ptrTif = ParseRaw(ff[i]);
+                //ptrTif = ParseRaw(ff[i]);
+                ptrTif = (unsigned char*)fastParseRaw(ff[i]);
             }
 
             ci->ptr = ptrTif;
@@ -202,11 +178,11 @@ int main()
     ors4.H = 3040;
     ors4.splicePath = "media/raw/*";
     ors4.imType = e_OD_ColorImageType::YUV422;
-    ors4.numRepetiotions = 85;
-    ors4.minDelay = 10;
+    ors4.numRepetiotions = 10;
+    ors4.minDelay = 100;
     ors4.startFrameID = 100000;
-    atrManager = OneRun(atrManager, ors4);
-
+    ors4.toShow = true;
+    atrManager = OneRun(atrManager, ors4); 
     OneRunStruct ors1;
     // ors1.H = 108000;
     // ors1.W = 192000;
@@ -245,6 +221,7 @@ int main()
     ors5.startFrameID = 500000;
     ors5.toDeleteATRM = false;
 
+    cout<<"STRESS TEST: will create 2 at the same time"<<endl;
     atrManagerAnother = OneRun(atrManagerAnother, ors5); // will create 2 at the same time
 
     ors3.doNotInit = true;
@@ -255,7 +232,8 @@ int main()
     atrManager = OneRun(atrManager, ors3);
     atrManagerAnother = OneRun(atrManagerAnother, ors5);
 
-    // will create 3 at the same time
+    cout<<"STRESS TEST: will create 3 at the same time"<<endl;
+    // will create 3 at the same time // failed stressTest in PC_linux
     OD::ObjectDetectionManager *atrManagerAnother2 = nullptr;
     ors4.toDeleteATRM = false;
     atrManagerAnother2 = OneRun(atrManagerAnother2, ors4); // will create 3 at the same time
@@ -263,14 +241,12 @@ int main()
     atrManager = OneRun(atrManager, ors3);
     atrManagerAnother = OneRun(atrManagerAnother, ors5);
     atrManagerAnother2 = OneRun(atrManagerAnother2, ors4);
-    // atrManager = OneRun(atrManager, ors3);
-    // atrManagerAnother = OneRun(atrManagerAnother, ors5);
-    // atrManagerAnother2 = OneRun(atrManagerAnother2, ors4);
-    //  OD::TerminateObjectDetection(atrManagerAnother2);
-
+    
+    
+    OD::TerminateObjectDetection(atrManagerAnother2);
     OD::TerminateObjectDetection(atrManager);
     OD::TerminateObjectDetection(atrManagerAnother);
-   
+  
     cout << "Ended StressTest Normally" << endl;
     return 0;
 }

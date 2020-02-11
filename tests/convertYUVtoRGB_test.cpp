@@ -22,7 +22,44 @@ double funcTime(F func, Args &&... args)
     return duration(timeNow() - t1);
 }
 
-int main(int argc, char const *argv[])
+
+void NewMain()
+{
+    {
+    int h = 4056;
+    int w = 3040;
+
+    char *buf = fastParseRaw("media/00006160.raw");
+    cv::Mat rgb(cv::Size(h, w), CV_8UC3);
+
+    cv::Mat *myRGB = new cv::Mat(h, w, CV_8UC3);
+    std::vector<uint8_t> img_data(h * w * 2);
+    for (int i = 0; i < h * w * 2; i++) //TODO: without for loop
+        img_data[i] = buf[i];
+
+    std::cout << "testing boris's convertYUV420toRGB function. " << std::endl;
+    std::cout << "time: " << funcTime(convertYUV420toRGB, img_data, h, w, myRGB) << " milliseconds" << std::endl;
+    std::cout << "Displaying results... press any key to continue" << std::endl;
+    namedWindow("Image RGB", WINDOW_NORMAL);
+    imshow("Image RGB", *myRGB);
+    waitKey();
+
+    std::cout << "testing itay's YUV2RGB function. " << std::endl;
+    std::cout << "time: " << funcTime(fastYUV2RGB, buf, h, w, &rgb) << " milliseconds" << std::endl;
+    std::cout << "Displaying results... press any key to continue" << std::endl;
+
+    namedWindow("Image RGB", WINDOW_NORMAL);
+    imshow("Image RGB", rgb);
+    waitKey();
+}
+
+
+
+
+}
+
+
+void ItayMain()
 {
     int h = 4056;
     int w = 3040;
@@ -43,14 +80,12 @@ int main(int argc, char const *argv[])
     waitKey();
 
     std::cout << "testing itay's YUV2RGB function. " << std::endl;
-    std::cout << "time: " << funcTime(itay_YUV2RGB, buf, h, w, &rgb) << " milliseconds" << std::endl;
+    std::cout << "time: " << funcTime(fastYUV2RGB, buf, h, w, &rgb) << " milliseconds" << std::endl;
     std::cout << "Displaying results... press any key to continue" << std::endl;
 
     namedWindow("Image RGB", WINDOW_NORMAL);
     imshow("Image RGB", rgb);
     waitKey();
-
-    return 0;
 }
 
 char *itay_readBytesFromFile(std::string filepath)
@@ -79,4 +114,11 @@ void itay_YUV2RGB(char *raw, int height, int width, cv::Mat *outRGB)
 {
     cv::Mat yuyv442(cv::Size(height, width), CV_8UC2, raw);
     cvtColor(yuyv442, *outRGB, COLOR_YUV2RGB_YUYV);
+}
+
+int main(int argc, char const *argv[])
+{
+    NewMain();
+
+    return 0;
 }

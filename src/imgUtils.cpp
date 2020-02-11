@@ -58,6 +58,11 @@ std::vector<unsigned char> readBytesFromFile(const char *filename)
   return result;
 }
 
+
+
+
+
+
 bool convertYUV420toRGB(vector<unsigned char> raw, int width, int height, cv::Mat *outRGB) //,
                                                                                            // vector <unsigned char>* R = NULL,
                                                                                            // vector <unsigned char>* G = NULL,
@@ -256,17 +261,6 @@ unsigned char *ParseImage(String path)
   return ptrTif;
 }
 
-unsigned char *ParseRaw(String path)
-{
-
-  //emulate buffer from RAW
-  std::vector<unsigned char> vecFromRaw = readBytesFromFile((char *)path.c_str());
-
-  unsigned char *ptrRaw = new unsigned char[vecFromRaw.size()];
-  std::copy(begin(vecFromRaw), end(vecFromRaw), ptrRaw);
-
-  return ptrRaw;
-}
 
 
 
@@ -380,4 +374,39 @@ uint argmax_vector(std::vector<float> prob_vec)
     }
 
     return argmax;
+}
+
+unsigned char *ParseRaw(String path)
+{
+
+  //emulate buffer from RAW
+  std::vector<unsigned char> vecFromRaw = readBytesFromFile((char *)path.c_str());
+
+  unsigned char *ptrRaw = new unsigned char[vecFromRaw.size()];
+  std::copy(begin(vecFromRaw), end(vecFromRaw), ptrRaw);
+
+  return ptrRaw;
+}
+
+//Itay
+char *fastParseRaw(std::string filepath)
+{
+    std::ifstream file(filepath, ios::binary | ios::ate);
+    ifstream::pos_type pos = file.tellg();
+
+    int length = pos;
+
+    if (length == 0)
+    {
+        cout << "length = 0. error reading file" << endl;
+        return nullptr;
+    }
+
+    char *buffer = new char[length];
+    file.seekg(0, std::ios::beg);
+    file.read(buffer, length);
+
+    file.close();
+
+    return buffer;
 }

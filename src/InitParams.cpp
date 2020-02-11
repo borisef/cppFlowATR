@@ -1,4 +1,4 @@
-#include "InitParams.h"
+#include "cppflowATR/InitParams.h"
 
 InitParams::InitParams(std::string filepath)
 {

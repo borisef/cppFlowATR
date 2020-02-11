@@ -37,7 +37,7 @@ bool mbInterfaceCM::LoadNewModel(const char *modelPath, const char *ckptPath, co
         delete m_outTensorScores;
     }
 
-    m_model = new Model(modelPath, CreateSessionOptions(0.2));
+    m_model = new Model(modelPath, CreateSessionOptions(0.3));
     if (ckptPath != nullptr)
         m_model->restore(ckptPath);
 

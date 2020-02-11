@@ -42,8 +42,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 #(2) Test ATR with API Inference
 add_executable(testATRInference  tests/testATRinference.cpp ${SRC})
-
-# #target_link_libraries (testATRInference -ltensorflow ${OpenCV_LIBS})
 target_link_libraries (testATRInference ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
 
 
@@ -60,7 +58,7 @@ target_link_libraries (mbATR ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
 # #(3) Test testATRInference but with SO dependencies
 # add_executable(testTamir tests/testATRinference.cpp)
 # FIND_LIBRARY(MY_LIB1 NAMES libmbATR.so PATHS /home/borisef/projects/cppFlowATR/build
-#                                              /home/borisef/projects/cppflowATR/libs/shared/ATR)
+#                                               /home/borisef/projects/cppflowATR/libs/shared/ATR)
 # target_link_libraries (testTamir  ${MY_TF_LIB} ${OpenCV_LIBS} ${MY_LIB1}  -lpthread)
 
 
@@ -70,8 +68,8 @@ target_link_libraries (mbATR ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
 # target_link_libraries(testThread -lpthread)
 
 # #(5) test video 
-# add_executable(videoTest  tests/videoTest.cpp ${SRC})
-# target_link_libraries (videoTest ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
+add_executable(testvideo  tests/testvideo.cpp ${SRC})
+target_link_libraries (testvideo ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
 
 
 # add_executable(test_itay  tests/test_itay.cpp ${SRC})
@@ -83,8 +81,8 @@ target_link_libraries (mbATR ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
 
 
 #(6) test tiles
-# add_executable(testTileImages  tests/testTileImages.cpp ${SRC})
-# target_link_libraries (testTileImages ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
+add_executable(testTileImages  tests/testTileImages.cpp ${SRC})
+target_link_libraries (testTileImages ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
 
 
 #stress test 
@@ -95,4 +93,12 @@ target_link_libraries (stressTest ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
 
 #color 
 add_executable(testColorNet  tests/testColorNet.cpp ${SRC})
- target_link_libraries (testColorNet ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
+target_link_libraries (testColorNet ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
+
+#yuv2rgb
+add_executable(yuv2rgb  tests/convertYUVtoRGB_test.cpp ${SRC})
+target_link_libraries (yuv2rgb ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
+
+#ini
+add_executable(jsonTest  tests/jsonTest.cpp ${SRC})
+target_link_libraries (jsonTest ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
