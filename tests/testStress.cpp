@@ -179,7 +179,7 @@ int main()
     ors4.splicePath = "media/raw/*";
     ors4.imType = e_OD_ColorImageType::YUV422;
     ors4.numRepetiotions = 10;
-    ors4.minDelay = 100;
+    ors4.minDelay = 0;
     ors4.startFrameID = 100000;
     ors4.toShow = true;
     atrManager = OneRun(atrManager, ors4); 

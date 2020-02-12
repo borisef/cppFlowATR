@@ -411,12 +411,14 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
 
     if (colortype == e_OD_ColorImageType::YUV422) // if raw
     {
-        std::vector<uint8_t> img_data(h * w * 2);
-        for (int i = 0; i < h * w * 2; i++) //TODO: without for loop
-            img_data[i] = buffer[i];
+        // std::vector<uint8_t> img_data(h * w * 2);
+        // for (int i = 0; i < h * w * 2; i++) //TODO: without for loop
+        //     img_data[i] = buffer[i];
 
         myRGB = new cv::Mat(h, w, CV_8UC3);
-        convertYUV420toRGB(img_data, w, h, myRGB);
+        
+        //convertYUV420toRGB(img_data, w, h, myRGB);
+        fastYUV2RGB((char *)(tempci->ptr), w, h, myRGB);
     }
     else if (colortype == e_OD_ColorImageType::RGB || colortype == e_OD_ColorImageType::RGB_IMG_PATH) // if rgb
     {
