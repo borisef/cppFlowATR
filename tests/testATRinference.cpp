@@ -31,9 +31,9 @@ void MyWait(string s, float ms)
 int main()
 {
 
-    int numInf1 = 0;
-    int numInf2 = 0;
-    int numInf3 = 0;
+    int numInf1 = 10;
+    int numInf2 = 10;
+    int numInf3 = 10;
     bool runInf4 = true;
     bool SHOW = false;
     float numIter = 3.0;
@@ -79,7 +79,8 @@ int main()
             //works bad performance
             //(char *)"/home/borisef/projects/MB2/TrainedModels/ckpts_along_the_train_process/local_frozen_1_2M/frozen_inference_graph.pb", 
             // (char *)"graphs/frozen_inference_graph_all_size_4096x2160.pb",
-            (char*)"graphs/frozen_inference_graph_all_3040_4056.pb",
+            //(char*)"graphs/frozen_inference_graph_all_3040_4056.pb",
+            (char*)"graphs/frozen_inference_graph_humans.pb",
 #endif
             350, // max number of items to be returned
             supportData1,
@@ -92,7 +93,7 @@ int main()
     cout << " ***  ObjectDetectionManager created  *** " << endl;
 
 
-    // new mission
+    // new mission (RGB)
     if(numInf1 > 0)
         OD::InitObjectDetection(atrManager, &initParams);
 
@@ -151,7 +152,7 @@ int main()
             atrManager->SaveResultsATRimage(co, (char *)outName.c_str(), true);
         }
 
-         MyWait("Small pause", 50.0);
+         MyWait("Small pause", 1000.0);
     }
 
     //MyWait("Long pause", 1000.0);
@@ -303,7 +304,7 @@ int main()
         temp++;
         ci->ImgID_input = 0 + i + temp;
 
-        ptrTif = ParseRaw(ff[i]);
+        ptrTif = (uchar*)fastParseRaw(ff[i]);
         ci->ptr = ptrTif;
 
         statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
