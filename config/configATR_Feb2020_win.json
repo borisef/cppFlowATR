@@ -1,8 +1,8 @@
 {
   "info": {
     "version": "1",
-    "author": "illuminati945",
-    "date": "2020-02-18"
+    "author": "boris",
+    "date": "15-02-2020"
 
   },
   "run_params" : {
@@ -16,8 +16,45 @@
       "task": "ATR",
       "filetype": ".pb",
       "mission": "0",
-      "load_path": "graphs/frozen_inference_graph_humans.pb",
-      "nickname": "default",
+      "load_path": "graphs/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_frozen_inference_graph.pb",
+      "nickname": "default_ATR",
+      "max_objects": "300",
+      "accuracy": "5",
+      "speed": "5",
+      "targets": "ALL",
+      "width": "0",
+      "height": "0",
+      "max_batch_size": "1",
+      "image_format": "RGB",
+      "resolution": "5",
+      "additional": "-nms 0 -opp 3"
+    },
+	{
+      "id": "2",
+      "task": "ATR",
+      "filetype": ".pb",
+      "mission": "0",
+      "load_path": "graphs/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_frozen_inference_graph.pb",
+      "nickname": "default_ATR_cars",
+      "max_objects": "300",
+      "accuracy": "5",
+      "speed": "5",
+      "targets": "CARS",
+      "width": "0",
+      "height": "0",
+      "max_batch_size": "1",
+      "image_format": "RGB",
+      "resolution": "5",
+      "additional": "-nms 0 -opp 3"
+    },
+	,
+	{
+      "id": "3",
+      "task": "ATR",
+      "filetype": ".pb",
+      "mission": "0",
+      "load_path": "graphs/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_frozen_inference_graph.pb",
+      "nickname": "default_ATR_humans",
       "max_objects": "300",
       "accuracy": "5",
       "speed": "5",
@@ -35,7 +72,7 @@
       "filetype": ".pb",
       "mission": "0",
       "load_path": "graphs/cm/output_graph.pb",
-      "nickname": "color",
+      "nickname": "default_CM",
       "max_objects": "300",
       "accuracy": "5",
       "speed": "5",

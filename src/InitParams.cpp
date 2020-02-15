@@ -28,4 +28,6 @@ InitParams::InitParams(std::string filepath)
         // }
         int i = 0;
     }
+
+    m_filePath = filepath;
 }
