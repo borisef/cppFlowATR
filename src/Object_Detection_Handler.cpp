@@ -681,6 +681,8 @@ bool ObjectDetectionManagerHandler::InitCM(const char* iniFilePath)
     const char *inname = "conv2d_input";
     const char *outname = "dense_1/Softmax";
 
+    //TODO: use iniParams
+
     //check file exist
     if(!file_exists_test(modelPath))
         return false;
@@ -693,3 +695,29 @@ bool ObjectDetectionManagerHandler::InitCM(const char* iniFilePath)
     }
     return true;
 }
+
+void ObjectDetectionManagerHandler::SetConfigParams(InitParams* ip)
+{
+    m_configParams = ip;
+}
+InitParams* ObjectDetectionManagerHandler::GetConfigParams()
+{
+    return m_configParams;
+}
+
+ bool ObjectDetectionManagerHandler::InitConfigParamsFromFile(const char *iniFilePath)
+ {
+     if(!file_exists_test(iniFilePath)){
+        cout<<"No file exists:"<<iniFilePath<<endl;
+        return false;
+        }
+    m_configParams= new InitParams(iniFilePath);
+
+    for (auto it = m_configParams->info.cbegin(); it != m_configParams->info.cend(); ++it)
+    {
+        std::cout << it->first << ": " << it->second << "\n";
+    }
+
+    std::cout << "Found a total of " << m_configParams->models.size() << " models" << std::endl;
+    return true;
+ }

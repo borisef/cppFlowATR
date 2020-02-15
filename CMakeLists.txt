@@ -73,3 +73,9 @@ target_link_libraries (testLikeMnist  opencv_world343d.lib  tensorflow.dll)
 
 add_executable(testColorNet tests/testColorNet.cpp ${SRC})
 target_link_libraries (testColorNet opencv_world343d.lib  tensorflow.dll)
+
+add_executable(jsonTest tests/jsonTest.cpp ${SRC})
+target_link_libraries (jsonTest opencv_world343d.lib  tensorflow.dll)
+
+add_executable(testIniFromJson tests/testIniFromJson.cpp ${SRC})
+target_link_libraries (testIniFromJson opencv_world343d.lib  tensorflow.dll)
