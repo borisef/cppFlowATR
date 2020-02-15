@@ -180,7 +180,17 @@ int main()
     ors1.minDelay = 0;
     ors1.startFrameID = 1;
     ors1.iniFile = "config/configATR_Feb2020_win.json";
+    ors1.toDeleteATRM = false;
     atrManager = OneRun(atrManager, ors1);
+    ors1.doNotInit = false; 
+    atrManager = OneRun(atrManager, ors1);
+    ors1.minDelay = 100;
+    ors1.splicePath = "media/filter/*";
+    atrManager = OneRun(atrManager, ors1);
+    ors1.splicePath = "media/filterUCLA/*";
+    atrManager = OneRun(atrManager, ors1);
+
+   
 
     OD::TerminateObjectDetection(atrManager);
   

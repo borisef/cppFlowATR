@@ -18,7 +18,9 @@ public:
     dict info;
     dict run_params;
     std::vector<dict> models;
+    std::string GetFilePath(){return m_filePath;}
 
 protected:
     json j;
+    std::string m_filePath;
 };

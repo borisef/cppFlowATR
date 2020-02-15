@@ -44,11 +44,15 @@ public:
     static mbInterfaceCM *m_mbCM;
 
 protected:
-    bool InitCM(const char *iniFilePath);
+    bool InitCM();
     void DeleteAllInnerCycleInputs();
     void AnalyzeTiledSample(OD_CycleOutput *co1, std::list<float *> *tarList, OD_CycleOutput *co2);
     int CleanWrongTileDetections(OD_CycleOutput *co1, std::list<float *> *tarList);
     bool InitConfigParamsFromFile(const char *iniFilePath);
+    const char* DefinePathForATRModel();
+    
+
+
     OD_CycleInput *m_prevCycleInput = nullptr;
     OD_CycleInput *m_curCycleInput = nullptr;
     OD_CycleInput *m_nextCycleInput = nullptr;
@@ -62,5 +66,6 @@ protected:
     std::mutex m_mutexOnPrev;
     
     InitParams *m_configParams = nullptr;
+    std::string m_lastPathATR = "";
 
 };

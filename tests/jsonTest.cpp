@@ -5,7 +5,13 @@ using namespace OD;
 
 int main()
 {
+#ifdef WIN32
+    InitParams a("config/configATR_Feb2020_win.json");
+#else
     InitParams a("config/configATR_Feb2020.json");
+#endif
+
+
 
     for (auto it = a.info.cbegin(); it != a.info.cend(); ++it)
     {
@@ -13,6 +19,17 @@ int main()
     }
 
     std::cout << "Found a total of " << a.models.size() << " models" << std::endl;
+    for (size_t i = 0; i < a.models.size(); i++)
+    {
+        std::cout<<a.models[i]["nickname"]<<std::endl;
+        std::cout<<a.models[i]["load_path"]<<std::endl;
+
+        
+    }
+    
+    
+
+
 
 
     return 0;

@@ -171,6 +171,19 @@ void ObjectDetectionManagerHandler::DeleteAllInnerCycleInputs()
     }
 }
 
+const char *ObjectDetectionManagerHandler::DefinePathForATRModel()
+{
+    // use m_configParams and m_initParams to get model path
+    for (size_t i = 0; i < m_configParams->models.size(); i++)
+    {
+        std::cout << m_configParams->models[i]["nickname"] << std::endl;
+        std::cout << m_configParams->models[i]["load_path"] << std::endl;
+        if (m_configParams->models[i]["nickname"].compare("default_ATR") == 0)
+            return m_configParams->models[i]["load_path"].c_str();
+    }
+    return (m_configParams->models[0]["load_path"].c_str()); // if not found return first
+}
+
 OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *odInitParams)
 {
     //check if busy, if yes wait till the end and assign nullptr to next, current and prev
@@ -179,39 +192,72 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
 
     mbInterfaceATR *mbATR = nullptr;
 
+<<<<<<< HEAD
     //TEMP:debug 
     std::ofstream output1("debug1.txt");
     output1 << "Before LoadNewModel";
 
 
     //initialization
+=======
+    //take care of InitParams
+    if (m_configParams != nullptr)
+        if (m_configParams->GetFilePath().compare(odInitParams->iniFilePath) != 0) //replace
+        {
+            delete m_configParams;
+            m_configParams = nullptr;
+        }
+    if (m_configParams == nullptr)
+        m_configParams = new InitParams(odInitParams->iniFilePath);
+
+    // define path for ATR model
+    const char *pathATR = DefinePathForATRModel();
+
+    //ATR model initialization
+    if(m_mbATR != nullptr)
+        if(m_lastPathATR.compare(pathATR) != 0)
+            {
+                delete m_mbATR;
+                m_mbATR = nullptr;
+            }
+>>>>>>> works with json, default graphs
     if (m_mbATR == nullptr)
     {
         mbATR = new mbInterfaceATR();
         cout << "Create new mbInterfaceATR in ObjectDetectionManagerHandler::InitObjectDetection" << endl;
-        //TODO: decide which model to take (if to take or stay with old )
-        mbATR->LoadNewModel(odInitParams->iniFilePath);
+        mbATR->LoadNewModel(pathATR);
         m_mbATR = mbATR;
         cout << "Executed LoadNewModel in  InitObjectDetection" << endl;
     }
+<<<<<<< HEAD
 
       //TEMP:debug 
     std::ofstream output2("debug2.txt");
     output2 << "After LoadNewModel";
+=======
+    
+
+    //remember lastPathATR
+    m_lastPathATR = std::string(pathATR);
+>>>>>>> works with json, default graphs
 
     if (odInitParams->supportData.colorType == e_OD_ColorImageType::RGB_IMG_PATH)
     {
         odInitParams->supportData.imageHeight = 2048;
         odInitParams->supportData.imageWidth = 4096;
     }
-    //create CM
+    //Color Model initialization
     bool initCMsuccess = true;
+<<<<<<< HEAD
     //m_withActiveCM = true; 
+=======
+    m_withActiveCM = true;
+>>>>>>> works with json, default graphs
 
     if (m_mbCM == nullptr && m_withActiveCM)
     {
-        initCMsuccess = InitCM(odInitParams->iniFilePath);
-        m_withActiveCM = initCMsuccess; 
+        initCMsuccess = InitCM();
+        m_withActiveCM = initCMsuccess;
     }
 
     setParams(odInitParams);
@@ -219,7 +265,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
     IdleRun();
     if (m_mbCM != nullptr && m_withActiveCM)
         m_mbCM->IdleRun();
-    // TODO: check if really OK 
+    // TODO: check if really OK
     return OD_ErrorCode::OD_OK;
 }
 OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_CycleInput *cycleInput)
@@ -272,18 +318,16 @@ void ObjectDetectionManagerHandler::IdleRun()
 {
     cout << " ObjectDetectionManagerHandler::Idle Run (on neutral)" << endl;
 
-    //TODO: is it continues in memory ? 
-   // unsigned char *tempPtr = new unsigned char[m_numImgPixels];
-    std::vector<uint8_t> *img_data = new std::vector<uint8_t>(m_numImgPixels);//try
+    //TODO: is it continues in memory ?
+    // unsigned char *tempPtr = new unsigned char[m_numImgPixels];
+    std::vector<uint8_t> *img_data = new std::vector<uint8_t>(m_numImgPixels); //try
     //create temp ptr
-   // this->m_mbATR->RunRGBVector(tempPtr, this->m_initParams->supportData.imageHeight, this->m_initParams->supportData.imageWidth);
-    
+    // this->m_mbATR->RunRGBVector(tempPtr, this->m_initParams->supportData.imageHeight, this->m_initParams->supportData.imageWidth);
+
     //try
-    this->m_mbATR->RunRGBVector(*img_data,this->m_initParams->supportData.imageHeight, this->m_initParams->supportData.imageWidth);
+    this->m_mbATR->RunRGBVector(*img_data, this->m_initParams->supportData.imageHeight, this->m_initParams->supportData.imageWidth);
     //delete tempPtr;
-    delete img_data;//try
-
-
+    delete img_data; //try
 }
 
 OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutput *odOut)
@@ -342,10 +386,15 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
 
     if (colortype == e_OD_ColorImageType::YUV422) // if raw
         //this->m_mbATR->RunRawImage(m_curCycleInput->ptr, h, w);
+<<<<<<< HEAD
         this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w, (int)colortype);
     else if (colortype == e_OD_ColorImageType::NV12) // if raw NV12
         this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w, (int)colortype);
         
+=======
+        this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w);
+
+>>>>>>> works with json, default graphs
     else if (colortype == e_OD_ColorImageType::RGB) // if rgb
     {
         cout << " Internal Run on RGB buffer " << endl;
@@ -364,9 +413,15 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     // save results
     this->PopulateCycleOutput(odOut);
 
+<<<<<<< HEAD
     //Color Model (CM)
     if(odOut->numOfObjects>0 && m_withActiveCM)
         m_mbCM->RunImgWithCycleOutput(m_mbATR->GetKeepImg(), odOut, 0, (odOut->numOfObjects -1), true);
+=======
+    //CM
+    if (odOut->numOfObjects > 0 && m_withActiveCM)
+        std::vector<float> vecScoresAll = m_mbCM->RunImgWithCycleOutput(m_mbATR->GetKeepImg(), odOut, 0, (odOut->numOfObjects - 1), true);
+>>>>>>> works with json, default graphs
 
     odOut->ImgID_output = fi;
 
@@ -432,7 +487,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
         //     img_data[i] = buffer[i];
 
         myRGB = new cv::Mat(h, w, CV_8UC3);
-        
+
         //convertYUV420toRGB(img_data, w, h, myRGB);
         fastYUV2RGB((char *)(tempci->ptr), w, h, myRGB);
     }
@@ -559,7 +614,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
     CreateTiledImage(imgName, bigW, bigH, bigIm, tarList);
 
     // cv::imwrite("smallImg.tif",cv::imread(imgName));
-    cv::imwrite("bigImg.tif",*bigIm);
+    cv::imwrite("bigImg.tif", *bigIm);
 
     unsigned char *ptrTif = ParseCvMat(*bigIm); // has new inside
     //run operate part without sync stuff etc.
@@ -569,10 +624,9 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
     OD_CycleOutput *tempCycleOutput = NewOD_CycleOutput(350);
     this->PopulateCycleOutput(tempCycleOutput);
 
-    // color 
-    if(m_withActiveCM && m_mbCM!=nullptr && tempCycleOutput->numOfObjects>0 )
-        this->m_mbCM->RunImgWithCycleOutput(*bigIm,tempCycleOutput,0,tempCycleOutput->numOfObjects-1,true);
-
+    // color
+    if (m_withActiveCM && m_mbCM != nullptr && tempCycleOutput->numOfObjects > 0)
+        this->m_mbCM->RunImgWithCycleOutput(*bigIm, tempCycleOutput, 0, tempCycleOutput->numOfObjects - 1, true);
 
     //DEBUG
     m_prevCycleInput = new OD_CycleInput();
@@ -696,17 +750,41 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
     //TODO: compute scores based on Binomial distribution
 }
 
-bool ObjectDetectionManagerHandler::InitCM(const char* iniFilePath)
+bool ObjectDetectionManagerHandler::InitCM()
 {
-    const char *modelPath = "graphs/output_graph.pb";
-    const char *ckpt = nullptr;
-    const char *inname = "conv2d_input";
-    const char *outname = "dense_1/Softmax";
-
-    //TODO: use iniParams
+    const char *modelPath;
+    const char *ckpt;
+    const char *inname;
+    const char *outname;
+    bool flag = false;
+    //use  m_configParams
+    for (size_t i = 0; i < m_configParams->models.size(); i++)
+    {
+        std::cout << m_configParams->models[i]["nickname"] << std::endl;
+        std::cout << m_configParams->models[i]["load_path"] << std::endl;
+        if (m_configParams->models[i]["nickname"].compare("default_CM") == 0)
+        {
+            modelPath = m_configParams->models[i]["load_path"].c_str();
+            inname = m_configParams->models[i]["input_layer"].c_str();
+            outname = m_configParams->models[i]["output_layer"].c_str();
+            if (m_configParams->models[i]["ckpt"].compare("nullptr") != 0)
+                ckpt = m_configParams->models[i]["ckpt"].c_str();
+            else
+                ckpt = nullptr;
+            flag = true;
+            break;
+        }
+    }
+    if (flag == false)
+    {
+        modelPath = "graphs/output_graph.pb";
+        ckpt = nullptr;
+        inname = "conv2d_input";
+        outname = "dense_1/Softmax";
+    }
 
     //check file exist
-    if(!file_exists_test(modelPath))
+    if (!file_exists_test(modelPath))
         return false;
 
     m_mbCM = new mbInterfaceCM();
@@ -718,22 +796,23 @@ bool ObjectDetectionManagerHandler::InitCM(const char* iniFilePath)
     return true;
 }
 
-void ObjectDetectionManagerHandler::SetConfigParams(InitParams* ip)
+void ObjectDetectionManagerHandler::SetConfigParams(InitParams *ip)
 {
     m_configParams = ip;
 }
-InitParams* ObjectDetectionManagerHandler::GetConfigParams()
+InitParams *ObjectDetectionManagerHandler::GetConfigParams()
 {
     return m_configParams;
 }
 
- bool ObjectDetectionManagerHandler::InitConfigParamsFromFile(const char *iniFilePath)
- {
-     if(!file_exists_test(iniFilePath)){
-        cout<<"No file exists:"<<iniFilePath<<endl;
+bool ObjectDetectionManagerHandler::InitConfigParamsFromFile(const char *iniFilePath)
+{
+    if (!file_exists_test(iniFilePath))
+    {
+        cout << "No file exists:" << iniFilePath << endl;
         return false;
-        }
-    m_configParams= new InitParams(iniFilePath);
+    }
+    m_configParams = new InitParams(iniFilePath);
 
     for (auto it = m_configParams->info.cbegin(); it != m_configParams->info.cend(); ++it)
     {
@@ -742,4 +821,4 @@ InitParams* ObjectDetectionManagerHandler::GetConfigParams()
 
     std::cout << "Found a total of " << m_configParams->models.size() << " models" << std::endl;
     return true;
- }
+}
