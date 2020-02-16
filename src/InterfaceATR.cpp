@@ -43,7 +43,7 @@ bool mbInterfaceATR::LoadNewModel(const char *modelPath)
         delete m_inpName;
     }
 
-    m_model = new Model(modelPath, CreateSessionOptions(0.3));// TODO: only 0.3 works OK ? 
+    m_model = new Model(modelPath, CreateSessionOptions(0.3));
     m_outTensorNumDetections = new Tensor(*m_model, "num_detections");
     m_outTensorScores = new Tensor(*m_model, "detection_scores");
     m_outTensorBB = new Tensor(*m_model, "detection_boxes");

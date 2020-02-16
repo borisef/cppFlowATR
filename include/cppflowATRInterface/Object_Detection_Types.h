@@ -48,7 +48,6 @@ enum MB_MissionType //BE
 
 };
 
-
 enum e_OD_TargetSubClass
 {
 	UNKNOWN_SUB_CLASS = 1,

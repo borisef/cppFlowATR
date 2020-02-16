@@ -2,6 +2,7 @@
 #include <utils/imgUtils.h>
 #include <utils/odUtils.h>
 
+
 #include <iomanip>
 #include <future>
 
@@ -173,13 +174,16 @@ void ObjectDetectionManagerHandler::DeleteAllInnerCycleInputs()
 
 const char *ObjectDetectionManagerHandler::DefinePathForATRModel()
 {
+   
     // use m_configParams and m_initParams to get model path
     for (size_t i = 0; i < m_configParams->models.size(); i++)
     {
         std::cout << m_configParams->models[i]["nickname"] << std::endl;
         std::cout << m_configParams->models[i]["load_path"] << std::endl;
         if (m_configParams->models[i]["nickname"].compare("default_ATR") == 0)
-            return m_configParams->models[i]["load_path"].c_str();
+        {
+            return (m_configParams->models[i]["load_path"]).c_str();
+        }
     }
     return (m_configParams->models[0]["load_path"].c_str()); // if not found return first
 }
@@ -212,7 +216,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
 
     // define path for ATR model
     const char *pathATR = DefinePathForATRModel();
-
+    
     //ATR model initialization
     if(m_mbATR != nullptr)
         if(m_lastPathATR.compare(pathATR) != 0)
@@ -225,6 +229,9 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
     {
         mbATR = new mbInterfaceATR();
         cout << "Create new mbInterfaceATR in ObjectDetectionManagerHandler::InitObjectDetection" << endl;
+        std::string fullPathATR (m_configParams->run_params["prePath"].append(pathATR));
+        const char* t = fullPathATR.c_str();//TODO: why I cannot give this as param to LoadNewModel
+    
         mbATR->LoadNewModel(pathATR);
         m_mbATR = mbATR;
         cout << "Executed LoadNewModel in  InitObjectDetection" << endl;
