@@ -1,15 +1,19 @@
 {
+"_comment": "--- Genereal Info, can be used in log ---",
   "info": {
     "version": "1",
     "author": "boris",
     "date": "15-02-2020"
-
   },
+ "_comment": "--- Run parameters ---",
   "run_params" : {
     "logfile_path" : "log/file.log",
     "debug_mode" : "false",
-    "prePath": "/home/borisef/projects/cppFlowATR/"
+    "prePath": "/home/borisef/projects/cppFlowATR/",
+	"os": "WIN"
   },
+"_comment": "--- Models go here --",
+"_comment": "Remark, most of params are not yet in use",
   "models": [
     {
       "id": "1",
@@ -47,7 +51,6 @@
       "resolution": "5",
       "additional": "-nms 0 -opp 3"
     },
-	,
 	{
       "id": "3",
       "task": "ATR",
