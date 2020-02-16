@@ -43,7 +43,7 @@ bool mbInterfaceATR::LoadNewModel(const char *modelPath)
         delete m_inpName;
     }
 
-    m_model = new Model(modelPath, CreateSessionOptions(0.4));
+    m_model = new Model(modelPath, CreateSessionOptions(0.3));// TODO: only 0.3 works OK ? 
     m_outTensorNumDetections = new Tensor(*m_model, "num_detections");
     m_outTensorScores = new Tensor(*m_model, "detection_scores");
     m_outTensorBB = new Tensor(*m_model, "detection_boxes");
@@ -135,7 +135,7 @@ int mbInterfaceATR::RunRawImage(const unsigned char *ptr, int height, int width)
     return status;
 }
 
-int mbInterfaceATR::RunRawImageFast(const unsigned char *ptr, int height, int width)
+int mbInterfaceATR::RunRawImageFast(const unsigned char *ptr, int height, int width, int colorType)
 {
 
     std::vector<uint8_t> img_data(height * width * 2);
@@ -147,7 +147,10 @@ int mbInterfaceATR::RunRawImageFast(const unsigned char *ptr, int height, int wi
     //
     cv::Mat *myRGB = new cv::Mat(height, width, CV_8UC3);
     //convertYUV420toRGB(img_data, width, height, myRGB);
-    fastYUV2RGB((char*)ptr,width,height,myRGB);
+    if(colorType == 7) //NV12
+        nv12ToRGB((char*)ptr,width,height,myRGB);
+    else //YUV422
+        fastYUV2RGB((char*)ptr,width,height,myRGB);
 
     // save JPG for debug
     cv::imwrite("debug_yuv420torgb.tif", *myRGB);

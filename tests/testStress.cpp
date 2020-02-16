@@ -178,11 +178,24 @@ int main()
     ors4.H = 3040;
     ors4.splicePath = "media/raw/*";
     ors4.imType = e_OD_ColorImageType::YUV422;
-    ors4.numRepetiotions = 10;
-    ors4.minDelay = 0;
+    ors4.numRepetiotions = 1;
+    ors4.minDelay = 50;
     ors4.startFrameID = 100000;
     ors4.toShow = true;
     atrManager = OneRun(atrManager, ors4); 
+    
+    OneRunStruct ors4nv;
+    ors4nv.W = 4056;
+    ors4nv.H = 3040;
+    ors4nv.splicePath = "media/NV12/*";
+    ors4nv.imType = e_OD_ColorImageType::NV12;
+    ors4nv.numRepetiotions = 1;
+    ors4nv.minDelay = 0;
+    ors4nv.startFrameID = 100000;
+    ors4nv.toShow = true;
+    atrManager = OneRun(atrManager, ors4nv); 
+
+
     OneRunStruct ors1;
     // ors1.H = 108000;
     // ors1.W = 192000;
@@ -191,6 +204,8 @@ int main()
     ors1.minDelay = 0;
     ors1.startFrameID = 1;
     atrManager = OneRun(atrManager, ors1);
+
+
 
     OneRunStruct ors2;
     // ors2.H = 1071;
@@ -234,16 +249,16 @@ int main()
 
     cout<<"STRESS TEST: will create 3 at the same time"<<endl;
     // will create 3 at the same time // failed stressTest in PC_linux
-    OD::ObjectDetectionManager *atrManagerAnother2 = nullptr;
-    ors4.toDeleteATRM = false;
-    atrManagerAnother2 = OneRun(atrManagerAnother2, ors4); // will create 3 at the same time
-    ors4.doNotInit = true;
-    atrManager = OneRun(atrManager, ors3);
-    atrManagerAnother = OneRun(atrManagerAnother, ors5);
-    atrManagerAnother2 = OneRun(atrManagerAnother2, ors4);
+    // OD::ObjectDetectionManager *atrManagerAnother2 = nullptr;
+    // ors4.toDeleteATRM = false;
+    // atrManagerAnother2 = OneRun(atrManagerAnother2, ors4); // will create 3 at the same time
+    // ors4.doNotInit = true;
+    // atrManager = OneRun(atrManager, ors3);
+    // atrManagerAnother = OneRun(atrManagerAnother, ors5);
+    // atrManagerAnother2 = OneRun(atrManagerAnother2, ors4);
     
     
-    OD::TerminateObjectDetection(atrManagerAnother2);
+    //OD::TerminateObjectDetection(atrManagerAnother2);
     OD::TerminateObjectDetection(atrManager);
     OD::TerminateObjectDetection(atrManagerAnother);
   

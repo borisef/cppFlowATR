@@ -12,6 +12,7 @@ inline void fastYUV2RGB(char *raw, int height, int width, cv::Mat *outRGB)
     cv::Mat yuyv442(cv::Size(height, width), CV_8UC2, raw);
     cvtColor(yuyv442, *outRGB, COLOR_YUV2RGB_YUYV);
 }
+bool nv12ToRGB(char *raw, int width, int height, cv::Mat *outRGB);
 
 
 bool convertYUV420toVector(vector <unsigned char> raw, int width, int height, std::vector<uint8_t>* outVec );

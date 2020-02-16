@@ -410,3 +410,38 @@ char *fastParseRaw(std::string filepath)
 
     return buffer;
 }
+
+bool nv12ToRGB(char *raw, int width, int height, cv::Mat *outRGB)
+{
+    cv::Mat Y(cv::Size( width,height), CV_8UC1, raw);
+    cv::Mat U(cv::Size( width/2,height/2), CV_8UC1);
+    cv::Mat V(cv::Size( width/2,height/2), CV_8UC1);
+
+    int t = width*height;
+    for (int i = 0; i < height/2; i++)
+        for (int j = 0; j < width/2; j++)
+    {
+
+      U.at<uint8_t>(i, j) = raw[t ];
+      V.at<uint8_t>(i, j) = raw[t + 1];
+      t = t + 2;
+    }
+ 
+
+  cv::resize(U,U,cv::Size(width,height));
+  cv::resize(V,V,cv::Size(width,height));
+  
+  // cv::imwrite("tryY_NV12.png", Y);
+  // cv::imwrite("tryU_NV12.png", U);
+  // cv::imwrite("tryV_NV12.png", V);
+
+  cv::Mat yuv;
+
+  std::vector<cv::Mat> yuv_channels = {Y, U, V};
+  cv::merge(yuv_channels, yuv);
+
+  // cv::Mat rgb(height, width,CV_8UC3);
+  cv::cvtColor(yuv, *outRGB, cv::COLOR_YUV2RGB);
+  //cv::imwrite("RGB_NV12.tif", *outRGB);
+   
+}
