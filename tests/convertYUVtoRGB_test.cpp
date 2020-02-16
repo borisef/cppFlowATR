@@ -10,6 +10,7 @@ void itay_YUV2RGB(char *raw, int width, int height, cv::Mat *outRGB);
 void nv12_rgb(char *raw, int height, int width, cv::Mat *outRGB);
 
 char *itay_readBytesFromFile(std::string filepath);
+void nv12ToRGBslow(char *raw, int width, int height, cv::Mat *outRGB);
 
 typedef std::chrono::high_resolution_clock::time_point TimeVar;
 
@@ -84,11 +85,11 @@ void ItayMain()
     waitKey();
 }
 
-void nv12main()
+void nv12main2()
 {
-    int w = 4056;
     int h = 3040;
-
+    int w = 4056;
+    
     char *buf = itay_readBytesFromFile("media/nv12/00000920.raw");
     cv::Mat *rgb = new cv::Mat();
     
@@ -104,7 +105,7 @@ void NV12Main()
     int h = 3040;
     int w = 4056;
 
-    char *buf = itay_readBytesFromFile("media/NV12/00000115.raw");
+    char *buf = itay_readBytesFromFile("media/nv12/00000920.raw");
     cv::Mat rgb(cv::Size(h, w), CV_8UC3);
 
     cv::Mat *myRGB = new cv::Mat(h, w, CV_8UC3);
@@ -155,11 +156,7 @@ void itay_YUV2RGB(char *raw, int height, int width, cv::Mat *outRGB)
     cv::Mat yuyv442(cv::Size(height, width), CV_8UC2, raw);
     cvtColor(yuyv442, *outRGB, COLOR_YUV2RGB_YUYV);
 }
-// void nv12ToRGB(char *raw, int width, int height, cv::Mat *outRGB)
-// {
-//     cv::Mat nv12(cv::Size(height, width), CV_8UC2, raw);
-//     cvtColor(nv12, *outRGB, CV_YUV2RGB_NV12);
-// }
+
 void nv12ToRGBslow(char *raw, int width, int height, cv::Mat *outRGB)
 {
     cv::Mat Y(cv::Size( width,height), CV_8UC1, raw);
@@ -201,12 +198,12 @@ void nv12ToRGBslow(char *raw, int width, int height, cv::Mat *outRGB)
 void nv12_rgb(char *raw, int height, int width, cv::Mat *outRGB)
 {
     cv::Mat nv12(height * 3/2, width, CV_8UC1, raw);
-    cvtColor(nv12, *outRGB, CV_YUV2RGB_YV12);
+    cvtColor(nv12, *outRGB, CV_YUV2RGB_NV12);
 }
 
 int main(int argc, char const *argv[])
 {
-    nv12main();
+    NV12Main();
 
     return 0;
 }
