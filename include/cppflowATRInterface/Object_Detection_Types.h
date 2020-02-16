@@ -35,7 +35,8 @@ enum e_OD_ColorImageType
 	RGB = 3,
 	BGR = 4,
 	YUV = 5,
-	RGB_IMG_PATH = 6
+	RGB_IMG_PATH = 6, 
+	NV12 = 7
 };
 
 NLOHMANN_JSON_SERIALIZE_ENUM(e_OD_ColorImageType, {
@@ -47,6 +48,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(e_OD_ColorImageType, {
 													  {BGR, "BGR"},
 													  {YUV, "YUV"},
 													  {RGB_IMG_PATH, "RGB_IMG_PATH"},
+													  {NV12, "NV12"}
 												  })
 
 enum MB_MissionType //BE

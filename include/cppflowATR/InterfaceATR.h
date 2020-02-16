@@ -35,7 +35,7 @@ class mbInterfaceATR
     int RunRGBVector(std::vector<uint8_t > img_data, int height, int width);
     int RunRGBImgPath(const unsigned char *ptr);
     int RunRawImage(const unsigned char *ptr, int height, int width);
-     int RunRawImageFast(const unsigned char *ptr, int height, int width);
+    int RunRawImageFast(const unsigned char *ptr, int height, int width, int colorType);
     int GetResultNumDetections();
     int GetResultClasses(int i);
     float GetResultScores(int i);

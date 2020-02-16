@@ -309,7 +309,7 @@ int main()
 
         statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
         if (lastReadyFrame != co->ImgID_output)
-        { //draw
+        { 
             cout << " Detected new results for frame " << co->ImgID_output << endl;
             string outName = "outRes/out_res3_" + std::to_string(co->ImgID_output) + ".png";
             lastReadyFrame = co->ImgID_output;

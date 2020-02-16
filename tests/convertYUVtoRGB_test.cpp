@@ -7,6 +7,8 @@ using namespace std::chrono;
 
 void stackoverflow_YUV2RGB(void *yuvDataIn, void *rgbDataOut, int w, int h, int outNCh);
 void itay_YUV2RGB(char *raw, int width, int height, cv::Mat *outRGB);
+//void nv12ToRGB(char *raw, int width, int height, cv::Mat *outRGB);
+void nv12ToRGBslow(char *raw, int width, int height, cv::Mat *outRGB);
 char *itay_readBytesFromFile(std::string filepath);
 
 typedef std::chrono::high_resolution_clock::time_point TimeVar;
@@ -88,6 +90,35 @@ void ItayMain()
     waitKey();
 }
 
+void NV12Main()
+{
+    int h = 3040;
+    int w = 4056;
+
+    char *buf = itay_readBytesFromFile("media/NV12/00000115.raw");
+    cv::Mat rgb(cv::Size(h, w), CV_8UC3);
+
+    cv::Mat *myRGB = new cv::Mat(h, w, CV_8UC3);
+    std::vector<uint8_t> img_data(h * w * 2);
+
+    // for (int i = 0; i < h * w * 2; i++) //TODO: without for loop
+    //     img_data[i] = buf[i];
+
+    // std::cout << "testing boris's convertYUV420toRGB function. " << std::endl;
+    // std::cout << "time: " << funcTime(convertYUV420toRGB, img_data, h, w, myRGB) << " milliseconds" << std::endl;
+    // std::cout << "Displaying results... press any key to continue" << std::endl;
+    // namedWindow("Image RGB", WINDOW_NORMAL);
+    // imshow("Image RGB", *myRGB);
+    // waitKey();
+    
+   
+    nv12ToRGBslow(buf, w,h, myRGB);
+    namedWindow("Image RGB", WINDOW_NORMAL);
+    imshow("Image RGB", *myRGB);
+    waitKey();
+}
+
+
 char *itay_readBytesFromFile(std::string filepath)
 {
     std::ifstream file(filepath, ios::binary | ios::ate);
@@ -115,10 +146,52 @@ void itay_YUV2RGB(char *raw, int height, int width, cv::Mat *outRGB)
     cv::Mat yuyv442(cv::Size(height, width), CV_8UC2, raw);
     cvtColor(yuyv442, *outRGB, COLOR_YUV2RGB_YUYV);
 }
+// void nv12ToRGB(char *raw, int width, int height, cv::Mat *outRGB)
+// {
+//     cv::Mat nv12(cv::Size(height, width), CV_8UC2, raw);
+//     cvtColor(nv12, *outRGB, CV_YUV2RGB_NV12);
+// }
+void nv12ToRGBslow(char *raw, int width, int height, cv::Mat *outRGB)
+{
+    cv::Mat Y(cv::Size( width,height), CV_8UC1, raw);
+    cv::Mat U(cv::Size( width/2,height/2), CV_8UC1);
+    cv::Mat V(cv::Size( width/2,height/2), CV_8UC1);
+
+    int t = width*height;
+    for (int i = 0; i < height/2; i++)
+        for (int j = 0; j < width/2; j++)
+    {
+
+      U.at<uint8_t>(i, j) = raw[t ];
+      V.at<uint8_t>(i, j) = raw[t + 1];
+      t = t + 2;
+    }
+ 
+
+  cv::resize(U,U,cv::Size(width,height));
+  cv::resize(V,V,cv::Size(width,height));
+  
+  cv::imwrite("tryY_NV12.png", Y);
+  cv::imwrite("tryU_NV12.png", U);
+  cv::imwrite("tryV_NV12.png", V);
+
+  cv::Mat yuv;
+
+  std::vector<cv::Mat> yuv_channels = {Y, U, V};
+  cv::merge(yuv_channels, yuv);
+
+  // cv::Mat rgb(height, width,CV_8UC3);
+  cv::cvtColor(yuv, *outRGB, cv::COLOR_YUV2BGR);
+  cv::imwrite("RGB_NV12.tif", *outRGB);
+
+
+
+   
+}
 
 int main(int argc, char const *argv[])
 {
-    NewMain();
+    NV12Main();
 
     return 0;
 }

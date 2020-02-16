@@ -62,8 +62,11 @@ void ObjectDetectionManagerHandler::setParams(OD_InitParams *ip)
     m_numImgPixels = ip->supportData.imageHeight * ip->supportData.imageWidth * 3;
     if (ip->supportData.colorType == e_OD_ColorImageType::YUV422)
         m_numPtrPixels = m_numPtrPixels * 2;
-    else
-        m_numPtrPixels = m_numPtrPixels * 3;
+    else 
+        if (ip->supportData.colorType == e_OD_ColorImageType::NV12)
+            m_numPtrPixels = m_numPtrPixels * 1.5;
+        else
+            m_numPtrPixels = m_numPtrPixels * 3;
 }
 
 bool ObjectDetectionManagerHandler::IsBusy()
@@ -175,6 +178,12 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
     DeleteAllInnerCycleInputs();
 
     mbInterfaceATR *mbATR = nullptr;
+
+    //TEMP:debug 
+    std::ofstream output1("debug1.txt");
+    output1 << "Before LoadNewModel";
+
+
     //initialization
     if (m_mbATR == nullptr)
     {
@@ -185,14 +194,19 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
         m_mbATR = mbATR;
         cout << "Executed LoadNewModel in  InitObjectDetection" << endl;
     }
+
+      //TEMP:debug 
+    std::ofstream output2("debug2.txt");
+    output2 << "After LoadNewModel";
+
     if (odInitParams->supportData.colorType == e_OD_ColorImageType::RGB_IMG_PATH)
     {
-        odInitParams->supportData.imageHeight = 2000;
-        odInitParams->supportData.imageWidth = 4000;
+        odInitParams->supportData.imageHeight = 2048;
+        odInitParams->supportData.imageWidth = 4096;
     }
     //create CM
     bool initCMsuccess = true;
-    m_withActiveCM = true; 
+    //m_withActiveCM = true; 
 
     if (m_mbCM == nullptr && m_withActiveCM)
     {
@@ -328,7 +342,9 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
 
     if (colortype == e_OD_ColorImageType::YUV422) // if raw
         //this->m_mbATR->RunRawImage(m_curCycleInput->ptr, h, w);
-        this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w);
+        this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w, (int)colortype);
+    else if (colortype == e_OD_ColorImageType::NV12) // if raw NV12
+        this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w, (int)colortype);
         
     else if (colortype == e_OD_ColorImageType::RGB) // if rgb
     {
@@ -419,6 +435,11 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
         
         //convertYUV420toRGB(img_data, w, h, myRGB);
         fastYUV2RGB((char *)(tempci->ptr), w, h, myRGB);
+    }
+    else if (colortype == e_OD_ColorImageType::NV12) // if NV12
+    {
+        myRGB = new cv::Mat(h, w, CV_8UC3);
+        nv12ToRGB((char *)(tempci->ptr), w, h, myRGB);
     }
     else if (colortype == e_OD_ColorImageType::RGB || colortype == e_OD_ColorImageType::RGB_IMG_PATH) // if rgb
     {

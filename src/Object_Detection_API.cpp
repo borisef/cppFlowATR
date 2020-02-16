@@ -85,7 +85,7 @@ OD_ErrorCode OperateObjectDetectionAPI(ObjectDetectionManager *odm, OD_CycleInpu
     if (prepOD == OD_ErrorCode::OD_OK && !odmHandler->IsBusy())
     {
         cout << "+++Can  Operate OD... Free for step " << odIn->ImgID_input << endl;
-        //ec = odmHandler->OperateObjectDetection(odIn, odOut); // synchroniously
+        //ec = odmHandler->OperateObjectDetection(odOut); // synchroniously
         odmHandler->m_result = std::async(std::launch::async, &ObjectDetectionManagerHandler::OperateObjectDetection, odmHandler, odOut);
     }
     else
