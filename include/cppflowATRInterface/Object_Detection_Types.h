@@ -8,7 +8,7 @@
 
 #ifndef OBJECT_DETECTION_TYPES_H
 #define OBJECT_DETECTION_TYPES_H
-#include <json.hpp>
+
 
 #pragma once
 #pragma pack(1)
@@ -39,18 +39,6 @@ enum e_OD_ColorImageType
 	NV12 = 7
 };
 
-NLOHMANN_JSON_SERIALIZE_ENUM(e_OD_ColorImageType, {
-													  {COLOR, "COLOR"},
-													  {BLACK_WHITE, "BLACK_WHITE"},
-													  {YUV422, "YUV422"},
-													  {RGB, "RGB"},
-													  {YUV422, "YUV422"},
-													  {BGR, "BGR"},
-													  {YUV, "YUV"},
-													  {RGB_IMG_PATH, "RGB_IMG_PATH"},
-													  {NV12, "NV12"}
-												  })
-
 enum MB_MissionType //BE
 {
 	MATMON = 0,
@@ -60,13 +48,6 @@ enum MB_MissionType //BE
 
 };
 
-NLOHMANN_JSON_SERIALIZE_ENUM(MB_MissionType, {
-												 {MATMON, "MATMON"},
-												 {STATIC_CHASER, "STATIC_CHASER"},
-												 {DYNAMIC_CHASER, "DYNAMIC_CHASER"},
-												 {ANALYZE_SAMPLE, "ANALYZE_SAMPLE"},
-
-											 })
 
 enum e_OD_TargetSubClass
 {
@@ -81,17 +62,6 @@ enum e_OD_TargetSubClass
 	OTHER_SUB_CLASS = 999
 };
 
-NLOHMANN_JSON_SERIALIZE_ENUM(e_OD_TargetSubClass, {
-													  {UNKNOWN_SUB_CLASS, "UNKNOWN_SUB_CLASS"},
-													  {PRIVATE, "PRIVATE"},
-													  {COMMERCIAL, "COMMERCIAL"},
-													  {PICKUP, "PICKUP"},
-													  {TRUCK, "TRUCK"},
-													  {BUS, "BUS"},
-													  {VAN, "VAN"},
-													  {TRACKTOR, "TRACKTOR"},
-													  {OTHER_SUB_CLASS, "OTHER_SUB_CLASS"},
-												  })
 
 enum e_OD_TargetColor
 {
@@ -107,20 +77,6 @@ enum e_OD_TargetColor
 	YELLOW = 10, //BE
 	OTHER = 999
 };
-NLOHMANN_JSON_SERIALIZE_ENUM(e_OD_TargetColor, {
-													  {UNKNOWN_COLOR, "UNKNOWN_COLOR"},
-													  {WHITE, "WHITE"},
-													  {SILVER, "SILVER"},
-													  {GRAY, "GRAY"},
-													  {BLACK, "BLACK"},
-													  {RED, "RED"},
-													  {GREEN, "GREEN"},
-													  {BLUE, "BLUE"},
-													  {BROWN, "BROWN"},
-													  {YELLOW, "YELLOW"},
-													  {OTHER, "OTHER"},
-												  })
-
 
 struct MB_Mission //BE
 {

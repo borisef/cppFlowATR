@@ -90,10 +90,12 @@ void nv12main2()
     int h = 3040;
     int w = 4056;
     
-    char *buf = itay_readBytesFromFile("media/nv12/00000920.raw");
+    char *buf = itay_readBytesFromFile("media/NV12/00000189.raw");
     cv::Mat *rgb = new cv::Mat();
     
-    nv12_rgb(buf, h, w, rgb);
+    //nv12_rgb(buf, h, w, rgb);
+    fastNV12ToRGB(buf,w,h,rgb);;
+    
 
     namedWindow("Image RGB", WINDOW_NORMAL);
     imshow("Image RGB", *rgb);
@@ -105,7 +107,7 @@ void NV12Main()
     int h = 3040;
     int w = 4056;
 
-    char *buf = itay_readBytesFromFile("media/nv12/00000920.raw");
+    char *buf = itay_readBytesFromFile("media/NV12/00000189.raw");
     cv::Mat rgb(cv::Size(h, w), CV_8UC3);
 
     cv::Mat *myRGB = new cv::Mat(h, w, CV_8UC3);
@@ -203,7 +205,7 @@ void nv12_rgb(char *raw, int height, int width, cv::Mat *outRGB)
 
 int main(int argc, char const *argv[])
 {
-    NV12Main();
+    nv12main2();
 
     return 0;
 }

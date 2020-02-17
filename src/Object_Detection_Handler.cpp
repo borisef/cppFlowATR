@@ -439,7 +439,8 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
     else if (colortype == e_OD_ColorImageType::NV12) // if NV12
     {
         myRGB = new cv::Mat(h, w, CV_8UC3);
-        nv12ToRGB((char *)(tempci->ptr), w, h, myRGB);
+        //nv12ToRGB((char *)(tempci->ptr), w, h, myRGB);
+        fastNV12ToRGB((char *)(tempci->ptr), w, h, myRGB);
     }
     else if (colortype == e_OD_ColorImageType::RGB || colortype == e_OD_ColorImageType::RGB_IMG_PATH) // if rgb
     {
