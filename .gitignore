@@ -13,3 +13,4 @@ junk/*
 media
 
 CMakeLists.txt
+*.log
