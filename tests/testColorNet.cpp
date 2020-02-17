@@ -53,7 +53,7 @@ int mainWithInterface()
     cout << "Net score: " << vecScores[color_id] << endl;
 
     //test on batch
-    std::vector<float> vecScoresAll = myCM->RunImgWithCycleOutput(bigImg, co, 0, (co->numOfObjects -1), true);
+    bool flag = myCM->RunImgWithCycleOutput(bigImg, co, 0, (co->numOfObjects -1), true);
     
     //test on img name 
     vecScores = myCM->RunRGBImgPath((const uchar*)inimage);
