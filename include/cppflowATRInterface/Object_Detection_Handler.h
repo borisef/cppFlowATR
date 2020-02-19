@@ -3,6 +3,7 @@
 #include <cppflowATRInterface/Object_Detection_API.h>
 #include <cppflowATR/InterfaceATR.h>
 #include <cppflowCM/InterfaceCM.h>
+#include <cppflowATR/InitParams.h>
 #include <future>
 #include <mutex>
 
@@ -27,6 +28,8 @@ public:
     void setParams(OD_InitParams *ip);
     bool IsBusy();
     void IdleRun();
+    void SetConfigParams(InitParams* ip);
+    InitParams* GetConfigParams();
 
     std::future<OD_ErrorCode> m_result;
 
@@ -45,6 +48,7 @@ protected:
     void DeleteAllInnerCycleInputs();
     void AnalyzeTiledSample(OD_CycleOutput *co1, std::list<float *> *tarList, OD_CycleOutput *co2);
     int CleanWrongTileDetections(OD_CycleOutput *co1, std::list<float *> *tarList);
+    bool InitConfigParamsFromFile(const char *iniFilePath);
     OD_CycleInput *m_prevCycleInput = nullptr;
     OD_CycleInput *m_curCycleInput = nullptr;
     OD_CycleInput *m_nextCycleInput = nullptr;
@@ -56,4 +60,7 @@ protected:
 
     std::mutex m_mutexOnNext;
     std::mutex m_mutexOnPrev;
+    
+    InitParams *m_configParams = nullptr;
+
 };
