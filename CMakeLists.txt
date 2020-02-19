@@ -105,6 +105,11 @@ target_link_libraries (testColorNet ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
 add_executable(yuv2rgb  tests/convertYUVtoRGB_test.cpp ${SRC})
 target_link_libraries (yuv2rgb ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
 
-#ini
-add_executable(jsonTest  tests/jsonTest.cpp ${SRC})
-target_link_libraries (jsonTest ${MY_TF_LIB} ${OpenCV_LIBS} -lpthread)
+add_executable(testColorNet tests/testColorNet.cpp ${SRC})
+target_link_libraries (testColorNet opencv_world343d.lib  tensorflow.dll)
+
+add_executable(jsonTest tests/jsonTest.cpp ${SRC})
+target_link_libraries (jsonTest opencv_world343d.lib  tensorflow.dll)
+
+add_executable(testIniFromJson tests/testIniFromJson.cpp ${SRC})
+target_link_libraries (testIniFromJson opencv_world343d.lib  tensorflow.dll)

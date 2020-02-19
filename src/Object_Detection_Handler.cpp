@@ -197,14 +197,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
 
     mbInterfaceATR *mbATR = nullptr;
 
-<<<<<<< HEAD
-    //TEMP:debug 
-    std::ofstream output1("debug1.txt");
-    output1 << "Before LoadNewModel";
-
-
     //initialization
-=======
     //take care of InitParams
     if (m_configParams != nullptr)
         if (m_configParams->GetFilePath().compare(odInitParams->iniFilePath) != 0) //replace
@@ -225,7 +218,6 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
                 delete m_mbATR;
                 m_mbATR = nullptr;
             }
->>>>>>> works with json, default graphs
     if (m_mbATR == nullptr)
     {
         mbATR = new mbInterfaceATR();
@@ -237,17 +229,12 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
         m_mbATR = mbATR;
         cout << "Executed LoadNewModel in  InitObjectDetection" << endl;
     }
-<<<<<<< HEAD
 
       //TEMP:debug 
     std::ofstream output2("debug2.txt");
     output2 << "After LoadNewModel";
-=======
-    
-
     //remember lastPathATR
     m_lastPathATR = std::string(pathATR);
->>>>>>> works with json, default graphs
 
     if (odInitParams->supportData.colorType == e_OD_ColorImageType::RGB_IMG_PATH)
     {
@@ -256,11 +243,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
     }
     //Color Model initialization
     bool initCMsuccess = true;
-<<<<<<< HEAD
-    //m_withActiveCM = true; 
-=======
-    m_withActiveCM = true;
->>>>>>> works with json, default graphs
+    //    m_withActiveCM = true;
 
     if (m_mbCM == nullptr && m_withActiveCM)
     {
@@ -394,15 +377,11 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
 
     if (colortype == e_OD_ColorImageType::YUV422) // if raw
         //this->m_mbATR->RunRawImage(m_curCycleInput->ptr, h, w);
-<<<<<<< HEAD
+
         this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w, (int)colortype);
     else if (colortype == e_OD_ColorImageType::NV12) // if raw NV12
         this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w, (int)colortype);
         
-=======
-        this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w);
-
->>>>>>> works with json, default graphs
     else if (colortype == e_OD_ColorImageType::RGB) // if rgb
     {
         cout << " Internal Run on RGB buffer " << endl;
@@ -420,17 +399,10 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     cout << " ObjectDetectionManagerHandler::OperateObjectDetection starts PopulateCycleOutput  " << endl;
     // save results
     this->PopulateCycleOutput(odOut);
-
-<<<<<<< HEAD
     //Color Model (CM)
     if(odOut->numOfObjects>0 && m_withActiveCM)
         m_mbCM->RunImgWithCycleOutput(m_mbATR->GetKeepImg(), odOut, 0, (odOut->numOfObjects -1), true);
-=======
-    //CM
-    if (odOut->numOfObjects > 0 && m_withActiveCM)
-        std::vector<float> vecScoresAll = m_mbCM->RunImgWithCycleOutput(m_mbATR->GetKeepImg(), odOut, 0, (odOut->numOfObjects - 1), true);
->>>>>>> works with json, default graphs
-
+    
     odOut->ImgID_output = fi;
 
     // copy current into prev
