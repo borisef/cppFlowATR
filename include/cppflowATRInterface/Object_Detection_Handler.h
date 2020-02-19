@@ -65,7 +65,7 @@ protected:
     std::mutex m_mutexOnNext;
     std::mutex m_mutexOnPrev;
     
-    InitParams *m_configParams = nullptr;
+    static InitParams *m_configParams;
     std::string m_lastPathATR = "";
 
 };
