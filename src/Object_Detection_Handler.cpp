@@ -10,6 +10,7 @@ using namespace OD;
 using namespace std;
 
 mbInterfaceCM *ObjectDetectionManagerHandler::m_mbCM = nullptr;
+InitParams *ObjectDetectionManagerHandler::m_configParams = nullptr;
 
 OD_CycleInput *NewCopyCycleInput(OD_CycleInput *tocopy, uint bufferSize)
 {
