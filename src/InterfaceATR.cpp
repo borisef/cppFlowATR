@@ -148,7 +148,8 @@ int mbInterfaceATR::RunRawImageFast(const unsigned char *ptr, int height, int wi
     cv::Mat *myRGB = new cv::Mat(height, width, CV_8UC3);
     //convertYUV420toRGB(img_data, width, height, myRGB);
     if(colorType == 7) //NV12
-        nv12ToRGB((char*)ptr,width,height,myRGB);
+        //nv12ToRGB((char*)ptr,width,height,myRGB);
+        fastNV12ToRGB((char*)ptr,width,height,myRGB);
     else //YUV422
         fastYUV2RGB((char*)ptr,width,height,myRGB);
 

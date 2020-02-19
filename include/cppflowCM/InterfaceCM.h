@@ -31,7 +31,7 @@ public:
   std::vector<float> RunRGBimage(cv::Mat img);
   std::vector<float> RunRGBImgPath(const unsigned char *ptr);
   std::vector<float> RunImgBB(cv::Mat img, OD::OD_BoundingBox bb);
-  std::vector<float> RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, int startInd, int stopInd, bool copyResults = true);
+  bool RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, int startInd, int stopInd, bool copyResults = true);
   std::vector<float>  GetResultScores(int i = 0);
   OD::e_OD_TargetColor TargetColor(uint cid);
   void IdleRun();

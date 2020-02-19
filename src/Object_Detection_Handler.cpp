@@ -364,9 +364,9 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     // save results
     this->PopulateCycleOutput(odOut);
 
-    //CM
+    //Color Model (CM)
     if(odOut->numOfObjects>0 && m_withActiveCM)
-        std::vector<float> vecScoresAll = m_mbCM->RunImgWithCycleOutput(m_mbATR->GetKeepImg(), odOut, 0, (odOut->numOfObjects -1), true);
+        m_mbCM->RunImgWithCycleOutput(m_mbATR->GetKeepImg(), odOut, 0, (odOut->numOfObjects -1), true);
 
     odOut->ImgID_output = fi;
 
@@ -439,7 +439,8 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
     else if (colortype == e_OD_ColorImageType::NV12) // if NV12
     {
         myRGB = new cv::Mat(h, w, CV_8UC3);
-        nv12ToRGB((char *)(tempci->ptr), w, h, myRGB);
+        //nv12ToRGB((char *)(tempci->ptr), w, h, myRGB);
+        fastNV12ToRGB((char *)(tempci->ptr), w, h, myRGB);
     }
     else if (colortype == e_OD_ColorImageType::RGB || colortype == e_OD_ColorImageType::RGB_IMG_PATH) // if rgb
     {

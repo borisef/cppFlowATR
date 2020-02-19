@@ -3,7 +3,6 @@
 #include <utils/odUtils.h>
 #include <iostream>
 
-
 //constructors/destructors
 mbInterfaceCM::mbInterfaceCM()
 {
@@ -21,7 +20,6 @@ mbInterfaceCM::~mbInterfaceCM()
         delete m_inTensorPatches;
         delete m_outTensorScores;
         delete m_model;
-      
     }
 }
 
@@ -50,7 +48,7 @@ bool mbInterfaceCM::LoadNewModel(const char *modelPath, const char *ckptPath, co
 std::vector<float> mbInterfaceCM::RunRGBimage(cv::Mat img)
 {
     cv::Mat img_resized;
-    
+
     //resize
     cv::resize(img, img_resized, cv::Size(m_patchWidth, m_patchHeight));
     // Put image in vector
@@ -70,33 +68,31 @@ std::vector<float> mbInterfaceCM::RunRGBimage(cv::Mat img)
 
 std::vector<float> mbInterfaceCM::RunRGBImgPath(const unsigned char *ptr)
 {
-    cv::Mat img = cv::imread(string((const char*)ptr), CV_LOAD_IMAGE_COLOR);
-    return(RunRGBimage(img));
+    cv::Mat img = cv::imread(string((const char *)ptr), CV_LOAD_IMAGE_COLOR);
+    return (RunRGBimage(img));
 }
 
 void mbInterfaceCM::IdleRun()
 {
-    if(m_model == nullptr)
+    if (m_model == nullptr)
         return;
-        
+
     int BS = 1;
-    if(m_hardBatchSize > 1)
+    if (m_hardBatchSize > 1)
         BS = m_hardBatchSize;
     std::vector<float> inVec(BS * m_patchHeight * m_patchWidth * 3);
-    
+
     // Put vector in Tensor
     this->m_inTensorPatches->set_data(inVec, {BS, m_patchHeight, m_patchWidth, 3});
     this->m_model->run(m_inTensorPatches, m_outTensorScores);
 }
 
-std::vector<float>  mbInterfaceCM::GetResultScores(int i)
-{   
-    //TODO: check if results do exist 
-    
+std::vector<float> mbInterfaceCM::GetResultScores(int i)
+{
+    //TODO: check if results do exist
+
     return (m_outTensorScores->get_data<float>());
 }
-
-
 
 std::vector<float> mbInterfaceCM::RunImgBB(cv::Mat img, OD::OD_BoundingBox bb)
 {
@@ -134,94 +130,112 @@ std::vector<float> mbInterfaceCM::RunImgBB(cv::Mat img, OD::OD_BoundingBox bb)
     return (m_outTensorScores->get_data<float>());
 }
 
-std::vector<float> mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, int startInd, int stopInd, bool copyResults)
+bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, int startInd, int stopInd, bool copyResults)
 {
     cv::Mat debugImg = img.clone();
 
     int N = co->numOfObjects; // N can be smaller or bigger than BS
+    int origStopInd = stopInd;
 
-    int BS = stopInd - startInd + 1;
+    int BS = stopInd - startInd + 1; // requested batch size
+
     if (m_hardBatchSize)
-        BS = m_batchSize;
-   
+        BS = m_batchSize; // force BS
+
     std::vector<float> inVec(BS * m_patchHeight * m_patchWidth * 3);
+   
+    int tempStopInd = stopInd;
     int ind = 0;
-
-    for (size_t i = startInd; i <= stopInd; i++)
+    while (1)
     {
-        if (i >= N)
+        ind = 0;
+        if (tempStopInd - startInd + 1 > BS)
+            tempStopInd = BS - 1 + startInd;
+
+        for (size_t i = startInd; i <= tempStopInd; i++)
         {
-            //not suppose to happen
+            if (i >= N)
+            {
+                //jic, not suppose to happen
+                break;
+            }
+            cv::Mat croppedRef, img_resized;
+            //crop
+            OD::OD_BoundingBox bb = co->ObjectsArr[i].tarBoundingBox;
+            cv::Rect myROI(bb.x1, bb.y1, bb.x2 - bb.x1, bb.y2 - bb.y1);
+            //debug
+            cv::rectangle(debugImg, myROI, cv::Scalar(0, 255, 0), 5);
+
+            croppedRef = img(myROI);
+            //resize
+            cv::resize(croppedRef, img_resized, cv::Size(m_patchWidth, m_patchHeight));
+
+            // Put image in vector
+            for (size_t i1 = 0; i1 < m_patchWidth * m_patchHeight * 3; i1++)
+            {
+                inVec[ind + i1] = img_resized.data[i1] / 255.0;
+            }
+            ind += m_patchWidth * m_patchHeight * 3;
+        }
+
+        cv::imwrite("color_batch.png", debugImg);
+
+        // Put vector in Tensor
+        this->m_inTensorPatches->set_data(inVec, {BS, m_patchHeight, m_patchWidth, 3});
+
+        m_model->run(m_inTensorPatches, m_outTensorScores);
+        std::vector<float> allscores = m_outTensorScores->get_data<float>();
+        if (copyResults)
+        {
+            ind = 0;
+            for (size_t si = startInd; si <= tempStopInd; si++)
+            {
+                //subvector
+                vector<float>::const_iterator first = allscores.begin() + ind * m_numColors;
+                vector<float>::const_iterator last = allscores.begin() + (ind + 1) * m_numColors;
+                vector<float> outRes(first, last);
+
+                //get color
+                //argmax
+                uint color_id = std::distance(outRes.begin(), std::max_element(outRes.begin(), outRes.end()));
+
+                cout << "color id = " << color_id << endl;
+                PrintColor(color_id);
+                // score
+                cout << "Net score: " << outRes[color_id] << endl;
+                // copy res into co
+                co->ObjectsArr[si].tarColor = TargetColor(color_id);
+                co->ObjectsArr[si].tarColorScore = outRes[color_id];
+                ind++;
+            }
+        }
+        if (tempStopInd >= origStopInd)
             break;
-        }
-        cv::Mat croppedRef, img_resized;
-        //crop
-        OD::OD_BoundingBox bb = co->ObjectsArr[i].tarBoundingBox;
-        cv::Rect myROI(bb.x1, bb.y1, bb.x2 - bb.x1, bb.y2 - bb.y1);
-        //debug
-        cv::rectangle(debugImg, myROI, cv::Scalar(0, 255, 0), 5);
-        
-        croppedRef = img(myROI);
-        //resize
-        cv::resize(croppedRef, img_resized, cv::Size(m_patchWidth, m_patchHeight));
-
-        // Put image in vector
-        for (size_t i1 = 0; i1 < m_patchWidth * m_patchHeight * 3; i1++)
+        else
         {
-            inVec[ind + i1] = img_resized.data[i1] / 255.0;
-        }
-        ind += m_patchWidth * m_patchHeight * 3;
-    }
-
-    cv::imwrite("color_batch.png", debugImg);
-
-    // Put vector in Tensor
-    this->m_inTensorPatches->set_data(inVec, {BS, m_patchHeight, m_patchWidth, 3});
-
-    m_model->run(m_inTensorPatches, m_outTensorScores);
-    std::vector<float> allscores = m_outTensorScores->get_data<float>();
-    if (copyResults)
-    {
-        for (size_t si = startInd; si <= stopInd; si++)
-        {
-            //subvector 
-            vector<float>::const_iterator first = allscores.begin() + si * m_numColors;
-            vector<float>::const_iterator last = allscores.begin() + (si + 1) * m_numColors;
-            vector<float> outRes(first, last);
-
-             //get color 
-            //argmax
-            uint color_id = std::distance(outRes.begin(), std::max_element(outRes.begin(), outRes.end()));
-            
-            cout << "color id = " << color_id << endl;
-            PrintColor(color_id);
-            // score 
-            cout << "Net score: " << outRes[color_id] << endl;
-            // copy res into co 
-            co->ObjectsArr[si].tarColor = TargetColor(color_id);
-            co->ObjectsArr[si].tarColorScore = outRes[color_id];
-           
+            startInd = tempStopInd + 1;
+            tempStopInd = origStopInd;
         }
     }
-    return (allscores);
+    return true;
 }
 
 OD::e_OD_TargetColor mbInterfaceCM::TargetColor(uint cid)
 {
-     switch (cid)
+    switch (cid)
     {
     case 0:
         cout << "Color: white" << endl;
         return OD::e_OD_TargetColor::WHITE;
     case 1:
         cout << "Color: black" << endl;
-       return OD::e_OD_TargetColor::BLACK;
+        return OD::e_OD_TargetColor::BLACK;
     case 2:
         cout << "Color: gray" << endl;
         return OD::e_OD_TargetColor::GRAY;
     case 3:
         cout << "Color: red" << endl;
-       return OD::e_OD_TargetColor::RED;
+        return OD::e_OD_TargetColor::RED;
     case 4:
         cout << "Color: green" << endl;
         return OD::e_OD_TargetColor::GREEN;
@@ -234,5 +248,4 @@ OD::e_OD_TargetColor mbInterfaceCM::TargetColor(uint cid)
     default:
         return OD::e_OD_TargetColor::UNKNOWN_COLOR;
     }
-    
 }
