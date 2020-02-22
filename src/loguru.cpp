@@ -23,7 +23,7 @@
 #endif // _MSC_VER
 #endif
 
-#include "loguru.hpp"
+#include "utils/loguru.hpp"
 
 #ifndef LOGURU_HAS_BEEN_IMPLEMENTED
 #define LOGURU_HAS_BEEN_IMPLEMENTED
@@ -693,7 +693,7 @@ namespace loguru
 		strncat_s(buff, buff_size - strlen(buff) - 1, s_argv0_filename.c_str(), buff_size - strlen(buff) - 1);
 		strncat_s(buff, buff_size - strlen(buff) - 1, "/",                      buff_size - strlen(buff) - 1);
 		write_date_time(buff + strlen(buff),    buff_size - strlen(buff));
-		strncat_s(buff, buff_size - strlen(buff) - 1, ".log",                   buff_size - strlen(buff) - 1);
+		strncat_s(buff, buff_size - sizeof(buff) - 1, ".log",                   buff_size - strlen(buff) - 1);
 	#else
 		strncat(buff, s_argv0_filename.c_str(), buff_size - strlen(buff) - 1);
 		strncat(buff, "/", buff_size - strlen(buff) - 1);

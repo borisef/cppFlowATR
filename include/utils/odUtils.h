@@ -1,7 +1,12 @@
+#ifndef _ODUTILS_H_
+#define _ODUTILS_H_
+
 #include <iostream>
 #include <vector>
 #include <cppflowATRInterface/Object_Detection_Types.h>
 #include <opencv2/opencv.hpp>
+#include <string>
+#include <map>
 
 using namespace OD;
 
@@ -15,3 +20,8 @@ void PrintColor(int color_id);
 
 cv::Scalar GetColor2Draw(OD::e_OD_TargetColor color_id);
 
+std::string GetStringInitParams(OD::OD_InitParams ip);
+
+
+
+#endif

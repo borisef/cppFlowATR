@@ -1,4 +1,4 @@
-#include <loguru.hpp>
+#include <utils/loguru.hpp>
 #include <iostream>
 
 #include <chrono>
@@ -29,16 +29,22 @@ inline void complex_calculation()
 
 int main(int argc, char *argv[])
 {
-	loguru::init(argc, argv);
+	// Optional, but useful to time-stamp the start of the log.
+    // Will also detect verbosity level on command line as -v.
+	//loguru::init(argc, argv);
+	
 
 	loguru::add_file("output/logs/log.log", loguru::Append, loguru::Verbosity_MAX);
 
-	char log_path[64];
-	loguru::suggest_log_path("output/logs/", log_path, sizeof(log_path));
-	loguru::add_file(log_path, loguru::FileMode::Truncate, loguru::Verbosity_MAX);
+	//char log_path[64];
+	//loguru::suggest_log_path("output/logs/", log_path, sizeof(log_path));
+	//loguru::add_file(log_path, loguru::FileMode::Truncate, loguru::Verbosity_MAX);
 
 	
 	LOG_F(INFO, "Hello from main.cpp!");
+	LOG_F(WARNING, "Example warning");
+	LOG_F(ERROR, "Example error");
+	LOG_F(INFO, "Try 5  lines: \n line 1 \n line 2\n line 3\n line 4\n line 5 ");
 	complex_calculation();
 	LOG_F(INFO, "main function about to end!");
 }

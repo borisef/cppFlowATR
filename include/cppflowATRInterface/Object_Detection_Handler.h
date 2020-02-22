@@ -6,6 +6,7 @@
 #include <cppflowATR/InitParams.h>
 #include <future>
 #include <mutex>
+#include <utils/loguru.hpp>
 
 using namespace OD;
 
@@ -14,6 +15,8 @@ OD_CycleInput *SafeNewCopyCycleInput(OD_CycleInput *, uint);
 void DeleteCycleInput(OD_CycleInput *);
 static std::mutex glob_mutexOnNext; // not in use
 static std::mutex glob_mutexOnPrev; // not in use
+
+static bool logInitialized = false;
 
 class ObjectDetectionManagerHandler : public ObjectDetectionManager
 {
@@ -49,7 +52,8 @@ protected:
     void AnalyzeTiledSample(OD_CycleOutput *co1, std::list<float *> *tarList, OD_CycleOutput *co2);
     int CleanWrongTileDetections(OD_CycleOutput *co1, std::list<float *> *tarList);
     bool InitConfigParamsFromFile(const char *iniFilePath);
-    const char* DefinePathForATRModel();
+    bool InitializeLogger();
+    std::string DefinePathForATRModel();
     
 
 

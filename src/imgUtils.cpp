@@ -443,5 +443,5 @@ bool nv12ToRGB(char *raw, int width, int height, cv::Mat *outRGB)
   // cv::Mat rgb(height, width,CV_8UC3);
   cv::cvtColor(yuv, *outRGB, cv::COLOR_YUV2RGB);
   //cv::imwrite("RGB_NV12.tif", *outRGB);
-   
+   return true;
 }

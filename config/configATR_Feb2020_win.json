@@ -7,9 +7,9 @@
   },
  "_comment": "--- Run parameters ---",
   "run_params" : {
-    "logfile_path" : "log/file.log",
+    "logfile_path" : "log/mylog.log",
     "debug_mode" : "false",
-    "prePath": "/home/borisef/projects/cppFlowATR/",
+    "prePath": "e:/projects/MB2/cppFlowATR/",
 	"os": "WIN"
   },
 "_comment": "--- Models go here --",

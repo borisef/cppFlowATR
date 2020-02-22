@@ -173,9 +173,13 @@ void ObjectDetectionManagerHandler::DeleteAllInnerCycleInputs()
     }
 }
 
-const char *ObjectDetectionManagerHandler::DefinePathForATRModel()
+
+std::string ObjectDetectionManagerHandler::DefinePathForATRModel()
 {
    
+    std::string prepath = m_configParams->run_params["prePath"];
+    std::string  mo = m_configParams->models[0]["load_path"];
+
     // use m_configParams and m_initParams to get model path
     for (size_t i = 0; i < m_configParams->models.size(); i++)
     {
@@ -183,10 +187,12 @@ const char *ObjectDetectionManagerHandler::DefinePathForATRModel()
         std::cout << m_configParams->models[i]["load_path"] << std::endl;
         if (m_configParams->models[i]["nickname"].compare("default_ATR") == 0)
         {
-            return (m_configParams->models[i]["load_path"]).c_str();
+            mo = (m_configParams->models[i]["load_path"]);
+            break;
         }
     }
-    return (m_configParams->models[0]["load_path"].c_str()); // if not found return first
+   prepath.append(mo).append("\0");
+   return prepath;
 }
 
 OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *odInitParams)
@@ -208,8 +214,17 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
     if (m_configParams == nullptr)
         m_configParams = new InitParams(odInitParams->iniFilePath);
 
+    //TODO: if something wrong with init params return error 
+
+    // take care of log file 
+    if(!logInitialized){ 
+        InitializeLogger();
+        logInitialized = true;
+        }
+    LOG_F(INFO, "Manager initialized from %s", odInitParams->iniFilePath);
     // define path for ATR model
-    const char *pathATR = DefinePathForATRModel();
+    std::string pathATR = DefinePathForATRModel();
+    LOG_F(INFO, "Defined path for ATR model %s",pathATR.c_str());
     
     //ATR model initialization
     if(m_mbATR != nullptr)
@@ -222,17 +237,11 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
     {
         mbATR = new mbInterfaceATR();
         cout << "Create new mbInterfaceATR in ObjectDetectionManagerHandler::InitObjectDetection" << endl;
-        std::string fullPathATR (m_configParams->run_params["prePath"].append(pathATR));
-        const char* t = fullPathATR.c_str();//TODO: why I cannot give this as param to LoadNewModel
-    
-        mbATR->LoadNewModel(pathATR);
+        mbATR->LoadNewModel(pathATR.c_str());
         m_mbATR = mbATR;
-        cout << "Executed LoadNewModel in  InitObjectDetection" << endl;
+        LOG_F(INFO, "Executed LoadNewModel in  InitObjectDetection");
     }
 
-      //TEMP:debug 
-    std::ofstream output2("debug2.txt");
-    output2 << "After LoadNewModel";
     //remember lastPathATR
     m_lastPathATR = std::string(pathATR);
 
@@ -243,7 +252,6 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
     }
     //Color Model initialization
     bool initCMsuccess = true;
-    //    m_withActiveCM = true;
 
     if (m_mbCM == nullptr && m_withActiveCM)
     {
@@ -256,6 +264,8 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
     IdleRun();
     if (m_mbCM != nullptr && m_withActiveCM)
         m_mbCM->IdleRun();
+    
+    LOG_F(INFO, "InitObjectDetection performed from %s", (GetStringInitParams(*odInitParams)).c_str());
     // TODO: check if really OK
     return OD_ErrorCode::OD_OK;
 }
@@ -578,6 +588,8 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
 
 OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(OD_CycleInput *cycleInput, OD_CycleOutput *cycleOutput)
 {
+    LOG_F(INFO,"Starting OperateObjectDetectionOnTiledSample");
+
     cycleOutput->numOfObjects = 0;
 
     uint bigH = m_initParams->supportData.imageHeight;
@@ -591,6 +603,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
 
     std::list<float *> *tarList = new list<float *>(0);
 
+    LOG_F(INFO,"Create tiled image from %s", imgName );
     CreateTiledImage(imgName, bigW, bigH, bigIm, tarList);
 
     // cv::imwrite("smallImg.tif",cv::imread(imgName));
@@ -737,6 +750,7 @@ bool ObjectDetectionManagerHandler::InitCM()
     const char *inname;
     const char *outname;
     bool flag = false;
+    std::string prepath = m_configParams->run_params["prePath"];
     //use  m_configParams
     for (size_t i = 0; i < m_configParams->models.size(); i++)
     {
@@ -744,7 +758,7 @@ bool ObjectDetectionManagerHandler::InitCM()
         std::cout << m_configParams->models[i]["load_path"] << std::endl;
         if (m_configParams->models[i]["nickname"].compare("default_CM") == 0)
         {
-            modelPath = m_configParams->models[i]["load_path"].c_str();
+            modelPath = prepath.append(m_configParams->models[i]["load_path"]).c_str();
             inname = m_configParams->models[i]["input_layer"].c_str();
             outname = m_configParams->models[i]["output_layer"].c_str();
             if (m_configParams->models[i]["ckpt"].compare("nullptr") != 0)
@@ -757,6 +771,7 @@ bool ObjectDetectionManagerHandler::InitCM()
     }
     if (flag == false)
     {
+        LOG_F(INFO, "Default CM loaded");
         modelPath = "graphs/output_graph.pb";
         ckpt = nullptr;
         inname = "conv2d_input";
@@ -770,9 +785,10 @@ bool ObjectDetectionManagerHandler::InitCM()
     m_mbCM = new mbInterfaceCM();
     if (!m_mbCM->LoadNewModel(modelPath, ckpt, inname, outname))
     {
-        std::cout << "ooops" << std::endl;
+        LOG_F(ERROR, "Failed to load CM: %s\ninname: %s\noutname:%s",modelPath, inname, outname );
         return false;
     }
+    LOG_F(INFO, "Loaded CM: %s\ninname: %s\noutname:%s",modelPath, inname, outname );
     return true;
 }
 
@@ -783,6 +799,17 @@ void ObjectDetectionManagerHandler::SetConfigParams(InitParams *ip)
 InitParams *ObjectDetectionManagerHandler::GetConfigParams()
 {
     return m_configParams;
+}
+
+bool ObjectDetectionManagerHandler::InitializeLogger()
+{
+    std::string lpath = m_configParams->run_params["logfile_path"];
+    std::string prepath = m_configParams->run_params["prePath"];
+    prepath.append(lpath);
+    loguru::add_file(prepath.c_str(), loguru::Append, loguru::Verbosity_MAX);
+
+    return true;
+
 }
 
 bool ObjectDetectionManagerHandler::InitConfigParamsFromFile(const char *iniFilePath)
@@ -800,5 +827,6 @@ bool ObjectDetectionManagerHandler::InitConfigParamsFromFile(const char *iniFile
     }
 
     std::cout << "Found a total of " << m_configParams->models.size() << " models" << std::endl;
+
     return true;
 }

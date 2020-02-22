@@ -3,6 +3,28 @@
 using namespace cv;
 using namespace std;
 
+std::map <OD::e_OD_TargetColor, char*> mapOfcolors= {
+		{BLACK, "black"},
+		{BLUE, "blue"},
+        {OD::e_OD_TargetColor::YELLOW, "yellow"},
+        {OD::e_OD_TargetColor::GRAY, "gray"},
+        {OD::e_OD_TargetColor::GREEN, "green"},
+        {OD::e_OD_TargetColor::RED, "red"},
+        {OD::e_OD_TargetColor::WHITE, "white"},
+        {OD::e_OD_TargetColor::SILVER, "silver"},
+        {OD::e_OD_TargetColor::BROWN, "brown"}       
+};
+
+std::map <MB_MissionType, char*> mapOfmissions= {
+		{MB_MissionType::ANALYZE_SAMPLE, "ANALYZE_SAMPLE"},
+		{MB_MissionType::MATMON, "MATMON"},  
+        {MB_MissionType::STATIC_CHASER, "STATIC_CHASER"},  
+        {MB_MissionType::DYNAMIC_CHASER, "DYNAMIC_CHASER"}  
+};
+
+
+
+
 
 OD_CycleOutput* NewOD_CycleOutput(int maxNumOfObjects, int defaultImgID_output){
     
@@ -94,5 +116,24 @@ cv::Scalar GetColor2Draw(OD::e_OD_TargetColor color_id)
     }
 
     return cv::Scalar(0,255,255);
+
+}
+
+
+std::string GetStringInitParams(OD::OD_InitParams ip)
+{
+    std::string mystr = "OD_InitParams: ";
+    mystr.append(ip.iniFilePath).append("\n");
+    mystr.append("ip.mbMission.missionType = ").append(mapOfmissions[ip.mbMission.missionType]).append("\n");
+    mystr.append("ip.supportData.colorType = ").append(std::to_string(ip.supportData.colorType)).append("\n");
+    mystr.append("ip.supportData.imageHeight = ").append(std::to_string(ip.supportData.imageHeight)).append("\n");
+    mystr.append("ip.supportData.imageWidth = ").append(std::to_string(ip.supportData.imageWidth)).append("\n");
+    mystr.append("ip.mbMission.targetClas = ").append(std::to_string(ip.mbMission.targetClas)).append("\n");
+    
+    
+    return mystr;
+    
+
+
 
 }
