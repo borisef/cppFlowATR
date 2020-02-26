@@ -105,7 +105,7 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
 
         cout << " ***  ObjectDetectionManager created  *** " << endl;
 
-        // // new mission
+        //  new mission
         OD::InitObjectDetection(atrManager, &initParams);
         ((ObjectDetectionManagerHandler *)atrManager)->WaitForThread();
     }

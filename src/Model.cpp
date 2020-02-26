@@ -269,7 +269,10 @@ void Model::run(const std::vector<Tensor*>& inputs, const std::vector<Tensor*>& 
     // Prepare output recipients
     auto ov = new TF_Tensor*[outputs.size()];
 
+    #ifdef TEST_MODE
     std::cout<<"TF_SessionRun"<<std::endl; //BE
+    #endif
+
     TF_SessionRun(this->session, nullptr, io.data(), iv.data(), inputs.size(), oo.data(), ov, outputs.size(), nullptr, 0, nullptr, this->status);
     this->status_check(true);
 

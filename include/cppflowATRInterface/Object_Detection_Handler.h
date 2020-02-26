@@ -38,7 +38,7 @@ public:
 
     ObjectDetectionManagerHandler();
     ObjectDetectionManagerHandler(OD_InitParams *ip);
-    bool WaitUntilForThread(int sec); //not in use
+    //bool WaitUntilForThread(int sec); //not in use
     bool WaitForThread();
 
     ~ObjectDetectionManagerHandler();

@@ -398,6 +398,7 @@ char *fastParseRaw(std::string filepath)
 
     if (length == 0)
     {
+      //TODO: log
         cout << "length = 0. error reading file" << endl;
         return nullptr;
     }

@@ -30,13 +30,18 @@ ObjectDetectionManager::ObjectDetectionManager(OD_InitParams *ip)
 #endif
 ObjectDetectionManager *CreateObjectDetector(OD_InitParams *initParams)
 {
-    // use initParams
-    cout << "Creating graph from" << initParams->iniFilePath << std::endl;
+    #ifdef TEST_MODE
+    cout << "Creating ObjectDetectionManager from ini" << initParams->iniFilePath << std::endl;
+    #endif //TEST_MODE
+    
 
     ObjectDetectionManager *new_manager;
     ObjectDetectionManagerHandler *new_managerH = new ObjectDetectionManagerHandler(initParams);
     new_manager = (ObjectDetectionManager *)new_managerH;
+
+    #ifdef TEST_MODE
     cout << "Created ObjectDetectionManager " << endl;
+    #endif //TEST_MODE
 
     return new_manager;
 }
@@ -55,14 +60,18 @@ OD_ErrorCode TerminateObjectDetection(ObjectDetectionManager *odm)
 DECLARE_API_FUNCTION OD_ErrorCode InitObjectDetection(ObjectDetectionManager *, OD_InitParams *);
 OD_ErrorCode InitObjectDetection(ObjectDetectionManager *odm, OD_InitParams *odInitParams)
 {
+    #ifdef TEST_MODE
     cout << "Entering InitObjectDetection" << endl;
+    #endif //TEST_MODE
 
     ObjectDetectionManagerHandler *odmHandler = (ObjectDetectionManagerHandler *)odm;
 
     OD_ErrorCode ec = odmHandler->InitObjectDetection(odInitParams);
 
+    #ifdef TEST_MODE
     cout << "Finished InitObjectDetection" << endl;
-
+    #endif //TEST_MODE
+    
     return ec;
 }
 
@@ -84,13 +93,18 @@ OD_ErrorCode OperateObjectDetectionAPI(ObjectDetectionManager *odm, OD_CycleInpu
 
     if (prepOD == OD_ErrorCode::OD_OK && !odmHandler->IsBusy())
     {
+        #ifdef TEST_MODE
         cout << "+++Can  Operate OD... Free for step " << odIn->ImgID_input << endl;
+        #endif //TEST_MODE
+
         //ec = odmHandler->OperateObjectDetection(odOut); // synchroniously
         odmHandler->m_result = std::async(std::launch::async, &ObjectDetectionManagerHandler::OperateObjectDetection, odmHandler, odOut);
     }
     else
     {
+        #ifdef TEST_MODE
         cout << "---Can not Operate OD... Busy for step " << odIn->ImgID_input << endl;
+        #endif //TEST_MODE
     }
 
     return ec; // TODO: not always ok

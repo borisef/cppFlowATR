@@ -5,7 +5,10 @@
 
 mbInterfaceATR::mbInterfaceATR()
 {
+#ifdef TEST_MODE
     cout << "Construct mbInterfaceATR" << endl;
+#endif //TEST_MODE
+
     m_show = false;
     m_model = nullptr;
     m_outTensorNumDetections = nullptr;
@@ -16,7 +19,9 @@ mbInterfaceATR::mbInterfaceATR()
 }
 mbInterfaceATR::~mbInterfaceATR()
 {
+#ifdef TEST_MODE
     cout << "Destruct mbInterfaceATR" << endl;
+#endif //TEST_MODE
 
     if (m_model != nullptr)
     {
@@ -31,7 +36,9 @@ mbInterfaceATR::~mbInterfaceATR()
 
 bool mbInterfaceATR::LoadNewModel(const char *modelPath)
 {
+#ifdef TEST_MODE
     std::cout << " LoadNewModel begin" << std::endl;
+#endif //TEST_MODE
 
     if (m_model != nullptr)
     {
@@ -63,7 +70,6 @@ int mbInterfaceATR::RunRGBimage(cv::Mat inp)
 
     m_model->run(m_inpName, {m_outTensorNumDetections, m_outTensorScores, m_outTensorBB, m_outTensorClasses});
 
-    
     inp.copyTo(m_keepImg);
     return 1;
 }
@@ -77,27 +83,38 @@ int mbInterfaceATR::RunRGBImgPath(const unsigned char *ptr)
 int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width)
 {
 
+#ifdef TEST_MODE
     cout << " RunRGBVector:Internal Run on RGB Vector on ptr*" << endl;
     cout << "RunRGBVector " << height << " " << width << "prt[10]" << ptr[10] << endl;
+#endif //TEST_MODE
 
     std::vector<uint8_t> img_data(height * width * 3);
     unsigned char *buffer = (unsigned char *)ptr;
 
+#ifdef TEST_MODE
     cout << " RunRGBVector:casted buffer to unsigned char* " << endl;
+#endif //TEST_MODE
 
     cv::Mat tempIm(height, width, CV_8UC3);
+#ifdef TEST_MODE
     cout << " RunRGBVector:copy buffer to cv::Mat* " << endl;
+#endif                    //TEST_MODE
     tempIm.data = buffer; //risky
-    cv::imwrite("tempim.png",tempIm);
+
+#ifdef TEST_MODE
+    cv::imwrite("tempim.png", tempIm);
+#endif //TEST_MODE
+
     cv::cvtColor(tempIm, tempIm, cv::COLOR_RGB2BGR);
     tempIm.copyTo(m_keepImg);
-    
+
 #ifdef TEST_MODE
-    
     cout << " RunRGBVector:saving cv::Mat* " << endl;
     cv::imwrite("testRGBbuffer.tif", tempIm);
+#endif //TEST_MODE
+
     cv::cvtColor(tempIm, tempIm, cv::COLOR_BGR2RGB); //because we do on original buffer
-#endif
+
     for (int i = 0; i < height * width * 3; i++)
         img_data[i] = buffer[i];
 
@@ -105,12 +122,14 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
 }
 int mbInterfaceATR::RunRGBVector(std::vector<uint8_t> img_data, int height, int width)
 {
+#ifdef TEST_MODE
     cout << " RunRGBVector:Internal Run on RGB Vector on vector<uint8_t> " << endl;
+#endif //TEST_MODE
+
     // Put image in Tensor
     m_inpName->set_data(img_data, {1, height, width, 3});
-    cout << " RunRGBVector:Internal Run on RGB Vector on vector<uint8_t>  done setting data" << endl;
     m_model->run(m_inpName, {m_outTensorNumDetections, m_outTensorScores, m_outTensorBB, m_outTensorClasses});
-    return 1;
+    return 1; //TODO useful return
 }
 int mbInterfaceATR::RunRawImage(const unsigned char *ptr, int height, int width)
 {
@@ -124,9 +143,12 @@ int mbInterfaceATR::RunRawImage(const unsigned char *ptr, int height, int width)
     //
     cv::Mat *myRGB = new cv::Mat(height, width, CV_8UC3);
     convertYUV420toRGB(img_data, width, height, myRGB);
+
+#ifdef TEST_MODE
     // save JPG for debug
     cv::imwrite("debug_yuv420torgb.tif", *myRGB);
-    //std::vector<uint8_t > img_data;
+#endif //TEST_MODE
+
     img_data.assign(myRGB->data, myRGB->data + myRGB->total() * myRGB->channels());
     myRGB->copyTo(m_keepImg);
     delete myRGB; //??? TODO: is it safe?
@@ -141,21 +163,18 @@ int mbInterfaceATR::RunRawImageFast(const unsigned char *ptr, int height, int wi
     std::vector<uint8_t> img_data(height * width * 2);
     unsigned char *buffer = (unsigned char *)ptr;
 
-    // for (int i = 0; i < height * width * 2; i++) //TODO: can we optimize it ?
-    //     img_data[i] = buffer[i];
-
-    //
     cv::Mat *myRGB = new cv::Mat(height, width, CV_8UC3);
-    //convertYUV420toRGB(img_data, width, height, myRGB);
-    if(colorType == 7) //NV12
-        //nv12ToRGB((char*)ptr,width,height,myRGB);
-        fastNV12ToRGB((char*)ptr,width,height,myRGB);
-    else //YUV422
-        fastYUV2RGB((char*)ptr,width,height,myRGB);
 
+    if (colorType == 7) //NV12
+        fastNV12ToRGB((char *)ptr, width, height, myRGB);
+    else //YUV422
+        fastYUV2RGB((char *)ptr, width, height, myRGB);
+
+#ifdef TEST_MODE
     // save JPG for debug
     cv::imwrite("debug_yuv420torgb.tif", *myRGB);
-    //std::vector<uint8_t > img_data;
+#endif //TEST_MODE
+
     img_data.assign(myRGB->data, myRGB->data + myRGB->total() * myRGB->channels());
     myRGB->copyTo(m_keepImg);
     delete myRGB; //??? TODO: is it safe?

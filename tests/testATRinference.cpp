@@ -39,7 +39,7 @@ int main()
     float numIter = 3.0;
 #ifdef TEST_MODE
     cout << "Test Mode" << endl;
-#endif
+#endif//TEST_MODE
 
 #ifdef WIN32
     unsigned int W = 1292;

@@ -2,7 +2,6 @@
 #include <utils/imgUtils.h>
 #include <utils/odUtils.h>
 
-
 #include <iomanip>
 #include <future>
 
@@ -64,11 +63,10 @@ void ObjectDetectionManagerHandler::setParams(OD_InitParams *ip)
     m_numImgPixels = ip->supportData.imageHeight * ip->supportData.imageWidth * 3;
     if (ip->supportData.colorType == e_OD_ColorImageType::YUV422)
         m_numPtrPixels = m_numPtrPixels * 2;
-    else 
-        if (ip->supportData.colorType == e_OD_ColorImageType::NV12)
-            m_numPtrPixels = m_numPtrPixels * 1.5;
-        else
-            m_numPtrPixels = m_numPtrPixels * 3;
+    else if (ip->supportData.colorType == e_OD_ColorImageType::NV12)
+        m_numPtrPixels = m_numPtrPixels * 1.5;
+    else
+        m_numPtrPixels = m_numPtrPixels * 3;
 }
 
 bool ObjectDetectionManagerHandler::IsBusy()
@@ -76,18 +74,21 @@ bool ObjectDetectionManagerHandler::IsBusy()
     if (m_result.valid())
     {
         bool temp = !(m_result.wait_for(std::chrono::seconds(0)) == std::future_status::ready);
+#ifdef TEST_MODE
         if (temp)
             cout << " IsBusy? Yes" << endl;
         else
         {
             cout << " IsBusy? No" << endl;
         }
-
+#endif //#ifdef TEST_MODE
         return !(m_result.wait_for(std::chrono::seconds(0)) == std::future_status::ready);
     }
     else
     {
+#ifdef TEST_MODE
         cout << " IsBusy? Not valid" << endl;
+#endif //#ifdef TEST_MODE
         return false;
     }
 }
@@ -117,43 +118,50 @@ bool ObjectDetectionManagerHandler::WaitForThread()
 {
     if (m_result.valid())
     {
+#ifdef TEST_MODE
         std::cout << "waiting...\n";
+#endif //TEST_MODE
+
         m_result.wait();
+#ifdef TEST_MODE
         std::cout << "Done!\n";
+#endif //TEST_MODE
     }
     else
     {
+#ifdef TEST_MODE
         cout << "Thread is still not valid" << endl;
+#endif //TEST_MODE
     }
 
     return true;
 }
 
-bool ObjectDetectionManagerHandler::WaitUntilForThread(int sec)
-{
-    if (m_result.valid())
-    {
-        std::chrono::system_clock::time_point few_seconds_passed = std::chrono::system_clock::now() + std::chrono::seconds(sec);
+// bool ObjectDetectionManagerHandler::WaitUntilForThread(int sec)
+// {
+//     if (m_result.valid())
+//     {
+//         std::chrono::system_clock::time_point few_seconds_passed = std::chrono::system_clock::now() + std::chrono::seconds(sec);
 
-        if (std::future_status::ready == m_result.wait_until(few_seconds_passed))
-        {
-            std::cout << "times_out "
-                      << "\n";
-        }
-        else
-        {
-            std::cout << "did not complete!\n";
-        }
+//         if (std::future_status::ready == m_result.wait_until(few_seconds_passed))
+//         {
+//             std::cout << "times_out "<< std::endl;
+//         }
+//         else
+//         {
+//             std::cout << "did not complete!\n";
+//         }
 
-        std::cout << "Done!\n";
-    }
-    else
-    {
-        cout << "Thread is still not valid" << endl;
-    }
+//         std::cout << "Done!\n";
+//     }
+//     else
+//     {
+//         cout << "Thread is still not valid" << endl;
+//     }
 
-    return true;
-}
+//     return true;
+// }
+
 void ObjectDetectionManagerHandler::DeleteAllInnerCycleInputs()
 {
     if (m_nextCycleInput)
@@ -173,36 +181,32 @@ void ObjectDetectionManagerHandler::DeleteAllInnerCycleInputs()
     }
 }
 
-
 std::string ObjectDetectionManagerHandler::DefinePathForATRModel()
 {
-   
+
     std::string prepath = m_configParams->run_params["prePath"];
-    std::string  mo = m_configParams->models[0]["load_path"];
+    std::string mo = m_configParams->models[0]["load_path"];
 
     // use m_configParams and m_initParams to get model path
     for (size_t i = 0; i < m_configParams->models.size(); i++)
     {
+#ifdef TEST_MODE
         std::cout << m_configParams->models[i]["nickname"] << std::endl;
         std::cout << m_configParams->models[i]["load_path"] << std::endl;
+#endif //TEST_MODE
+
         if (m_configParams->models[i]["nickname"].compare("default_ATR") == 0)
         {
             mo = (m_configParams->models[i]["load_path"]);
             break;
         }
     }
-   prepath.append(mo).append("\0");
-   return prepath;
+    prepath.append(mo).append("\0");
+    return prepath;
 }
 
 OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *odInitParams)
 {
-    //check if busy, if yes wait till the end and assign nullptr to next, current and prev
-    WaitForThread();
-    DeleteAllInnerCycleInputs();
-
-    mbInterfaceATR *mbATR = nullptr;
-
     //initialization
     //take care of InitParams
     if (m_configParams != nullptr)
@@ -214,29 +218,41 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
     if (m_configParams == nullptr)
         m_configParams = new InitParams(odInitParams->iniFilePath);
 
-    //TODO: if something wrong with init params return error 
+    //TODO: if something wrong with init params return error
 
-    // take care of log file 
-    if(!logInitialized){ 
+    // take care of log file
+    if (!logInitialized)
+    {
         InitializeLogger();
         logInitialized = true;
-        }
+    }
+    //From now on can use logger !!!
+
     LOG_F(INFO, "Manager initialized from %s", odInitParams->iniFilePath);
+
+    //check if busy, if yes wait till the end and assign nullptr to next, current and prev
+    WaitForThread();
+    DeleteAllInnerCycleInputs();
+
+    mbInterfaceATR *mbATR = nullptr;
+
     // define path for ATR model
     std::string pathATR = DefinePathForATRModel();
-    LOG_F(INFO, "Defined path for ATR model %s",pathATR.c_str());
-    
+    LOG_F(INFO, "Defined path for ATR model %s", pathATR.c_str());
+
     //ATR model initialization
-    if(m_mbATR != nullptr)
-        if(m_lastPathATR.compare(pathATR) != 0)
-            {
-                delete m_mbATR;
-                m_mbATR = nullptr;
-            }
+    if (m_mbATR != nullptr)
+        if (m_lastPathATR.compare(pathATR) != 0)
+        {
+            delete m_mbATR;
+            m_mbATR = nullptr;
+        }
     if (m_mbATR == nullptr)
     {
         mbATR = new mbInterfaceATR();
+#ifdef TEST_MODE
         cout << "Create new mbInterfaceATR in ObjectDetectionManagerHandler::InitObjectDetection" << endl;
+#endif //TEST_MODE
         mbATR->LoadNewModel(pathATR.c_str());
         m_mbATR = mbATR;
         LOG_F(INFO, "Executed LoadNewModel in  InitObjectDetection");
@@ -261,23 +277,37 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
 
     setParams(odInitParams);
 
+#ifdef TEST_MODE
+    LOG_F(INFO, "Do IdleRun() for ATR");
+#endif //#ifdef TEST_MODE
+
     IdleRun();
     if (m_mbCM != nullptr && m_withActiveCM)
+    {
+#ifdef TEST_MODE
+        LOG_F(INFO, "Do IdleRun() for CM");
+#endif //#ifdef TEST_MODE
         m_mbCM->IdleRun();
-    
+    }
     LOG_F(INFO, "InitObjectDetection performed from %s", (GetStringInitParams(*odInitParams)).c_str());
     // TODO: check if really OK
     return OD_ErrorCode::OD_OK;
 }
 OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_CycleInput *cycleInput)
 {
-    //keep OD_CycleInput copy
+#ifdef TEST_MODE
     cout << " PrepareOperateObjectDetection: Prepare to run on frame " << cycleInput->ImgID_input << endl;
+#endif //#ifdef TEST_MODE
+
     if (cycleInput && cycleInput->ptr) // input is valid
     {
 
         OD_CycleInput *tempCycleInput = nullptr;
+
+#ifdef TEST_MODE
         cout << "Replace old next cycle input" << endl;
+#endif //#ifdef TEST_MODE
+
         m_mutexOnNext.lock();
         //glob_mutexOnNext.lock();
         if (m_nextCycleInput) //my next not null
@@ -293,7 +323,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_Cyc
             }
             else // same next frame
             {
-                cout << "PrepareOperateObjectDetection: attempt to call with same frame twice, skipping" << endl;
+                LOG_F(WARNING, "PrepareOperateObjectDetection: attempt to call with same frame twice, skipping");
             }
         }
         else
@@ -305,12 +335,17 @@ OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_Cyc
     }
     else
     {
-        cout << "PrepareOperateObjectDetection:Input cycle is null, skip " << endl;
+        LOG_F(WARNING, "PrepareOperateObjectDetection:Input cycle is null, skip");
     }
+
+#ifdef TEST_MODE
     if (m_nextCycleInput && m_nextCycleInput->ptr)
         cout << "PrepareOperateObjectDetection:Next cycle is valid" << endl;
     else
         cout << "PrepareOperateObjectDetection:Next cycle is empty" << endl;
+#endif //#ifdef TEST_MODE
+
+    //TODO: return not always OK
 
     return OD_ErrorCode::OD_OK;
 }
@@ -334,6 +369,7 @@ void ObjectDetectionManagerHandler::IdleRun()
 OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutput *odOut)
 {
 
+#ifdef TEST_MODE
     cout << "^^^Locked" << endl;
 
     if (m_nextCycleInput && m_nextCycleInput->ptr)
@@ -350,10 +386,11 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
         cout << "OperateObjectDetection:Previous cycle is valid" << endl;
     else
         cout << "OperateObjectDetection:Previous cycle is empty" << endl;
+#endif //#ifdef TEST_MODE
 
     if (m_curCycleInput) // never suppose to happen, jic
     {
-        cout << "This was never  supposed to happen... m_curCycleInput is not empty... How? " << endl;
+        LOG_F(ERROR, "This was never  supposed to happen... m_curCycleInput is not empty... How?");
         DeleteCycleInput(m_curCycleInput);
         m_curCycleInput = nullptr;
         return OD_ErrorCode::OD_FAILURE;
@@ -369,15 +406,19 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
 
     if (!(m_curCycleInput && m_curCycleInput->ptr)) // former next (current ) cycle or buffer is null
     {
+#ifdef TEST_MODE
         cout << "ObjectDetectionManagerHandler::OperateObjectDetection nothing todo" << endl;
         cout << "###UnLocked" << endl;
+#endif //#ifdef TEST_MODE
         DeleteCycleInput(m_curCycleInput);
         m_curCycleInput = nullptr;
 
         return OD_ErrorCode::OD_OK;
     }
 
+#ifdef TEST_MODE
     cout << " OperateObjectDetection: Run on frame " << m_curCycleInput->ImgID_input << endl;
+#endif //#ifdef TEST_MODE
 
     unsigned int fi = m_curCycleInput->ImgID_input;
     int h = m_initParams->supportData.imageHeight;
@@ -386,37 +427,49 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     e_OD_ColorImageType colortype = m_initParams->supportData.colorType;
 
     if (colortype == e_OD_ColorImageType::YUV422) // if raw
-        //this->m_mbATR->RunRawImage(m_curCycleInput->ptr, h, w);
-
+    {
         this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w, (int)colortype);
+    }
     else if (colortype == e_OD_ColorImageType::NV12) // if raw NV12
+    {
         this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w, (int)colortype);
-        
+    }
     else if (colortype == e_OD_ColorImageType::RGB) // if rgb
     {
+#ifdef TEST_MODE
         cout << " Internal Run on RGB buffer " << endl;
+#endif //#ifdef TEST_MODE
         this->m_mbATR->RunRGBVector(m_curCycleInput->ptr, h, w);
     }
     else if (colortype == e_OD_ColorImageType::RGB_IMG_PATH) //path
     {
+#ifdef TEST_MODE
         cout << " Internal Run on RGB_IMG_PATH " << endl;
+#endif //#ifdef TEST_MODE
         this->m_mbATR->RunRGBImgPath(m_curCycleInput->ptr);
     }
     else
     {
         return OD_ErrorCode::OD_ILEGAL_INPUT;
     }
+
+#ifdef TEST_MODE
     cout << " ObjectDetectionManagerHandler::OperateObjectDetection starts PopulateCycleOutput  " << endl;
+#endif //#ifdef TEST_MODE
     // save results
     this->PopulateCycleOutput(odOut);
+
     //Color Model (CM)
-    if(odOut->numOfObjects>0 && m_withActiveCM)
-        m_mbCM->RunImgWithCycleOutput(m_mbATR->GetKeepImg(), odOut, 0, (odOut->numOfObjects -1), true);
-    
+    if (odOut->numOfObjects > 0 && m_withActiveCM)
+        m_mbCM->RunImgWithCycleOutput(m_mbATR->GetKeepImg(), odOut, 0, (odOut->numOfObjects - 1), true);
+
     odOut->ImgID_output = fi;
 
-    // copy current into prev
-    cout << "ObjectDetectionManagerHandler::OperateObjectDetection m_prevCycleInput<=m_curCycleInput<=nullptr" << endl;
+// copy current into prev
+#ifdef TEST_MODE
+    cout << "ObjectDetectionManagerHandler::OperateObjectDetection m_prevCycleInput <-- m_curCycleInput <-- nullptr" << endl;
+#endif //#ifdef TEST_MODE
+
     OD_CycleInput *tempCI = m_prevCycleInput;
     m_prevCycleInput = m_curCycleInput; // transfere
 
@@ -431,12 +484,17 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     // string outName = "outRes/out_res3_" + std::to_string(odOut->ImgID_output) + "_in.png";
     // this->SaveResultsATRimage(nullptr,odOut, (char*)outName.c_str(),false);
 
+#ifdef TEST_MODE
     cout << "###UnLocked" << endl;
+#endif //#ifdef TEST_MODE
 
     //Recoursive call
     if (m_nextCycleInput)
     {
-        cout << "+++++++++++++++++++++++++++++++++Call OperateObjectDetection again automatically" << endl;
+#ifdef TEST_MODE
+        cout << "+++++++++++++++++++++++++++++++++Call OperateObjectDetection again recoursively" << endl;
+#endif //#ifdef TEST_MODE
+
         OperateObjectDetection(odOut);
     }
     return OD_ErrorCode::OD_OK;
@@ -449,7 +507,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
     //glob_mutexOnPrev.lock();
     if (!(m_prevCycleInput && m_prevCycleInput->ptr))
     {
-        cout << "No m_prevCycleInput data, skipping" << endl;
+        LOG_F(WARNING, "ObjectDetectionManagerHandler::SaveResultsATRimage: No m_prevCycleInput data, skipping");
         return false;
     }
     else
@@ -472,36 +530,30 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
 
     if (colortype == e_OD_ColorImageType::YUV422) // if raw
     {
-        // std::vector<uint8_t> img_data(h * w * 2);
-        // for (int i = 0; i < h * w * 2; i++) //TODO: without for loop
-        //     img_data[i] = buffer[i];
-
         myRGB = new cv::Mat(h, w, CV_8UC3);
-
-        //convertYUV420toRGB(img_data, w, h, myRGB);
         fastYUV2RGB((char *)(tempci->ptr), w, h, myRGB);
     }
     else if (colortype == e_OD_ColorImageType::NV12) // if NV12
     {
         myRGB = new cv::Mat(h, w, CV_8UC3);
-        //nv12ToRGB((char *)(tempci->ptr), w, h, myRGB);
         fastNV12ToRGB((char *)(tempci->ptr), w, h, myRGB);
     }
     else if (colortype == e_OD_ColorImageType::RGB || colortype == e_OD_ColorImageType::RGB_IMG_PATH) // if rgb
     {
         myRGB = new cv::Mat(h, w, CV_8UC3);
-        //myRGB->data = buffer;// NOT safe if we going to use buffer later
         std::copy(buffer, buffer + w * h * 3, myRGB->data);
-        //std::copy(arrayOne, arrayOne+10, arrayTwo);
+#ifdef TEST_MODE
         cv::imwrite("debug_newImg1_bgr.tif", *myRGB);
+#endif //#ifdef TEST_MODE
     }
     else
     {
         DeleteCycleInput(tempci);
         return false;
     }
-
+#ifdef TEST_MODE
     std::cout << "***** num_detections " << co->numOfObjects << std::endl;
+#endif //#ifdef TEST_MODE
     for (int i = 0; i < co->numOfObjects; i++)
     {
         int classId = co->ObjectsArr[i].tarClass;
@@ -513,7 +565,10 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
 
         if (score >= drawThresh)
         {
+#ifdef TEST_MODE
             cout << "add rectangle to drawing" << endl;
+#endif //#ifdef TEST_MODE
+
             float x = bbox_data.x1;
             float y = bbox_data.y1;
             float right = bbox_data.x2;
@@ -526,7 +581,9 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
             cv::putText(*myRGB, string("Label:") + std::to_string(classId) + ";" + std::to_string(int(score * 100)) + "%", cv::Point(x, y - 10), 1, 2, tColor, 3);
         }
     }
+#ifdef TEST_MODE
     cout << " Done reading targets" << endl;
+#endif //#ifdef TEST_MODE
     if (show)
     {
         cv::Mat imgS;
@@ -534,49 +591,58 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
         cv::imshow("Image", imgS);
 
         char c = (char)cv::waitKey(25);
-
-        // cv::waitKey(0);
     }
     cv::Mat bgr(h, w, CV_8UC3);
     cv::cvtColor(*myRGB, bgr, cv::COLOR_RGB2BGR);
+
+#ifdef TEST_MODE
     cv::imwrite(imgNam, bgr);
     cout << " Done saving image" << endl;
+#endif //#ifdef TEST_MODE
+
     if (myRGB != nullptr)
     {
         myRGB->release();
         delete myRGB;
     }
+#ifdef TEST_MODE
     cout << " Done cleaning image" << endl;
+#endif //#ifdef TEST_MODE
     DeleteCycleInput(tempci);
     return true;
 }
 
 int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutput)
 {
-    float LOWER_SCORE_THRESHOLD = 0.1;
+    float LOWER_SCORE_THRESHOLD = 0.1; //TODO: ini param (?)
+#ifdef TEST_MODE
     cout << "ObjectDetectionManagerHandler::PopulateCycleOutput" << endl;
+#endif //TEST_MODE
 
     OD_DetectionItem *odi = cycleOutput->ObjectsArr;
 
     int N = m_mbATR->GetResultNumDetections();
 
+#ifdef TEST_MODE
     cout << "PopulateCycleOutput: Num detections total " << N << endl;
+#endif //TEST_MODE
 
     auto bbox_data = m_mbATR->GetResultBoxes();
     unsigned int w = this->m_initParams->supportData.imageWidth;
     unsigned int h = this->m_initParams->supportData.imageHeight;
 
-    //cycleOutput->numOfObjects = cycleOutput->maxNumOfObjects;
     cycleOutput->numOfObjects = N;
     for (int i = 0; i < N; i++)
     {
         e_OD_TargetClass aa = e_OD_TargetClass(1);
         odi[i].tarClass = e_OD_TargetClass(m_mbATR->GetResultClasses(i));
         odi[i].tarScore = m_mbATR->GetResultScores(i);
-        if (odi[i].tarScore < LOWER_SCORE_THRESHOLD)
+        if (odi[i].tarScore < LOWER_SCORE_THRESHOLD) // we suppose detections are sorted by score !!!
         {
             cycleOutput->numOfObjects = i;
-            cout << "Taking only " << cycleOutput->numOfObjects << endl;
+#ifdef TEST_MODE
+            cout << "Cutting PopulateCycleOutput. Taking only " << cycleOutput->numOfObjects << endl;
+#endif //TEST_MODE
             break;
         }
 
@@ -588,7 +654,7 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
 
 OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(OD_CycleInput *cycleInput, OD_CycleOutput *cycleOutput)
 {
-    LOG_F(INFO,"Starting OperateObjectDetectionOnTiledSample");
+    LOG_F(INFO, "Starting OperateObjectDetectionOnTiledSample");
 
     cycleOutput->numOfObjects = 0;
 
@@ -603,15 +669,20 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
 
     std::list<float *> *tarList = new list<float *>(0);
 
-    LOG_F(INFO,"Create tiled image from %s", imgName );
+    LOG_F(INFO, "Create tiled image from %s", imgName);
     CreateTiledImage(imgName, bigW, bigH, bigIm, tarList);
 
-    // cv::imwrite("smallImg.tif",cv::imread(imgName));
+#ifdef TEST_MODE
     cv::imwrite("bigImg.tif", *bigIm);
+#endif //#ifdef TEST_MODE
 
     unsigned char *ptrTif = ParseCvMat(*bigIm); // has new inside
     //run operate part without sync stuff etc.
+
+#ifdef TEST_MODE
     cout << " Internal Run on RGB buffer " << endl;
+#endif //#ifdef TEST_MODE
+
     this->m_mbATR->RunRGBVector(ptrTif, bigH, bigW);
 
     OD_CycleOutput *tempCycleOutput = NewOD_CycleOutput(350);
@@ -621,11 +692,12 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
     if (m_withActiveCM && m_mbCM != nullptr && tempCycleOutput->numOfObjects > 0)
         this->m_mbCM->RunImgWithCycleOutput(*bigIm, tempCycleOutput, 0, tempCycleOutput->numOfObjects - 1, true);
 
-    //DEBUG
-    m_prevCycleInput = new OD_CycleInput();
+//DEBUG
+#ifdef TEST_MODE
+    m_prevCycleInput = new OD_CycleInput(); // TODO: in ifdef (?) TODO take care of new
     m_prevCycleInput->ptr = ptrTif;
-
     SaveResultsATRimage(tempCycleOutput, (char *)"tiles1.png", false);
+#endif //#ifdef TEST_MODE
 
     // analyze results and populate output
     AnalyzeTiledSample(tempCycleOutput, tarList, cycleOutput);
@@ -686,16 +758,16 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
 
     // make sure co1->ObjectsArr[i] is one of tarList[j] by IoU
     int nr = CleanWrongTileDetections(co1, tarList);
+
+#ifdef TEST_MODE
     cout << " CleanWrongTileDetections removed " << nr << " objects" << endl;
+#endif //#ifdef TEST_MODE
+
     co1->numOfObjects = co1->numOfObjects - nr;
     int co1NumOfObjectsWithSkips = co1->numOfObjects + nr;
 
     for (size_t i = 0; i < co1NumOfObjectsWithSkips; i++)
     {
-        // cout << co1->ObjectsArr[i].tarClass << endl;
-        // cout << co1->ObjectsArr[i].tarSubClass << endl;
-        // cout << co1->ObjectsArr[i].tarColor << endl;
-        // cout << co1->ObjectsArr[i].tarScore << endl;
         if (co1->ObjectsArr[i].tarScore < 0.2)
             continue;
 
@@ -745,6 +817,7 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
 
 bool ObjectDetectionManagerHandler::InitCM()
 {
+    LOG_F(INFO, "ObjectDetectionManagerHandler::InitCM");
     const char *modelPath;
     const char *ckpt;
     const char *inname;
@@ -754,8 +827,10 @@ bool ObjectDetectionManagerHandler::InitCM()
     //use  m_configParams
     for (size_t i = 0; i < m_configParams->models.size(); i++)
     {
+#ifdef TEST_MODE
         std::cout << m_configParams->models[i]["nickname"] << std::endl;
         std::cout << m_configParams->models[i]["load_path"] << std::endl;
+#endif //#ifdef TEST_MODE
         if (m_configParams->models[i]["nickname"].compare("default_CM") == 0)
         {
             modelPath = prepath.append(m_configParams->models[i]["load_path"]).c_str();
@@ -771,7 +846,7 @@ bool ObjectDetectionManagerHandler::InitCM()
     }
     if (flag == false)
     {
-        LOG_F(INFO, "Default CM loaded");
+        LOG_F(INFO, "default_CM is not specified,  `default` default CM loaded");
         modelPath = "graphs/output_graph.pb";
         ckpt = nullptr;
         inname = "conv2d_input";
@@ -780,15 +855,17 @@ bool ObjectDetectionManagerHandler::InitCM()
 
     //check file exist
     if (!file_exists_test(modelPath))
+    {
+        LOG_F(WARNING, "The color model file: %s  is missing... Skipping", modelPath);
         return false;
-
+    }
     m_mbCM = new mbInterfaceCM();
     if (!m_mbCM->LoadNewModel(modelPath, ckpt, inname, outname))
     {
-        LOG_F(ERROR, "Failed to load CM: %s\ninname: %s\noutname:%s",modelPath, inname, outname );
+        LOG_F(ERROR, "Failed to load CM: %s\ninname: %s\noutname:%s", modelPath, inname, outname);
         return false;
     }
-    LOG_F(INFO, "Loaded CM: %s\ninname: %s\noutname:%s",modelPath, inname, outname );
+    LOG_F(INFO, "Loaded CM: %s\ninname: %s\noutname:%s", modelPath, inname, outname);
     return true;
 }
 
@@ -809,7 +886,6 @@ bool ObjectDetectionManagerHandler::InitializeLogger()
     loguru::add_file(prepath.c_str(), loguru::Append, loguru::Verbosity_MAX);
 
     return true;
-
 }
 
 bool ObjectDetectionManagerHandler::InitConfigParamsFromFile(const char *iniFilePath)

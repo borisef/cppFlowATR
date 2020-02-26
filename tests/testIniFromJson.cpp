@@ -25,7 +25,10 @@ vector<String> GetFileNames();
 
 void MyWait(string s, float ms)
 {
+#ifdef TEST_MODE
     std::cout << s << " Waiting sec:" << (ms / 1000.0) << endl;
+#endif//#ifdef TEST_MODE
+
     std::this_thread::sleep_for(std::chrono::milliseconds((uint)ms));
 }
 
