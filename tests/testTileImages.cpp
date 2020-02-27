@@ -47,9 +47,9 @@ int main()
                             "media/gzir/gzir009.jpg"};
 
 #ifdef WIN32
-    string graph = (char *)"graphs/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_frozen_inference_graph.pb";
+    string iniFile = (char *)"config/configATR_Feb2020_win.json";
 #else
-    string graph = (char *)"graphs/frozen_inference_graph_humans.pb";
+    string iniFile = (char *)"config/configATR_Feb2020.json";
 #endif
 
     // Mission
@@ -70,7 +70,7 @@ int main()
 
     OD_InitParams initParamsSamples =
         {
-            (char *)graph.c_str(),
+            (char *)iniFile.c_str(),
             350, // max number of items to be returned
             supportData,
             mission};

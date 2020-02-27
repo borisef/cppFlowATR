@@ -63,8 +63,8 @@ target_link_libraries (stressTest opencv_world343d.lib tensorflow.dll )
 # # test threads
 # add_executable(testThread  tests/testThread.cpp)
 
-# add_executable(testTileImages tests/testTileImages.cpp ${SRC})
-# target_link_libraries (testTileImages  opencv_world343d.lib tensorflow.dll)
+ add_executable(testTileImages tests/testTileImages.cpp ${SRC})
+ target_link_libraries (testTileImages  opencv_world343d.lib tensorflow.dll)
 
 
 add_executable(testLikeMnist tests/testLikeMnist.cpp ${SRC})
@@ -82,3 +82,6 @@ target_link_libraries (testIniFromJson opencv_world343d.lib  tensorflow.dll)
 
 add_executable(testlog tests/logtest.cpp ${SRC})
 target_link_libraries (testlog opencv_world343d.lib  tensorflow.dll)
+
+add_executable(videoTest tests/testvideo.cpp ${SRC})
+target_link_libraries (videoTest opencv_world343d.lib  tensorflow.dll)

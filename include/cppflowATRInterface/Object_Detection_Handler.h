@@ -22,6 +22,7 @@ class ObjectDetectionManagerHandler : public ObjectDetectionManager
 {
 public:
     OD_ErrorCode InitObjectDetection(OD_InitParams *input);
+    OD_ErrorCode StartConfigAndLogger(OD_InitParams *ip);
     OD_ErrorCode OperateObjectDetection(OD_CycleOutput *CycleOutput);
     OD_ErrorCode PrepareOperateObjectDetection(OD_CycleInput *CycleInput); // run synchroniusly
     OD_ErrorCode OperateObjectDetectionOnTiledSample(OD_CycleInput *cycleInput, OD_CycleOutput *cycleOutput);

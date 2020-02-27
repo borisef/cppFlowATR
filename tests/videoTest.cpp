@@ -16,7 +16,7 @@
 #include "inih/INIReader.h"
 
 void doATRinference(cv::Mat inp1, OD::ObjectDetectionManager *atrManager);
-OD_InitParams *loadConfig(string path);
+OD::OD_InitParams *loadConfig(string path);
 OD::ObjectDetectionManager *createAtrManager();
 
 int main()

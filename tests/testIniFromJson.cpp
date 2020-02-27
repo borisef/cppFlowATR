@@ -53,9 +53,9 @@ struct OneRunStruct
     e_OD_ColorImageType imType = e_OD_ColorImageType::RGB;
 
 #ifdef WIN32
-    string iniFile = (char *)"graphs/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_frozen_inference_graph.pb";
+    string iniFile = (char *)"config/configATR_Feb2020_win.json";
 #else
-    string iniFile = (char *)"graphs/frozen_inference_graph_humans.pb";
+    string iniFile = (char *)"config/configATR_Feb2020.json";
 #endif
 
     bool toDeleteATRM = true;

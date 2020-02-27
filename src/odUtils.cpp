@@ -4,8 +4,8 @@ using namespace cv;
 using namespace std;
 
 std::map<OD::e_OD_TargetColor, char *> mapOfcolors = {
-    {BLACK, "black"},
-    {BLUE, "blue"},
+    {OD::e_OD_TargetColor::BLACK, "black"},
+    {OD::e_OD_TargetColor::BLUE, "blue"},
     {OD::e_OD_TargetColor::YELLOW, "yellow"},
     {OD::e_OD_TargetColor::GRAY, "gray"},
     {OD::e_OD_TargetColor::GREEN, "green"},

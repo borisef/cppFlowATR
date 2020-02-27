@@ -105,6 +105,34 @@ ObjectDetectionManagerHandler::ObjectDetectionManagerHandler(OD_InitParams *ip) 
     setParams(ip);
 }
 
+
+OD_ErrorCode ObjectDetectionManagerHandler::StartConfigAndLogger(OD_InitParams *odInitParams)
+{
+    //initialization
+    //take care of InitParams
+    if (m_configParams != nullptr)
+        if (m_configParams->GetFilePath().compare(odInitParams->iniFilePath) != 0) //replace
+        {
+            delete m_configParams;
+            m_configParams = nullptr;
+        }
+    if (m_configParams == nullptr)
+        m_configParams = new InitParams(odInitParams->iniFilePath);
+
+    //TODO: if something wrong with init params return error
+
+    // take care of log file
+    if (!logInitialized)
+    {
+        InitializeLogger();
+        logInitialized = true;
+    }
+   
+    return OD_OK;
+
+}
+
+
 ObjectDetectionManagerHandler::~ObjectDetectionManagerHandler()
 {
     WaitForThread();
@@ -207,27 +235,7 @@ std::string ObjectDetectionManagerHandler::DefinePathForATRModel()
 
 OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *odInitParams)
 {
-    //initialization
-    //take care of InitParams
-    if (m_configParams != nullptr)
-        if (m_configParams->GetFilePath().compare(odInitParams->iniFilePath) != 0) //replace
-        {
-            delete m_configParams;
-            m_configParams = nullptr;
-        }
-    if (m_configParams == nullptr)
-        m_configParams = new InitParams(odInitParams->iniFilePath);
-
-    //TODO: if something wrong with init params return error
-
-    // take care of log file
-    if (!logInitialized)
-    {
-        InitializeLogger();
-        logInitialized = true;
-    }
-    //From now on can use logger !!!
-
+    
     LOG_F(INFO, "Manager initialized from %s", odInitParams->iniFilePath);
 
     //check if busy, if yes wait till the end and assign nullptr to next, current and prev

@@ -88,7 +88,7 @@
 	#define LOGURU_PTHREADS    1
 	#define LOGURU_WINTHREADS  0
 	#ifndef LOGURU_STACKTRACES
-		#define LOGURU_STACKTRACES 1
+		#define LOGURU_STACKTRACES 0//1 To solve crash in Jetson
 	#endif
 #endif
 

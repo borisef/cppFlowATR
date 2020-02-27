@@ -25,7 +25,9 @@ vector<String> GetFileNames();
 
 void MyWait(string s, float ms)
 {
+    #ifdef TEST_MODE
     std::cout << s << " Waiting sec:" << (ms / 1000.0) << endl;
+#endif//#ifdef TEST_MODE
     std::this_thread::sleep_for(std::chrono::milliseconds((uint)ms));
 }
 
@@ -50,9 +52,9 @@ struct OneRunStruct
     e_OD_ColorImageType imType = e_OD_ColorImageType::RGB;
 
 #ifdef WIN32
-    string graph = (char *)"graphs/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03_frozen_inference_graph.pb";
+    string iniFile = (char *)"config/configATR_Feb2020_win.json";
 #else
-    string graph = (char *)"graphs/frozen_inference_graph_humans.pb";
+    string iniFile = (char *)"config/configATR_Feb2020.json";
 #endif
 
     bool toDeleteATRM = true;
@@ -92,7 +94,7 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
 
     OD_InitParams initParams =
         {
-            (char *)ors.graph.c_str(),
+            (char *)ors.iniFile.c_str(),
             350, // max number of items to be returned
             supportData,
             mission};
@@ -102,8 +104,9 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
         // // Creation of ATR manager + new mission
         if (!atrManager)
             atrManager = OD::CreateObjectDetector(&initParams); //first mission
-
+#ifdef TEST_MODE
         cout << " ***  ObjectDetectionManager created  *** " << endl;
+#endif//#ifdef TEST_MODE
 
         //  new mission
         OD::InitObjectDetection(atrManager, &initParams);
@@ -121,7 +124,7 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
     co->ObjectsArr = new OD_DetectionItem[co->maxNumOfObjects];
 
     unsigned char *ptrTif;
-    char *ptrTifnew;
+    // char *ptrTifnew;
     int lastReadyFrame = 0;
     co->ImgID_output = 0;
     int temp = 0;
@@ -184,16 +187,16 @@ int main()
     ors4.toShow = true;
     atrManager = OneRun(atrManager, ors4); 
     
-    OneRunStruct ors4nv;
-    ors4nv.W = 4056;
-    ors4nv.H = 3040;
-    ors4nv.splicePath = "media/NV12/*";
-    ors4nv.imType = e_OD_ColorImageType::NV12;
-    ors4nv.numRepetiotions = 1;
-    ors4nv.minDelay = 0;
-    ors4nv.startFrameID = 100000;
-    ors4nv.toShow = true;
-    atrManager = OneRun(atrManager, ors4nv); 
+    // OneRunStruct ors4nv;
+    // ors4nv.W = 4056;
+    // ors4nv.H = 3040;
+    // ors4nv.splicePath = "media/NV12/*";
+    // ors4nv.imType = e_OD_ColorImageType::NV12;
+    // ors4nv.numRepetiotions = 1;
+    // ors4nv.minDelay = 0;
+    // ors4nv.startFrameID = 100000;
+    // ors4nv.toShow = true;
+    // atrManager = OneRun(atrManager, ors4nv); 
 
 
     OneRunStruct ors1;
@@ -247,7 +250,7 @@ int main()
     atrManager = OneRun(atrManager, ors3);
     atrManagerAnother = OneRun(atrManagerAnother, ors5);
 
-    cout<<"STRESS TEST: will create 3 at the same time"<<endl;
+    //cout<<"STRESS TEST: will create 3 at the same time"<<endl;
     // will create 3 at the same time // failed stressTest in PC_linux
     // OD::ObjectDetectionManager *atrManagerAnother2 = nullptr;
     // ors4.toDeleteATRM = false;

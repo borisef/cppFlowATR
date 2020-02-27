@@ -65,6 +65,9 @@ OD_ErrorCode InitObjectDetection(ObjectDetectionManager *odm, OD_InitParams *odI
     #endif //TEST_MODE
 
     ObjectDetectionManagerHandler *odmHandler = (ObjectDetectionManagerHandler *)odm;
+    OD_ErrorCode ec0 = odmHandler->StartConfigAndLogger(odInitParams);
+     //From now we can use logger !!!
+     //TODO: what if ec0 is not OK ? 
 
     OD_ErrorCode ec = odmHandler->InitObjectDetection(odInitParams);
 

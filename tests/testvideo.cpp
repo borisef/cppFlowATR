@@ -17,7 +17,9 @@ using namespace OD;
 
 void MyWait(string s, float ms)
 {
+    #ifdef TEST_MODE
     std::cout << s << " Waiting sec:" << (ms / 1000.0) << endl;
+    #endif //#ifdef TEST_MODE
     std::this_thread::sleep_for(std::chrono::milliseconds((uint)ms));
 }
 
@@ -33,7 +35,11 @@ struct OneRunStruct
     e_OD_ColorImageType imType = e_OD_ColorImageType::RGB;
 
 
-    string graph = (char *)"graphs/frozen_inference_graph_humans.pb";
+  #ifdef WIN32
+    string iniFile = (char *)"config/configATR_Feb2020_win.json";
+#else
+    string iniFile = (char *)"config/configATR_Feb2020.json";
+#endif
 
     bool toDeleteATRM = true;
     bool doNotInit = false;
@@ -61,7 +67,7 @@ OD::ObjectDetectionManager * OneRun(OD::ObjectDetectionManager *atrManager, OneR
 
     OD_InitParams initParams =
         {
-            (char *)ors.graph.c_str(),
+            (char *)ors.iniFile.c_str(),
             350, // max number of items to be returned
             supportData,
             mission};
