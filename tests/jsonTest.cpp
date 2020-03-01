@@ -5,12 +5,16 @@ using namespace OD;
 
 int main()
 {
-#ifdef WIN32
-    InitParams a("config/configATR_Feb2020_win.json");
-#else
-    InitParams a("config/configATR_Feb2020.json");
-#endif
 
+#ifdef OS_WINDOWS
+    InitParams a("config/configATR_Feb2020_win.json");
+#elif OS_LINUX
+#ifdef JETSON
+    InitParams a("config/configATR_Feb2020_linux_jetson.json");
+#else
+    InitParams a("config/configATR_Feb2020_linux.json");
+#endif
+#endif
 
 
     for (auto it = a.info.cbegin(); it != a.info.cend(); ++it)

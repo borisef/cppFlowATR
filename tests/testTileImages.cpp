@@ -48,8 +48,12 @@ int main()
 
 #ifdef WIN32
     string iniFile = (char *)"config/configATR_Feb2020_win.json";
-#else
-    string iniFile = (char *)"config/configATR_Feb2020.json";
+#elif OS_LINUX
+    #ifdef JETSON
+        string iniFile = (char *)"config/configATR_Feb2020_linux_jetson.json";
+    #else
+        string iniFile = (char *)"config/configATR_Feb2020_linux.json";
+    #endif
 #endif
 
     // Mission

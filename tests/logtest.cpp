@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 	//loguru::init(argc, argv);
 	
 
-	loguru::add_file("output/logs/log.log", loguru::Append, loguru::Verbosity_MAX);
+	loguru::add_file("logs/log.log", loguru::Append, loguru::Verbosity_MAX);
 
 	//char log_path[64];
 	//loguru::suggest_log_path("output/logs/", log_path, sizeof(log_path));

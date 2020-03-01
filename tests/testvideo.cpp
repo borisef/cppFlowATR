@@ -17,12 +17,11 @@ using namespace OD;
 
 void MyWait(string s, float ms)
 {
-    #ifdef TEST_MODE
+#ifdef TEST_MODE
     std::cout << s << " Waiting sec:" << (ms / 1000.0) << endl;
-    #endif //#ifdef TEST_MODE
+#endif //#ifdef TEST_MODE
     std::this_thread::sleep_for(std::chrono::milliseconds((uint)ms));
 }
-
 
 struct OneRunStruct
 {
@@ -34,11 +33,14 @@ struct OneRunStruct
     bool toShow = true;
     e_OD_ColorImageType imType = e_OD_ColorImageType::RGB;
 
-
-  #ifdef WIN32
+#ifdef WIN32
     string iniFile = (char *)"config/configATR_Feb2020_win.json";
+#elif OS_LINUX
+#ifdef JETSON
+    string iniFile = (char *)"config/configATR_Feb2020_linux.json";
 #else
-    string iniFile = (char *)"config/configATR_Feb2020.json";
+    string iniFile = (char *)"config/configATR_Feb2020_linux_jetson.json";
+#endif
 #endif
 
     bool toDeleteATRM = true;
@@ -46,7 +48,7 @@ struct OneRunStruct
     int startFrameID = 1;
 };
 
-OD::ObjectDetectionManager * OneRun(OD::ObjectDetectionManager *atrManager, OneRunStruct ors)
+OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRunStruct ors)
 {
     // Mission
     MB_Mission mission = {
@@ -82,7 +84,7 @@ OD::ObjectDetectionManager * OneRun(OD::ObjectDetectionManager *atrManager, OneR
 
         // // new mission
         OD::InitObjectDetection(atrManager, &initParams);
-          ((ObjectDetectionManagerHandler*)atrManager)->WaitForThread();
+        ((ObjectDetectionManagerHandler *)atrManager)->WaitForThread();
     }
 
     //((ObjectDetectionManagerHandler*)atrManager)->WaitForThread();
@@ -105,7 +107,6 @@ OD::ObjectDetectionManager * OneRun(OD::ObjectDetectionManager *atrManager, OneR
 
     int N = int(cap.get(cv::CAP_PROP_FRAME_COUNT));
 
-
     unsigned char *ptrTif;
 
     int lastReadyFrame = 0;
@@ -118,10 +119,11 @@ OD::ObjectDetectionManager * OneRun(OD::ObjectDetectionManager *atrManager, OneR
             temp++;
 
             //read next frame
-            frame.release(); 
+            frame.release();
             cap >> frame;
 
-            if(frame.empty()){
+            if (frame.empty())
+            {
                 break;
             }
 
@@ -142,8 +144,9 @@ OD::ObjectDetectionManager * OneRun(OD::ObjectDetectionManager *atrManager, OneR
         }
     }
     //at the end
-     ((ObjectDetectionManagerHandler*)atrManager)->WaitForThread();
-    if(ors.toDeleteATRM){
+    ((ObjectDetectionManagerHandler *)atrManager)->WaitForThread();
+    if (ors.toDeleteATRM)
+    {
         OD::TerminateObjectDetection(atrManager);
         atrManager = nullptr;
     }
@@ -170,12 +173,10 @@ int main()
     ors1.startFrameID = 1;
     atrManager = OneRun(atrManager, ors1);
 
-
     atrManager = OneRun(atrManager, ors1);
-
 
     OD::TerminateObjectDetection(atrManager);
 
-    cout<<"Ended VideoTest Normally"<<endl;
+    cout << "Ended VideoTest Normally" << endl;
     return 0;
 }

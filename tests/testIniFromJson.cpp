@@ -27,7 +27,7 @@ void MyWait(string s, float ms)
 {
 #ifdef TEST_MODE
     std::cout << s << " Waiting sec:" << (ms / 1000.0) << endl;
-#endif//#ifdef TEST_MODE
+#endif //#ifdef TEST_MODE
 
     std::this_thread::sleep_for(std::chrono::milliseconds((uint)ms));
 }
@@ -41,7 +41,6 @@ vector<String> GetFileNames(const char *pa)
     return fn;
 }
 
-
 struct OneRunStruct
 {
     int H;
@@ -54,8 +53,12 @@ struct OneRunStruct
 
 #ifdef WIN32
     string iniFile = (char *)"config/configATR_Feb2020_win.json";
+#elif OS_LINUX
+#ifdef JETSON
+    string iniFile = (char *)"config/configATR_Feb2020_linux_jetson.json";
 #else
-    string iniFile = (char *)"config/configATR_Feb2020.json";
+    string iniFile = (char *)"config/configATR_Feb2020_linux.json";
+#endif
 #endif
 
     bool toDeleteATRM = true;
@@ -139,7 +142,7 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
             else
             {
                 //ptrTif = ParseRaw(ff[i]);
-                ptrTif = (unsigned char*)fastParseRaw(ff[i]);
+                ptrTif = (unsigned char *)fastParseRaw(ff[i]);
             }
 
             ci->ptr = ptrTif;
@@ -176,16 +179,24 @@ int main()
 {
     OD::ObjectDetectionManager *atrManager = nullptr;
 
-   
     OneRunStruct ors1;
     ors1.splicePath = "media/spliced/*";
     ors1.numRepetiotions = 1;
     ors1.minDelay = 0;
     ors1.startFrameID = 1;
     ors1.iniFile = "config/configATR_Feb2020_win.json";
+#ifdef WIN32
+    ors1.iniFile = (char *)"config/configATR_Feb2020_win.json";
+#elif OS_LINUX
+#ifdef JETSON
+    ors1.iniFile = (char *)"config/configATR_Feb2020_linux_jetson.json";
+#else
+    ors1.iniFile = (char *)"config/configATR_Feb2020_linux.json";
+#endif
+#endif
     ors1.toDeleteATRM = false;
     atrManager = OneRun(atrManager, ors1);
-    ors1.doNotInit = false; 
+    ors1.doNotInit = false;
     atrManager = OneRun(atrManager, ors1);
     ors1.minDelay = 100;
     ors1.splicePath = "media/filter/*";
@@ -193,10 +204,8 @@ int main()
     ors1.splicePath = "media/filterUCLA/*";
     atrManager = OneRun(atrManager, ors1);
 
-   
-
     OD::TerminateObjectDetection(atrManager);
-  
+
     cout << "Ended testIniFromJson Normally" << endl;
     return 0;
 }
