@@ -7,7 +7,7 @@
   },
  "_comment": "--- Run parameters ---",
   "run_params" : {
-    "logfile_path" : "log/mylog.log",
+    "logfile_path" : "logs/mylog.log",
     "debug_mode" : "false",
     "prePath": "e:/projects/MB2/cppFlowATR/",
 	"os": "WIN"

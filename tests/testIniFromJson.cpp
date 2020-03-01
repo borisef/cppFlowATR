@@ -159,12 +159,14 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
         }
     }
     //at the end
-    ((ObjectDetectionManagerHandler *)atrManager)->WaitForThread();
+
     if (ors.toDeleteATRM)
     {
         OD::TerminateObjectDetection(atrManager);
         atrManager = nullptr;
     }
+    else
+         ((ObjectDetectionManagerHandler *)atrManager)->WaitForThread();
     //release OD_CycleInput
     delete ci;
 

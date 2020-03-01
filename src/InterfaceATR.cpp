@@ -25,6 +25,9 @@ mbInterfaceATR::~mbInterfaceATR()
 
     if (m_model != nullptr)
     {
+#ifdef TEST_MODE
+        cout << "Delete 5 tensors and model" << endl;
+#endif //TEST_MODE
         delete m_model;
         delete m_outTensorNumDetections;
         delete m_outTensorScores;

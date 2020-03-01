@@ -118,3 +118,12 @@ target_link_libraries (testCmake  ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lp
 add_library(mbATR SHARED   ${SRC})
 target_link_libraries (mbATR ${MY_TF_LIB} ${MY_TF_LIB2} ${OpenCV_LIBS} -lpthread)
 
+# #(3) Test stressTest but with SO dependencies
+add_executable(testTamir tests/testStress.cpp  ${SRC})
+FIND_LIBRARY(MY_LIB1 NAMES libmbATR.so PATHS build/
+                                             build/libs/shared/ATR)               
+target_link_libraries (testTamir  ${MY_TF_LIB} ${MY_TF_LIB2} ${OpenCV_LIBS} -lpthread)
+
+#TEMP
+add_executable(stressTest1 tests/testStress1.cpp ${SRC})
+target_link_libraries (stressTest1 ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)

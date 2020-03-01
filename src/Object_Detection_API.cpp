@@ -51,6 +51,7 @@ OD_ErrorCode TerminateObjectDetection(ObjectDetectionManager *odm)
 {
     if (odm != nullptr)
     {
+        ((ObjectDetectionManagerHandler *)odm)->WaitForThread();
         delete (ObjectDetectionManagerHandler *)odm; //delete as handler
         odm = nullptr;
     }

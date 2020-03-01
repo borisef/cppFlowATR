@@ -135,6 +135,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::StartConfigAndLogger(OD_InitParams *
 
 ObjectDetectionManagerHandler::~ObjectDetectionManagerHandler()
 {
+    LOG_F(INFO, "Destructor for ObjectDetectionManagerHandler started...");
     WaitForThread();
     DeleteAllInnerCycleInputs();
 
@@ -144,6 +145,7 @@ ObjectDetectionManagerHandler::~ObjectDetectionManagerHandler()
 
 bool ObjectDetectionManagerHandler::WaitForThread()
 {
+    LOG_F(INFO, "WaitForThread() started");
     if (m_result.valid())
     {
 #ifdef TEST_MODE
@@ -161,7 +163,8 @@ bool ObjectDetectionManagerHandler::WaitForThread()
         cout << "Thread is still not valid" << endl;
 #endif //TEST_MODE
     }
-
+    
+    LOG_F(INFO, "WaitForThread() finished");
     return true;
 }
 
