@@ -1,0 +1,53 @@
+cmake_minimum_required(VERSION 3.10)
+project(cppFlowATR)
+
+add_compile_options(-pthread)
+add_compile_options(-lm)
+
+include_directories(PRIVATE include /home/borisef/projects/tf_1_13_source)
+
+
+find_package( OpenCV REQUIRED )
+set(OpenCV_STATIC ON)
+
+AUX_SOURCE_DIRECTORY(src SRC)
+
+
+link_directories(${CMAKE_CURRENT_LIST_DIR}/lib)
+include_directories(${OpenCV_INCLUDE_DIRS})
+
+FIND_LIBRARY(MY_LIB_TF1 NAMES libtensorflow_framework.so PATHS /home/borisef/projects/cppFlowATR/libs/shared/tensorflow_nano_gpu113 )
+FIND_LIBRARY(MY_LIB_TF2 NAMES libtensorflow.so PATHS /home/borisef/projects/cppFlowATR/libs/shared/tensorflow_nano_gpu113 )
+set(CMAKE_CXX_STANDARD 17)
+
+#add_executable(main_like_coco tests/main_like_coco.cpp src/Model.cpp src/Tensor.cpp)
+#target_link_libraries (main_like_coco -ltensorflow ${OpenCV_LIBS})
+
+#add_executable(main_ATR tests/main_ATR.cpp src/Model.cpp 
+#                         src/Tensor.cpp src/InterfaceATR.cpp 
+#                         src/Object_Detection_API.cpp src/imgUtils.cpp)
+
+#target_link_libraries (main_ATR -ltensorflow ${OpenCV_LIBS})
+
+
+
+#TESTS
+#add_executable(testUtils tests/testUtils.cpp src/imgUtils.cpp)
+#target_link_libraries (testUtils  ${OpenCV_LIBS})
+
+
+#add_executable(testATRInference  tests/testATRinference.cpp ${SRC})
+#target_link_libraries (testATRInference ${MY_LIB_TF1} ${MY_LIB_TF2}  ${OpenCV_LIBS} -lpthread)
+
+add_executable(testStress  tests/testStress.cpp ${SRC})
+target_link_libraries (testStress ${MY_LIB_TF1} ${MY_LIB_TF2}  ${OpenCV_LIBS} -lpthread)
+
+
+add_executable(logtest  tests/logtest.cpp ${SRC})
+target_link_libraries (logtest ${MY_LIB_TF1} ${MY_LIB_TF2}  ${OpenCV_LIBS} -lpthread)
+
+#SO 
+#add_library(mbATR SHARED src/InterfaceATR.cpp  src/Object_Detection_API.cpp)
+#target_link_libraries (mbATR -ltensorflow ${OpenCV_LIBS})
+
+

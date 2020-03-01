@@ -59,7 +59,10 @@ else(OS_WINDOWS) #Linux
     include_directories(${OpenCV_INCLUDE_DIRS})
 
     if(JETSON) #Linux Jetson ONLY
-        
+        add_compile_options(-pthread -lm)
+        include_directories(PRIVATE include /home/borisef/projects/tf_1_13_source)
+        FIND_LIBRARY(MY_TF_LIB NAMES libtensorflow_framework.so PATHS /home/borisef/projects/cppFlowATR/libs/shared/tensorflow_nano_gpu113 )
+        FIND_LIBRARY(MY_TF_LIB2 NAMES libtensorflow.so PATHS /home/borisef/projects/cppFlowATR/libs/shared/tensorflow_nano_gpu113 )
     else(JETSON) # Linux PC ONLY
         FIND_LIBRARY(MY_TF_LIB NAMES libtensorflow.so PATHS /home/borisef/projects/cppflowATR/libs/shared/113 )
         set(MY_TF_LIB2 "")
@@ -110,4 +113,8 @@ target_link_libraries (videoTest  ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lp
 
 add_executable(testCmake tests/testCmake.cpp ${SRC})
 target_link_libraries (testCmake  ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+
+#SO 
+add_library(mbATR SHARED   ${SRC})
+target_link_libraries (mbATR ${MY_TF_LIB} ${MY_TF_LIB2} ${OpenCV_LIBS} -lpthread)
 
