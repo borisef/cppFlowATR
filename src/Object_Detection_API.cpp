@@ -49,12 +49,15 @@ ObjectDetectionManager *CreateObjectDetector(OD_InitParams *initParams)
 DECLARE_API_FUNCTION OD_ErrorCode TerminateObjectDetection(ObjectDetectionManager *);
 OD_ErrorCode TerminateObjectDetection(ObjectDetectionManager *odm)
 {
+    LOG_F(INFO, "TerminateObjectDetection: started ...");
+
     if (odm != nullptr)
     {
         ((ObjectDetectionManagerHandler *)odm)->WaitForThread();
         delete (ObjectDetectionManagerHandler *)odm; //delete as handler
         odm = nullptr;
     }
+     LOG_F(INFO, "TerminateObjectDetection: Ended !");
     return OD_ErrorCode::OD_OK;
 }
 
@@ -87,6 +90,7 @@ OD_ErrorCode OperateObjectDetectionAPI(ObjectDetectionManager *odm, OD_CycleInpu
 
     if(odmHandler->getParams()->mbMission.missionType == OD::MB_MissionType::ANALYZE_SAMPLE)
         {
+            LOG_F(INFO,"Calling for OperateObjectDetectionOnTiledSample with %s",odIn->ptr);
             odmHandler->OperateObjectDetectionOnTiledSample(odIn,odOut);
             return ec; // TODO: not always ok
         }

@@ -22,6 +22,10 @@ cv::Scalar GetColor2Draw(OD::e_OD_TargetColor color_id);
 
 std::string GetStringInitParams(OD::OD_InitParams ip);
 
+std::string CycleOutput2LogString(OD_CycleOutput* co);
+
+std::string DetectionItem2LogString(OD_DetectionItem di);
+
 
 
 #endif

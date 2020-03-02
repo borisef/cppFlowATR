@@ -125,5 +125,5 @@ FIND_LIBRARY(MY_LIB1 NAMES libmbATR.so PATHS build/
 target_link_libraries (testTamir  ${MY_TF_LIB} ${MY_TF_LIB2} ${OpenCV_LIBS} -lpthread)
 
 #TEMP
-add_executable(stressTest1 tests/testStress1.cpp ${SRC})
-target_link_libraries (stressTest1 ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+# add_executable(stressTest1 tests/testStress1.cpp ${SRC})
+# target_link_libraries (stressTest1 ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)

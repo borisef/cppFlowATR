@@ -41,6 +41,13 @@ std::map<e_OD_TargetSubClass, char *> mapOfSubclasses = {
     {TRACKTOR, "TRACKTOR"},
     {OTHER_SUB_CLASS, "OTHER_SUB_CLASS"}};
 
+std::map<e_OD_TargetClass, char *> mapOfClasses = {
+    {UNKNOWN_CLASS, "UNKNOWN_CLASS"},
+    {VEHICLE, "VEHICLE"},
+    {PERSON, "PERSON"},
+    {OTHER_CLASS, "OTHER_CLASS"}
+};
+
 OD_CycleOutput *NewOD_CycleOutput(int maxNumOfObjects, int defaultImgID_output)
 {
 
@@ -171,4 +178,45 @@ std::string GetStringInitParams(OD::OD_InitParams ip)
     mystr.append("ip.mbMission.targetClas = ").append(std::to_string(ip.mbMission.targetClas)).append("\n");
 
     return mystr;
+}
+
+std::string BB2LogString(OD_BoundingBox bb)
+{
+    std::string mystr = "(";
+    mystr.append(std::to_string(bb.x1)).append(",");
+    mystr.append(std::to_string(bb.x2)).append(",");
+    mystr.append(std::to_string(bb.y1)).append(",");
+    mystr.append(std::to_string(bb.y2)).append(")");
+    return mystr;
+}
+
+std::string DetectionItem2LogString(OD_DetectionItem di)
+{
+    std::string mystr = "";
+    mystr.append(BB2LogString(di.tarBoundingBox)).append(",");
+  //  mystr.append(mapOfClasses[di.tarClass]).append(",");
+  mystr.append(std::to_string(di.tarClass)).append(",");
+  //  mystr.append(mapOfSubclasses[di.tarSubClass]).append(",");
+  mystr.append(std::to_string(di.tarSubClass)).append(",");
+    mystr.append(std::to_string(di.tarScore)).append(",");
+   // mystr.append(mapOfcolors[di.tarColor]).append(",");
+    mystr.append(std::to_string(di.tarColor)).append(",");
+    mystr.append(std::to_string(di.tarColorScore)).append(",");
+    mystr.append("\n");
+    return mystr;
+}
+std::string CycleOutput2LogString(OD_CycleOutput* co)
+{
+    std::string mystr = "OD_CycleOutput:\n ";
+    mystr.append("numOfObjects=").append(std::to_string(co->numOfObjects)).append("\n");
+    for (size_t i = 0; i < co->numOfObjects; i++)
+    {
+        mystr.append("OD_DetectionItem:").append(std::to_string(i)).append("\n"); 
+        mystr.append(DetectionItem2LogString(co->ObjectsArr[i]));
+    }
+    
+    mystr.append("TODO=").append("TODO").append("\n");
+
+    return mystr;
+
 }

@@ -699,6 +699,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
     OD_CycleOutput *tempCycleOutput = NewOD_CycleOutput(350);
     this->PopulateCycleOutput(tempCycleOutput);
 
+    LOG_F(INFO, "Tiled image found %d targets", tempCycleOutput->numOfObjects);
     // color
     if (m_withActiveCM && m_mbCM != nullptr && tempCycleOutput->numOfObjects > 0)
         this->m_mbCM->RunImgWithCycleOutput(*bigIm, tempCycleOutput, 0, tempCycleOutput->numOfObjects - 1, true);
@@ -712,6 +713,9 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
 
     // analyze results and populate output
     AnalyzeTiledSample(tempCycleOutput, tarList, cycleOutput);
+
+    LOG_F(INFO, "AnalyzeTiledSample found final count of %d targets", cycleOutput->numOfObjects);
+    LOG_F(INFO, CycleOutput2LogString(cycleOutput).c_str());
 
     // clean
     bigIm->release();
