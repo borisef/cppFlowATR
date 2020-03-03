@@ -24,11 +24,13 @@ elseif((UNIX OR LINUX OR (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")) AND NOT APPLE)
     message("-------Linux-------")
 endif()
 
-IF((${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm") OR (${CMAKE_SYSTEM_PROCESSOR} MATCHES "ARM") )
+
+IF((${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm") OR (${CMAKE_SYSTEM_PROCESSOR} MATCHES "ARM")  OR (${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64") )
     add_definitions (-DJETSON)
     set(JETSON TRUE)
     message("-------Jetson-------")
 ELSE()
+    message("-------NOT Jetson-------")
     set(JETSON FALSE)
 ENDIF()
 
@@ -61,8 +63,8 @@ else(OS_WINDOWS) #Linux
     if(JETSON) #Linux Jetson ONLY
         add_compile_options(-pthread -lm)
         include_directories(PRIVATE include /home/borisef/projects/tf_1_13_source)
-        FIND_LIBRARY(MY_TF_LIB NAMES libtensorflow_framework.so PATHS /home/borisef/projects/cppFlowATR/libs/shared/tensorflow_nano_gpu113 )
-        FIND_LIBRARY(MY_TF_LIB2 NAMES libtensorflow.so PATHS /home/borisef/projects/cppFlowATR/libs/shared/tensorflow_nano_gpu113 )
+	FIND_LIBRARY(MY_TF_LIB NAMES libtensorflow_framework.so PATHS /home/borisef/projects/libs/shared/tensorflow_nano_gpu113 )
+        FIND_LIBRARY(MY_TF_LIB2 NAMES libtensorflow.so PATHS /home/borisef/projects/libs/shared/tensorflow_nano_gpu113 )
     else(JETSON) # Linux PC ONLY
         FIND_LIBRARY(MY_TF_LIB NAMES libtensorflow.so PATHS /home/borisef/projects/cppflowATR/libs/shared/113 )
         set(MY_TF_LIB2 "")

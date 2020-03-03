@@ -703,10 +703,13 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
     // color
     if (m_withActiveCM && m_mbCM != nullptr && tempCycleOutput->numOfObjects > 0)
         this->m_mbCM->RunImgWithCycleOutput(*bigIm, tempCycleOutput, 0, tempCycleOutput->numOfObjects - 1, true);
+     else{
+	 LOG_F(INFO, "Skipping color classifier for tiled image");
+	}
 
 //DEBUG
 #ifdef TEST_MODE
-    m_prevCycleInput = new OD_CycleInput(); // TODO: in ifdef (?) TODO take care of new
+     m_prevCycleInput = new OD_CycleInput(); // TODO: in ifdef (?) TODO take care of new
     m_prevCycleInput->ptr = ptrTif;
     SaveResultsATRimage(tempCycleOutput, (char *)"tiles1.png", false);
 #endif //#ifdef TEST_MODE
@@ -774,7 +777,7 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
 
     // make sure co1->ObjectsArr[i] is one of tarList[j] by IoU
     int nr = CleanWrongTileDetections(co1, tarList);
-
+    
 #ifdef TEST_MODE
     cout << " CleanWrongTileDetections removed " << nr << " objects" << endl;
 #endif //#ifdef TEST_MODE
@@ -782,7 +785,7 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
     co1->numOfObjects = co1->numOfObjects - nr;
     int co1NumOfObjectsWithSkips = co1->numOfObjects + nr;
 
-    //TODO: separate analysis for colors 
+    // separate analysis for colors 
     float colorWeight[32];
     float sumScoresColors=0.001;
     for (size_t j = 0; j < MAX_COLORS; j++)
@@ -794,7 +797,8 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
         if (co1->ObjectsArr[i].tarScore < 0.2)
             continue;
 
-        if((int)co1->ObjectsArr[i].tarColor<MAX_COLORS)
+
+        if((int)co1->ObjectsArr[i].tarColor<MAX_COLORS && (int)co1->ObjectsArr[i].tarColor>=0)
         {
             colorWeight[(int)co1->ObjectsArr[i].tarColor]+=co1->ObjectsArr[i].tarColorScore;
             sumScoresColors+=co1->ObjectsArr[i].tarColorScore;
@@ -828,7 +832,7 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
 
     // sort co2->ObjectsArr[i2] by score
     bubbleSort_OD_DetectionItem(co2->ObjectsArr, co2->numOfObjects);
-
+  
     for (size_t j = 0; j < MAX_COLORS; j++)
           colorWeight[j]=colorWeight[j]/sumScoresColors;
 
@@ -843,12 +847,13 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
     for (size_t i2 = 0; i2 < co2->numOfObjects; i2++)
         co2->ObjectsArr[i2].tarScore = co2->ObjectsArr[i2].tarScore / (totalScores + 0.00001);
 
-    //TODO: update scores for co2->ObjectsArr[i].tarColorScore from colorWeight[co2->ObjectsArr[i].tarColor]
+    //update scores for co2->ObjectsArr[i].tarColorScore from colorWeight[co2->ObjectsArr[i].tarColor]
      for (size_t i2 = 0; i2 < co2->numOfObjects; i2++)
-        if((int)(co2->ObjectsArr[i2].tarColor)<MAX_COLORS)
+        if((int)(co2->ObjectsArr[i2].tarColor)<MAX_COLORS && ((int)(co2->ObjectsArr[i2].tarColor)>=0))
             co2->ObjectsArr[i2].tarColorScore = colorWeight[(int)(co2->ObjectsArr[i2].tarColor)];
             
     //TODO: compute scores based on Binomial distribution
+	
 }
 
 bool ObjectDetectionManagerHandler::InitCM()

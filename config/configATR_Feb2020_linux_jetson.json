@@ -8,7 +8,7 @@
   "run_params" : {
     "logfile_path" : "log/file.log",
     "debug_mode" : "false",
-    "prePath": "/home/borisef/projects/cppFlowATR/"
+    "prePath": "/media/borisef/3734-6230/projects/cppFlowATR/"
   },
   "models": [
     {
@@ -16,7 +16,7 @@
       "task": "ATR",
       "filetype": ".pb",
       "mission": "0",
-      "load_path": "graphs/frozen_inference_graph_humans.pb",
+      "load_path": "graphs/frozen_inference_graph_all.pb",
       "nickname": "default",
       "max_objects": "300",
       "accuracy": "5",
