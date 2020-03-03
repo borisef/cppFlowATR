@@ -72,7 +72,7 @@ bool convertYUV420toRGB(vector<unsigned char> raw, int width, int height, cv::Ma
 // vector <unsigned char> U ; U.reserve(width*height);
 // vector <unsigned char> V ; V.reserve(width*height);
 //TODO: this is very slow
-cv:
+
   Mat ymat(height, width, CV_8UC1), umat(height, width, CV_8UC1), vmat(height, width, CV_8UC1);
 
   int t = 0;
@@ -118,7 +118,6 @@ cv:
 bool convertYUV420toVector(vector<unsigned char> raw, int width, int height, vector<uint8_t> *outVector)
 {
 
-cv:
   Mat ymat(height, width, CV_8UC1), umat(height, width, CV_8UC1), vmat(height, width, CV_8UC1);
 
   int t = 0;
@@ -267,14 +266,14 @@ unsigned char *ParseImage(String path)
 bool CreateTiledImage(const char *imname, uint W, uint H, cv::Mat *bigImg, list<float *> *trueTargets)
 {
   uint gap = 80;
-  float whiteBalanceProb = 0.05;
-  float rotAngleMax = 90;
-  float rotAngleProb = 0.2;
-  float flipLRprob = 0.1;
-  float flipUDprob = 0.1;
-  float resizeFactor[2] = {0.6, 1.8};
-  float resizeProb = 0.5;
-  float histoEqProb = 0.1; // not in use
+  float whiteBalanceProb = 0.05f;
+  float rotAngleMax = 90.0f;
+  float rotAngleProb = 0.2f;
+  float flipLRprob = 0.1f;
+  float flipUDprob = 0.1f;
+  float resizeFactor[2] = {0.6f, 1.8f};
+  float resizeProb = 0.5f;
+  float histoEqProb = 0.1f; // not in use
 
   uint gapX = gap, gapY = gap;
   bool flag = true;

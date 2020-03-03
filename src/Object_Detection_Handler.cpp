@@ -64,7 +64,7 @@ void ObjectDetectionManagerHandler::setParams(OD_InitParams *ip)
     if (ip->supportData.colorType == e_OD_ColorImageType::YUV422)
         m_numPtrPixels = m_numPtrPixels * 2;
     else if (ip->supportData.colorType == e_OD_ColorImageType::NV12)
-        m_numPtrPixels = m_numPtrPixels * 1.5;
+        m_numPtrPixels = (uint)(m_numPtrPixels * 1.5);
     else
         m_numPtrPixels = m_numPtrPixels * 3;
 }
@@ -401,7 +401,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
 
     if (m_curCycleInput) // never suppose to happen, jic
     {
-        LOG_F(ERROR, "This was never  supposed to happen... m_curCycleInput is not empty... How?");
+        LOG_F(ERROR, "This was never  supposed to happen... m_curCycleInput in OperateObjectDetection is not empty. How?");
         DeleteCycleInput(m_curCycleInput);
         m_curCycleInput = nullptr;
         return OD_ErrorCode::OD_FAILURE;
@@ -461,6 +461,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     }
     else
     {
+        LOG_F(ERROR, "OD_ILEGAL_INPUT for the e_OD_ColorImageType");
         return OD_ErrorCode::OD_ILEGAL_INPUT;
     }
 
@@ -475,6 +476,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
         m_mbCM->RunImgWithCycleOutput(m_mbATR->GetKeepImg(), odOut, 0, (odOut->numOfObjects - 1), true);
 
     odOut->ImgID_output = fi;
+    
 
 // copy current into prev
 #ifdef TEST_MODE
@@ -487,6 +489,8 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     m_mutexOnPrev.lock();
     //glob_mutexOnPrev.lock();
     DeleteCycleInput(tempCI);
+    LOG_F(INFO,"OperateObjectDetection: Done with ATR on frame %d",fi);
+    LOG_F(INFO, CycleOutput2LogString(odOut).c_str());
     m_mutexOnPrev.unlock();
     //glob_mutexOnPrev.unlock();
 
@@ -565,7 +569,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
 #ifdef TEST_MODE
     std::cout << "***** num_detections " << co->numOfObjects << std::endl;
 #endif //#ifdef TEST_MODE
-    for (int i = 0; i < co->numOfObjects; i++)
+    for (uint i = 0; i < co->numOfObjects; i++)
     {
         int classId = co->ObjectsArr[i].tarClass;
         OD::e_OD_TargetColor colorId = co->ObjectsArr[i].tarColor;
@@ -625,7 +629,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
 
 int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutput)
 {
-    float LOWER_SCORE_THRESHOLD = 0.1; //TODO: ini param (?)
+    float LOWER_SCORE_THRESHOLD = 0.1f; //TODO: ini param (?)
 #ifdef TEST_MODE
     cout << "ObjectDetectionManagerHandler::PopulateCycleOutput" << endl;
 #endif //TEST_MODE
@@ -737,8 +741,8 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
 int ObjectDetectionManagerHandler::CleanWrongTileDetections(OD_CycleOutput *co1, std::list<float *> *tarList)
 {
     int numRemoved = 0;
-    float thresh = 0.01;
-    int numTrueTargets = tarList->size();
+    float thresh = 0.01f;
+    // size_t numTrueTargets = tarList->size();
     float objBB[4];
 
     for (size_t d = 0; d < co1->numOfObjects; d++)
@@ -772,8 +776,8 @@ int ObjectDetectionManagerHandler::CleanWrongTileDetections(OD_CycleOutput *co1,
 }
 void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std::list<float *> *tarList, OD_CycleOutput *co2)
 {
-    int MAX_TILES_CONSIDER = 3;
-    int MAX_COLORS = 32;
+    uint MAX_TILES_CONSIDER = 3;
+    uint MAX_COLORS = 32;
 
     // make sure co1->ObjectsArr[i] is one of tarList[j] by IoU
     int nr = CleanWrongTileDetections(co1, tarList);
@@ -787,7 +791,7 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
 
     // separate analysis for colors 
     float colorWeight[32];
-    float sumScoresColors=0.001;
+    float sumScoresColors=0.001f;
     for (size_t j = 0; j < MAX_COLORS; j++)
           colorWeight[j]=0;
 
@@ -798,7 +802,7 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
             continue;
 
 
-        if((int)co1->ObjectsArr[i].tarColor<MAX_COLORS && (int)co1->ObjectsArr[i].tarColor>=0)
+        if(co1->ObjectsArr[i].tarColor<(int)MAX_COLORS && (int)co1->ObjectsArr[i].tarColor>=0)
         {
             colorWeight[(int)co1->ObjectsArr[i].tarColor]+=co1->ObjectsArr[i].tarColorScore;
             sumScoresColors+=co1->ObjectsArr[i].tarColorScore;
@@ -811,7 +815,7 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
                 if (co1->ObjectsArr[i].tarSubClass == co2->ObjectsArr[i1].tarSubClass)
                     if (co1->ObjectsArr[i].tarColor == co2->ObjectsArr[i1].tarColor)
                     {
-                        targetSlot = i1;
+                        targetSlot = (int)i1;
                         break;
                     }
         }
@@ -827,7 +831,7 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
         co2->ObjectsArr[targetSlot].tarClass = co1->ObjectsArr[i].tarClass;
         co2->ObjectsArr[targetSlot].tarSubClass = co1->ObjectsArr[i].tarSubClass;
         co2->ObjectsArr[targetSlot].tarColor = co1->ObjectsArr[i].tarColor;
-        co2->ObjectsArr[targetSlot].tarScore += 1.0 / (co1->numOfObjects + 0.000001);
+        co2->ObjectsArr[targetSlot].tarScore += 1.0f / (co1->numOfObjects + 0.000001f);
     }
 
     // sort co2->ObjectsArr[i2] by score
@@ -845,11 +849,11 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
     for (size_t i2 = 0; i2 < co2->numOfObjects; i2++)
         totalScores = totalScores + co2->ObjectsArr[i2].tarScore;
     for (size_t i2 = 0; i2 < co2->numOfObjects; i2++)
-        co2->ObjectsArr[i2].tarScore = co2->ObjectsArr[i2].tarScore / (totalScores + 0.00001);
+        co2->ObjectsArr[i2].tarScore = co2->ObjectsArr[i2].tarScore / (totalScores + 0.00001f);
 
     //update scores for co2->ObjectsArr[i].tarColorScore from colorWeight[co2->ObjectsArr[i].tarColor]
      for (size_t i2 = 0; i2 < co2->numOfObjects; i2++)
-        if((int)(co2->ObjectsArr[i2].tarColor)<MAX_COLORS && ((int)(co2->ObjectsArr[i2].tarColor)>=0))
+        if((co2->ObjectsArr[i2].tarColor) < (int)MAX_COLORS && ((int)(co2->ObjectsArr[i2].tarColor) >= 0))
             co2->ObjectsArr[i2].tarColorScore = colorWeight[(int)(co2->ObjectsArr[i2].tarColor)];
             
     //TODO: compute scores based on Binomial distribution
@@ -924,7 +928,10 @@ bool ObjectDetectionManagerHandler::InitializeLogger()
     std::string lpath = m_configParams->run_params["logfile_path"];
     std::string prepath = m_configParams->run_params["prePath"];
     prepath.append(lpath);
-    loguru::add_file(prepath.c_str(), loguru::Append, loguru::Verbosity_MAX);
+    //loguru::add_file(prepath.c_str(), loguru::Append, loguru::Verbosity_OFF); // not to file 
+    // Turn off writing to stderr:
+    loguru::add_file(prepath.c_str(), loguru::Append, loguru::Verbosity_MAX); //  to file 
+    loguru::g_stderr_verbosity = loguru::Verbosity_OFF; // no to stderr
 
     return true;
 }
