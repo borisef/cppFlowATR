@@ -7,7 +7,8 @@
   },
   "run_params" : {
     "logfile_path" : "log/file.log",
-    "debug_mode" : "false",
+    "log_verbosity" : "9",
+    "log_stderr_verbosity" : "0",
     "prePath": "/media/borisef/3734-6230/projects/cppFlowATR/"
   },
   "models": [

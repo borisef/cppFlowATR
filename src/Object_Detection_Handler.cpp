@@ -925,13 +925,23 @@ InitParams *ObjectDetectionManagerHandler::GetConfigParams()
 
 bool ObjectDetectionManagerHandler::InitializeLogger()
 {
-    std::string lpath = m_configParams->run_params["logfile_path"];
+    std::string logfile_path = m_configParams->run_params["logfile_path"];
     std::string prepath = m_configParams->run_params["prePath"];
-    prepath.append(lpath);
-    //loguru::add_file(prepath.c_str(), loguru::Append, loguru::Verbosity_OFF); // not to file 
+    std::string log_verbosity = m_configParams->run_params["log_verbosity"];
+    std::string log_stderr_verbosity = m_configParams->run_params["log_stderr_verbosity"];
+
+    prepath.append(logfile_path);
+
+    if(logfile_path.compare("")==0 || log_verbosity.compare("0")==0 || log_verbosity.compare("false")==0)
+        loguru::add_file(prepath.c_str(), loguru::Append, loguru::Verbosity_OFF); // not to file
+    else
+    {
+         loguru::add_file(prepath.c_str(), loguru::Append, loguru::Verbosity_MAX); //  to file
+    }
+    
     // Turn off writing to stderr:
-    loguru::add_file(prepath.c_str(), loguru::Append, loguru::Verbosity_MAX); //  to file 
-    loguru::g_stderr_verbosity = loguru::Verbosity_OFF; // no to stderr
+    if(log_stderr_verbosity.compare("")==0 || log_stderr_verbosity.compare("0")==0 || log_stderr_verbosity.compare("false")==0 )
+        loguru::g_stderr_verbosity = loguru::Verbosity_OFF; // no to stderr
 
     return true;
 }

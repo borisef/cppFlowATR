@@ -7,10 +7,11 @@
   },
  "_comment": "--- Run parameters ---",
   "run_params" : {
-    "logfile_path" : "logs/mylog.log",
-    "debug_mode" : "false",
+    "logfile_path" : "logs/file.log",
+    "log_verbosity" : "9",
+    "log_stderr_verbosity" : "0",
     "prePath": "e:/projects/MB2/cppFlowATR/",
-	"os": "WIN"
+    "os": "WIN"
   },
 "_comment": "--- Models go here --",
 "_comment": "Remark, most of params are not yet in use",
