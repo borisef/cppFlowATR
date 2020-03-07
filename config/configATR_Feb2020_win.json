@@ -83,6 +83,7 @@
       "targets": "ALL",
       "width": "128",
       "height": "128",
+	  "margin": "0.2",
       "max_batch_size": "64",
       "image_format": "RGB",
       "resolution": "5",

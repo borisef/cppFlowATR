@@ -867,6 +867,8 @@ bool ObjectDetectionManagerHandler::InitCM()
     const char *ckpt;
     const char *inname;
     const char *outname;
+    float tileMargin = 0.2;
+
     bool flag = false;
     std::string prepath = m_configParams->run_params["prePath"];
     //use  m_configParams
@@ -881,6 +883,8 @@ bool ObjectDetectionManagerHandler::InitCM()
             modelPath = prepath.append(m_configParams->models[i]["load_path"]).c_str();
             inname = m_configParams->models[i]["input_layer"].c_str();
             outname = m_configParams->models[i]["output_layer"].c_str();
+            tileMargin = std::stof(m_configParams->models[i]["margin"]);
+
             if (m_configParams->models[i]["ckpt"].compare("nullptr") != 0)
                 ckpt = m_configParams->models[i]["ckpt"].c_str();
             else
@@ -910,6 +914,7 @@ bool ObjectDetectionManagerHandler::InitCM()
         LOG_F(ERROR, "Failed to load CM: %s\ninname: %s\noutname:%s", modelPath, inname, outname);
         return false;
     }
+    m_mbCM->m_tileMargin = tileMargin;
     LOG_F(INFO, "Loaded CM: %s\ninname: %s\noutname:%s", modelPath, inname, outname);
     return true;
 }

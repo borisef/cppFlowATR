@@ -19,8 +19,10 @@ protected:
   int m_batchSize = 32;
   int m_numColors = 7;
   bool m_hardBatchSize = false;
+ 
 
 public:
+   float m_tileMargin = 0.2;
 public:
   //constructors/destructors
   mbInterfaceCM(int h, int w, int nc, int bs, bool hbs) : m_patchHeight(h), m_patchWidth(w), m_batchSize(bs), m_numColors(nc), m_hardBatchSize(hbs) {}
