@@ -107,7 +107,7 @@ std::vector<float> mbInterfaceCM::RunImgBB(cv::Mat img, OD::OD_BoundingBox bb)
 #endif //#ifdef TEST_MODE
 
     //get sub-image
-
+    //TODO: take tileMargin into account 
     cv::Rect myROI(bb.x1, bb.y1, bb.x2 - bb.x1, bb.y2 - bb.y1);
 
     croppedRef = img(myROI);
@@ -176,6 +176,7 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
             cv::Mat croppedRef, img_resized;
             //crop
             OD::OD_BoundingBox bb = co->ObjectsArr[i].tarBoundingBox;
+             //TODO: take tileMargin into account
             cv::Rect myROI(bb.x1, bb.y1, bb.x2 - bb.x1, bb.y2 - bb.y1);
 
 #ifdef TEST_MODE

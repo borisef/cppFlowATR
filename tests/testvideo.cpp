@@ -175,7 +175,7 @@ int main()
     ors1.startFrameID = 1;
     atrManager = OneRun(atrManager, ors1);
 
-    atrManager = OneRun(atrManager, ors1);
+    //atrManager = OneRun(atrManager, ors1);
 
     OD::TerminateObjectDetection(atrManager);
 

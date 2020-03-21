@@ -36,13 +36,13 @@ void PrintCO(OD::OD_CycleOutput *co1)
 int main()
 {
     
-    const char *tiles[9] = {"media/gzir/gzir001.jpg",
+    const char *tiles[9] = {"media/gzir/gzir007.jpg",
                             "media/gzir/gzir002.jpg", 
                             "media/gzir/gzir003.jpg", 
                             "media/gzir/gzir004.jpg", 
                             "media/gzir/gzir005.jpg",
                             "media/gzir/gzir006.jpg", 
-                            "media/gzir/gzir007.jpg",
+                            "media/gzir/gzir001.jpg",
                             "media/gzir/gzir008.jpg", 
                             "media/gzir/gzir009.jpg"};
 

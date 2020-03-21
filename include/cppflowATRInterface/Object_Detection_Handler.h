@@ -54,7 +54,7 @@ protected:
     int CleanWrongTileDetections(OD_CycleOutput *co1, std::list<float *> *tarList);
     bool InitConfigParamsFromFile(const char *iniFilePath);
     bool InitializeLogger();
-    std::string DefinePathForATRModel();
+    std::string DefineATRModel(std::string nickname );
     
 
 
@@ -64,6 +64,8 @@ protected:
     uint m_numImgPixels = 0;
     uint m_numPtrPixels = 0;
     bool m_withActiveCM = true; 
+    int m_modelIndexInConfig = -1; //replaced after initialization of model 
+    float m_ATR_resize_factor = -1; // will read from config, if -1 => no info 
 
     cv::Mat m_bigImg; 
 

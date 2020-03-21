@@ -105,7 +105,6 @@ ObjectDetectionManagerHandler::ObjectDetectionManagerHandler(OD_InitParams *ip) 
     setParams(ip);
 }
 
-
 OD_ErrorCode ObjectDetectionManagerHandler::StartConfigAndLogger(OD_InitParams *odInitParams)
 {
     //initialization
@@ -127,11 +126,9 @@ OD_ErrorCode ObjectDetectionManagerHandler::StartConfigAndLogger(OD_InitParams *
         InitializeLogger();
         logInitialized = true;
     }
-   
+
     return OD_OK;
-
 }
-
 
 ObjectDetectionManagerHandler::~ObjectDetectionManagerHandler()
 {
@@ -163,7 +160,7 @@ bool ObjectDetectionManagerHandler::WaitForThread()
         cout << "Thread is still not valid" << endl;
 #endif //TEST_MODE
     }
-    
+
     LOG_F(INFO, "WaitForThread() finished");
     return true;
 }
@@ -212,11 +209,14 @@ void ObjectDetectionManagerHandler::DeleteAllInnerCycleInputs()
     }
 }
 
-std::string ObjectDetectionManagerHandler::DefinePathForATRModel()
+std::string ObjectDetectionManagerHandler::DefineATRModel(std::string nickname)
 {
 
     std::string prepath = m_configParams->run_params["prePath"];
     std::string mo = m_configParams->models[0]["load_path"];
+
+    m_modelIndexInConfig = 0; //replaced after initialization of model 
+    m_ATR_resize_factor = -1; // will read from config, if -1 => no info 
 
     // use m_configParams and m_initParams to get model path
     for (size_t i = 0; i < m_configParams->models.size(); i++)
@@ -226,19 +226,22 @@ std::string ObjectDetectionManagerHandler::DefinePathForATRModel()
         std::cout << m_configParams->models[i]["load_path"] << std::endl;
 #endif //TEST_MODE
 
-        if (m_configParams->models[i]["nickname"].compare("default_ATR") == 0)
+        if (m_configParams->models[i]["nickname"].compare(nickname) == 0)
         {
             mo = (m_configParams->models[i]["load_path"]);
+            m_modelIndexInConfig = i;
             break;
         }
     }
+    if(!m_configParams->models[m_modelIndexInConfig]["imresize_factor"].empty())
+        m_ATR_resize_factor = std::stof(m_configParams->models[m_modelIndexInConfig]["imresize_factor"]);
     prepath.append(mo).append("\0");
     return prepath;
 }
 
 OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *odInitParams)
 {
-    
+
     LOG_F(INFO, "Manager initialized from %s", odInitParams->iniFilePath);
 
     //check if busy, if yes wait till the end and assign nullptr to next, current and prev
@@ -246,10 +249,19 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
     DeleteAllInnerCycleInputs();
 
     mbInterfaceATR *mbATR = nullptr;
-
+    std::string pathATR;
     // define path for ATR model
-    std::string pathATR = DefinePathForATRModel();
-    LOG_F(INFO, "Defined path for ATR model %s", pathATR.c_str());
+    if(odInitParams->mbMission.missionType != ANALYZE_SAMPLE)
+    {
+        pathATR = DefineATRModel("default_ATR");
+        LOG_F(INFO, "Defined path for ATR model %s, imresize-factor %g, model index in config %d", pathATR.c_str(), this->m_ATR_resize_factor, this->m_modelIndexInConfig);
+    }
+    else
+    {
+        pathATR = DefineATRModel("tiles");
+        LOG_F(INFO, "Defined path for tiles ATR model %s, imresize-factor %g, model index in config %d", pathATR.c_str(), this->m_ATR_resize_factor, this->m_modelIndexInConfig);
+
+    }
 
     //ATR model initialization
     if (m_mbATR != nullptr)
@@ -276,6 +288,11 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
     {
         odInitParams->supportData.imageHeight = 2048;
         odInitParams->supportData.imageWidth = 4096;
+        //get sizes 
+        if(!m_configParams->models[m_modelIndexInConfig]["width"].empty())
+            odInitParams->supportData.imageWidth = std::stoi(m_configParams->models[m_modelIndexInConfig]["width"]);
+        if(!m_configParams->models[m_modelIndexInConfig]["height"].empty())
+            odInitParams->supportData.imageHeight = std::stoi(m_configParams->models[m_modelIndexInConfig]["height"]);
     }
     //Color Model initialization
     bool initCMsuccess = true;
@@ -367,12 +384,16 @@ void ObjectDetectionManagerHandler::IdleRun()
 
     //TODO: is it continues in memory ?
     // unsigned char *tempPtr = new unsigned char[m_numImgPixels];
-    std::vector<uint8_t> *img_data = new std::vector<uint8_t>(m_numImgPixels); //try
+    float resize_factor = 1;
+    if(m_ATR_resize_factor > 0 )
+        resize_factor = m_ATR_resize_factor;
+    int numImgPixels = int(m_initParams->supportData.imageHeight * resize_factor) * int(m_initParams->supportData.imageWidth * resize_factor) * 3;
+    std::vector<uint8_t> *img_data = new std::vector<uint8_t>(numImgPixels); //try
     //create temp ptr
     // this->m_mbATR->RunRGBVector(tempPtr, this->m_initParams->supportData.imageHeight, this->m_initParams->supportData.imageWidth);
 
     //try
-    this->m_mbATR->RunRGBVector(*img_data, this->m_initParams->supportData.imageHeight, this->m_initParams->supportData.imageWidth);
+    this->m_mbATR->RunRGBVector(*img_data, int(m_initParams->supportData.imageHeight * resize_factor), int(m_initParams->supportData.imageWidth * resize_factor));
     //delete tempPtr;
     delete img_data; //try
 }
@@ -436,28 +457,31 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     int w = m_initParams->supportData.imageWidth;
 
     e_OD_ColorImageType colortype = m_initParams->supportData.colorType;
+    float resize_factor = 1;
+    if(m_ATR_resize_factor > 0)
+        resize_factor = m_ATR_resize_factor;
 
     if (colortype == e_OD_ColorImageType::YUV422) // if raw
     {
-        this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w, (int)colortype);
+        this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w, (int)colortype, resize_factor);
     }
     else if (colortype == e_OD_ColorImageType::NV12) // if raw NV12
     {
-        this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w, (int)colortype);
+        this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w, (int)colortype, resize_factor);
     }
     else if (colortype == e_OD_ColorImageType::RGB) // if rgb
     {
 #ifdef TEST_MODE
         cout << " Internal Run on RGB buffer " << endl;
 #endif //#ifdef TEST_MODE
-        this->m_mbATR->RunRGBVector(m_curCycleInput->ptr, h, w);
+        this->m_mbATR->RunRGBVector(m_curCycleInput->ptr, h, w, resize_factor);
     }
     else if (colortype == e_OD_ColorImageType::RGB_IMG_PATH) //path
     {
 #ifdef TEST_MODE
         cout << " Internal Run on RGB_IMG_PATH " << endl;
 #endif //#ifdef TEST_MODE
-        this->m_mbATR->RunRGBImgPath(m_curCycleInput->ptr);
+        this->m_mbATR->RunRGBImgPath(m_curCycleInput->ptr, resize_factor);
     }
     else
     {
@@ -476,7 +500,6 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
         m_mbCM->RunImgWithCycleOutput(m_mbATR->GetKeepImg(), odOut, 0, (odOut->numOfObjects - 1), true);
 
     odOut->ImgID_output = fi;
-    
 
 // copy current into prev
 #ifdef TEST_MODE
@@ -489,7 +512,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     m_mutexOnPrev.lock();
     //glob_mutexOnPrev.lock();
     DeleteCycleInput(tempCI);
-    LOG_F(INFO,"OperateObjectDetection: Done with ATR on frame %d",fi);
+    LOG_F(INFO, "OperateObjectDetection: Done with ATR on frame %d", fi);
     LOG_F(INFO, CycleOutput2LogString(odOut).c_str());
     m_mutexOnPrev.unlock();
     //glob_mutexOnPrev.unlock();
@@ -698,7 +721,11 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
     cout << " Internal Run on RGB buffer " << endl;
 #endif //#ifdef TEST_MODE
 
-    this->m_mbATR->RunRGBVector(ptrTif, bigH, bigW);
+    float rf = 1.0f;
+    if(m_ATR_resize_factor > 0 && m_ATR_resize_factor != 1)
+        rf = m_ATR_resize_factor;
+
+    this->m_mbATR->RunRGBVector(ptrTif, bigH, bigW, rf); //TODO: resize factor ? 
 
     OD_CycleOutput *tempCycleOutput = NewOD_CycleOutput(350);
     this->PopulateCycleOutput(tempCycleOutput);
@@ -707,13 +734,14 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
     // color
     if (m_withActiveCM && m_mbCM != nullptr && tempCycleOutput->numOfObjects > 0)
         this->m_mbCM->RunImgWithCycleOutput(*bigIm, tempCycleOutput, 0, tempCycleOutput->numOfObjects - 1, true);
-     else{
-	 LOG_F(INFO, "Skipping color classifier for tiled image");
-	}
+    else
+    {
+        LOG_F(INFO, "Skipping color classifier for tiled image");
+    }
 
 //DEBUG
 #ifdef TEST_MODE
-     m_prevCycleInput = new OD_CycleInput(); // TODO: in ifdef (?) TODO take care of new
+    m_prevCycleInput = new OD_CycleInput(); // TODO: in ifdef (?) TODO take care of new
     m_prevCycleInput->ptr = ptrTif;
     SaveResultsATRimage(tempCycleOutput, (char *)"tiles1.png", false);
 #endif //#ifdef TEST_MODE
@@ -781,7 +809,7 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
 
     // make sure co1->ObjectsArr[i] is one of tarList[j] by IoU
     int nr = CleanWrongTileDetections(co1, tarList);
-    
+
 #ifdef TEST_MODE
     cout << " CleanWrongTileDetections removed " << nr << " objects" << endl;
 #endif //#ifdef TEST_MODE
@@ -789,23 +817,21 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
     co1->numOfObjects = co1->numOfObjects - nr;
     int co1NumOfObjectsWithSkips = co1->numOfObjects + nr;
 
-    // separate analysis for colors 
+    // separate analysis for colors
     float colorWeight[32];
-    float sumScoresColors=0.001f;
+    float sumScoresColors = 0.001f;
     for (size_t j = 0; j < MAX_COLORS; j++)
-          colorWeight[j]=0;
-
+        colorWeight[j] = 0;
 
     for (size_t i = 0; i < co1NumOfObjectsWithSkips; i++)
     {
         if (co1->ObjectsArr[i].tarScore < 0.2)
             continue;
 
-
-        if(co1->ObjectsArr[i].tarColor<(int)MAX_COLORS && (int)co1->ObjectsArr[i].tarColor>=0)
+        if (co1->ObjectsArr[i].tarColor < (int)MAX_COLORS && (int)co1->ObjectsArr[i].tarColor >= 0)
         {
-            colorWeight[(int)co1->ObjectsArr[i].tarColor]+=co1->ObjectsArr[i].tarColorScore;
-            sumScoresColors+=co1->ObjectsArr[i].tarColorScore;
+            colorWeight[(int)co1->ObjectsArr[i].tarColor] += co1->ObjectsArr[i].tarColorScore;
+            sumScoresColors += co1->ObjectsArr[i].tarColorScore;
         }
         // if already exists increment score
         int targetSlot = co2->numOfObjects;
@@ -836,9 +862,9 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
 
     // sort co2->ObjectsArr[i2] by score
     bubbleSort_OD_DetectionItem(co2->ObjectsArr, co2->numOfObjects);
-  
+
     for (size_t j = 0; j < MAX_COLORS; j++)
-          colorWeight[j]=colorWeight[j]/sumScoresColors;
+        colorWeight[j] = colorWeight[j] / sumScoresColors;
 
     // trim num objects
     if (co2->numOfObjects > MAX_TILES_CONSIDER)
@@ -852,12 +878,11 @@ void ObjectDetectionManagerHandler::AnalyzeTiledSample(OD_CycleOutput *co1, std:
         co2->ObjectsArr[i2].tarScore = co2->ObjectsArr[i2].tarScore / (totalScores + 0.00001f);
 
     //update scores for co2->ObjectsArr[i].tarColorScore from colorWeight[co2->ObjectsArr[i].tarColor]
-     for (size_t i2 = 0; i2 < co2->numOfObjects; i2++)
-        if((co2->ObjectsArr[i2].tarColor) < (int)MAX_COLORS && ((int)(co2->ObjectsArr[i2].tarColor) >= 0))
+    for (size_t i2 = 0; i2 < co2->numOfObjects; i2++)
+        if ((co2->ObjectsArr[i2].tarColor) < (int)MAX_COLORS && ((int)(co2->ObjectsArr[i2].tarColor) >= 0))
             co2->ObjectsArr[i2].tarColorScore = colorWeight[(int)(co2->ObjectsArr[i2].tarColor)];
-            
+
     //TODO: compute scores based on Binomial distribution
-	
 }
 
 bool ObjectDetectionManagerHandler::InitCM()
@@ -937,15 +962,15 @@ bool ObjectDetectionManagerHandler::InitializeLogger()
 
     prepath.append(logfile_path);
 
-    if(logfile_path.compare("")==0 || log_verbosity.compare("0")==0 || log_verbosity.compare("false")==0)
+    if (logfile_path.compare("") == 0 || log_verbosity.compare("0") == 0 || log_verbosity.compare("false") == 0)
         loguru::add_file(prepath.c_str(), loguru::Append, loguru::Verbosity_OFF); // not to file
     else
     {
-         loguru::add_file(prepath.c_str(), loguru::Append, loguru::Verbosity_MAX); //  to file
+        loguru::add_file(prepath.c_str(), loguru::Append, loguru::Verbosity_MAX); //  to file
     }
-    
+
     // Turn off writing to stderr:
-    if(log_stderr_verbosity.compare("")==0 || log_stderr_verbosity.compare("0")==0 || log_stderr_verbosity.compare("false")==0 )
+    if (log_stderr_verbosity.compare("") == 0 || log_stderr_verbosity.compare("0") == 0 || log_stderr_verbosity.compare("false") == 0)
         loguru::g_stderr_verbosity = loguru::Verbosity_OFF; // no to stderr
 
     return true;

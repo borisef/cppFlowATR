@@ -186,8 +186,8 @@ int main()
     ors4.H = 3040;
     ors4.splicePath = "media/raw/*";
     ors4.imType = e_OD_ColorImageType::YUV422;
-    ors4.numRepetiotions = 1;
-    ors4.minDelay = 50;
+    ors4.numRepetiotions = 2;
+    ors4.minDelay = 0;
     ors4.startFrameID = 100000;
     ors4.toShow = true;
     atrManager = OneRun(atrManager, ors4); 
@@ -240,7 +240,7 @@ int main()
     // ors5.W = 1920;
     ors5.splicePath = "media/spliced/*";
     ors5.numRepetiotions = 1;
-    ors5.minDelay = 10;
+    ors5.minDelay = 0;
     ors5.startFrameID = 500000;
     ors5.toDeleteATRM = false;
 

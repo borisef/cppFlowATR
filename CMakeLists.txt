@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 
 
-set(TEST_MODE FALSE)
+set(TEST_MODE TRUE)
 
 if(TEST_MODE)
     add_definitions(-DTEST_MODE)

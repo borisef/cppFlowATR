@@ -31,11 +31,11 @@ class mbInterfaceATR
 
     bool LoadNewModel(const char* modelPath);
     int RunRGBimage(cv::Mat img);
-    int RunRGBVector(const unsigned char *ptr, int height, int width);
-    int RunRGBVector(std::vector<uint8_t > img_data, int height, int width);
-    int RunRGBImgPath(const unsigned char *ptr);
+    int RunRGBVector(const unsigned char *ptr, int height, int width, float resize_factor = 1.0f);
+    int RunRGBVector(std::vector<uint8_t > img_data, int height, int width, float resize_factor = 1.0f);
+    int RunRGBImgPath(const unsigned char *ptr, float resize_factor = 1.0f);
     int RunRawImage(const unsigned char *ptr, int height, int width);
-    int RunRawImageFast(const unsigned char *ptr, int height, int width, int colorType);
+    int RunRawImageFast(const unsigned char *ptr, int height, int width, int colorType, float resize_factor = 1.0f);
     int GetResultNumDetections();
     int GetResultClasses(int i);
     float GetResultScores(int i);
