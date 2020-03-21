@@ -19,10 +19,10 @@ OD::OD_CycleOutput* CreateSynthCO(cv::Mat img, uint numBB);
 
 int mainWithInterface()
 {
-    const char *modelPath = "graphs/output_graph.pb";
+    const char *modelPath = "graphs/cm/output_graph_08_03_20.pb";
     const char *ckpt = nullptr;
-    const char *inname = "conv2d_input";
-    const char *outname = "dense_1/Softmax";
+    const char *inname = "conv2d_input_3";
+    const char *outname = "dense_1_1/Softmax";
 
     const char *inimage = "media/00000018.tif";
     const char *smallim= "media/color/color001.png";
