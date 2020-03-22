@@ -11,6 +11,7 @@ temp/*
 junk/
 junk/*
 media
+media/00000018.MP4
 
 CMakeLists.txt
 *.log
