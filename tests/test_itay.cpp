@@ -67,8 +67,11 @@ void MyWait(string s, float ms)
 
 void image(String path, OD_CycleInput *ci, OD_CycleOutput *co, OD::ObjectDetectionManager *atrManager)
 {
-    cv::Mat img = imread(path, CV_LOAD_IMAGE_COLOR);
-
+      #ifdef OPENCV_MAJOR_4
+    cv::Mat img = imread(path, IMREAD_COLOR );//CV_LOAD_IMAGE_COLOR
+    #else
+    cv::Mat img = imread(path, CV_LOAD_IMAGE_COLOR );//CV_LOAD_IMAGE_COLOR
+    #endif
     if (!img.data) // Check for invalid input
     {
         cout << "Could not open or find the image" << std::endl;

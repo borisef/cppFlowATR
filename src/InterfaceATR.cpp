@@ -2,6 +2,7 @@
 #include "cppflowATR/InterfaceATR.h"
 #include <utils/imgUtils.h>
 #include <iostream>
+using namespace cv;
 
 mbInterfaceATR::mbInterfaceATR()
 {
@@ -78,13 +79,21 @@ int mbInterfaceATR::RunRGBimage(cv::Mat inp)
 }
 int mbInterfaceATR::RunRGBImgPath(const unsigned char *ptr, float resize_factor)
 {
-    cv::Mat inp1 = cv::imread(string((const char *)ptr), CV_LOAD_IMAGE_COLOR);
-    cv::cvtColor(inp1, inp1, CV_BGR2RGB);
-
+    #ifdef OPENCV_MAJOR_4
+    cv::Mat inp1 = cv::imread(string((const char *)ptr), IMREAD_COLOR);//CV_LOAD_IMAGE_COLOR
+    cv::cvtColor(inp1, inp1, cv::COLOR_BGR2RGB );//CV_BGR2RGB, 4
+    #else
+    cv::Mat inp1 = cv::imread(string((const char *)ptr), CV_LOAD_IMAGE_COLOR);//
+    cv::cvtColor(inp1, inp1, cv::CV_BGR2RGB );//, 4
+    #endif 
     if(resize_factor>0 && resize_factor != 1)
     {
         //imresize of inp1 inplace
-        cv::resize(inp1, inp1, cv::Size(int(inp1.cols * resize_factor),int(inp1.rows * resize_factor)), 0, 0, CV_INTER_LINEAR);
+         #ifdef OPENCV_MAJOR_4
+        cv::resize(inp1, inp1, cv::Size(int(inp1.cols * resize_factor),int(inp1.rows * resize_factor)), 0, 0, INTER_LINEAR); //CV_INTER_LINEAR
+        #else
+        cv::resize(inp1, inp1, cv::Size(int(inp1.cols * resize_factor),int(inp1.rows * resize_factor)), 0, 0, CV_INTER_LINEAR); //
+        #endif
     }
 
     return RunRGBimage(inp1);
@@ -119,7 +128,7 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
     if(resize_factor>0 && resize_factor != 1)
     {
         //imresize of tempIm inplace
-        cv::resize(tempIm, tempIm, cv::Size(int(tempIm.cols * resize_factor),int(tempIm.rows * resize_factor)), 0, 0, CV_INTER_LINEAR);
+        cv::resize(tempIm, tempIm, cv::Size(int(tempIm.cols * resize_factor),int(tempIm.rows * resize_factor)), 0, 0, INTER_LINEAR);//CV_INTER_LINEAR
         #ifdef TEST_MODE
         cv::imwrite("tempim_resized.png", tempIm);
         #endif //TEST_MODE
@@ -198,7 +207,12 @@ int mbInterfaceATR::RunRawImageFast(const unsigned char *ptr, int height, int wi
     if(resize_factor>0 && resize_factor != 1)
     {
         //imresize of myRGB inplace
-        cv::resize(*myRGB, *myRGB, cv::Size(int(myRGB->cols * resize_factor),int(myRGB->rows * resize_factor)), 0, 0, CV_INTER_LINEAR);
+        #ifdef OPENCV_MAJOR_4
+        cv::resize(*myRGB, *myRGB, cv::Size(int(myRGB->cols * resize_factor),int(myRGB->rows * resize_factor)), 0, 0, INTER_LINEAR );//CV_INTER_LINEAR
+        #else
+        cv::resize(*myRGB, *myRGB, cv::Size(int(myRGB->cols * resize_factor),int(myRGB->rows * resize_factor)), 0, 0, CV_INTER_LINEAR );
+        #endif
+
         #ifdef TEST_MODE
         // save JPG for debug
         cv::imwrite("debug_raw2rgb_resized.tif", *myRGB);

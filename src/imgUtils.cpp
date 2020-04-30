@@ -1,4 +1,5 @@
 #include <utils/imgUtils.h>
+#include <fstream>
 
 using namespace cv;
 using namespace std;
@@ -233,8 +234,11 @@ void balance_white(cv::Mat mat)
 unsigned char *ParseCvMat(cv::Mat inp1)
 {
   //cv::Mat inp1 = cv::imread(path, CV_LOAD_IMAGE_COLOR);
-  cv::cvtColor(inp1, inp1, CV_BGR2RGB);
-
+  #ifdef OPENCV_MAJOR_4
+  cv::cvtColor(inp1, inp1, COLOR_BGR2RGB); //CV_BGR2RGB
+  #else
+  cv::cvtColor(inp1, inp1, CV_BGR2RGB); //
+  #endif
   //put image in vector
   std::vector<uint8_t> img_data1(inp1.rows * inp1.cols * inp1.channels());
   img_data1.assign(inp1.data, inp1.data + inp1.total() * inp1.channels());
@@ -247,8 +251,13 @@ unsigned char *ParseCvMat(cv::Mat inp1)
 
 unsigned char *ParseImage(String path)
 {
+  #ifdef OPENCV_MAJOR_4
+  cv::Mat inp1 = cv::imread(path, IMREAD_COLOR);//CV_LOAD_IMAGE_COLOR
+  cv::cvtColor(inp1, inp1,COLOR_BGR2RGB );//CV_BGR2RGB
+  #else
   cv::Mat inp1 = cv::imread(path, CV_LOAD_IMAGE_COLOR);
-  cv::cvtColor(inp1, inp1, CV_BGR2RGB);
+  cv::cvtColor(inp1, inp1,CV_BGR2RGB );//
+  #endif
 
   //put image in vector
   std::vector<uint8_t> img_data1(inp1.rows * inp1.cols * inp1.channels());
@@ -281,9 +290,11 @@ bool CreateTiledImage(const char *imname, uint W, uint H, cv::Mat *bigImg, list<
   uint maxY = 0;
   uint topX = 10;
   uint topY = 10;
-
-  cv::Mat im = cv::imread(imname, CV_LOAD_IMAGE_COLOR);
-
+  #ifdef OPENCV_MAJOR_4
+  cv::Mat im = cv::imread(imname, IMREAD_COLOR); //CV_LOAD_IMAGE_COLOR
+  #else
+  cv::Mat im = cv::imread(imname, CV_LOAD_IMAGE_COLOR); //
+  #endif
   uint nextYline = 0;
 
   while (flag)

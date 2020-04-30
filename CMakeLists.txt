@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 
 set(TEST_MODE FALSE)
+set(CMAKE_MAJOR_4 FALSE)
 
 if(TEST_MODE)
     add_definitions(-DTEST_MODE)
@@ -55,10 +56,19 @@ if(OS_WINDOWS)
     set(MY_TF_LIB2 "")
 else(OS_WINDOWS) #Linux
     include_directories(PRIVATE include)
-    find_package( OpenCV REQUIRED )
+    find_package( OpenCV REQUIRED)
+    
+    message("OpenCV_VERSION_MAJOR=" ${OpenCV_VERSION_MAJOR})
+    IF((${OpenCV_VERSION_MAJOR} MATCHES "4"))
+        set(CMAKE_MAJOR_4 TRUE)
+        message ("Changes CMAKE_MAJOR_4 to" ${CMAKE_MAJOR_4})
+    ENDIF()
+
     set(OpenCV_STATIC ON)
     link_directories(${CMAKE_CURRENT_LIST_DIR}/lib)
     include_directories(${OpenCV_INCLUDE_DIRS})
+
+    message(${OpenCV_INCLUDE_DIRS})
 
     if(JETSON) #Linux Jetson ONLY
         add_compile_options(-pthread -lm)
@@ -70,6 +80,12 @@ else(OS_WINDOWS) #Linux
         set(MY_TF_LIB2 "")
     endif(JETSON)
 endif(OS_WINDOWS)
+
+if(CMAKE_MAJOR_4)
+    add_definitions (-DOPENCV_MAJOR_4)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DOPENCV_MAJOR_4")#jic
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DOPENCV_MAJOR_4")#jic
+endif(CMAKE_MAJOR_4)
 
 AUX_SOURCE_DIRECTORY(src SRC)
 
@@ -127,5 +143,6 @@ FIND_LIBRARY(MY_LIB1 NAMES libmbATR.so PATHS build/
 target_link_libraries (testTamir  ${MY_TF_LIB} ${MY_TF_LIB2} ${OpenCV_LIBS} -lpthread)
 
 #TEMP
-# add_executable(stressTest1 tests/testStress1.cpp ${SRC})
-# target_link_libraries (stressTest1 ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+add_executable(stressTest1 tests/testStressTry1.cpp ${SRC})
+target_link_libraries (stressTest1 ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+

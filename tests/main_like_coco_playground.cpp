@@ -66,7 +66,7 @@ int main() {
      //emulate buffer from TIF
     cout << " ***  Read tif image to rgb buffer  ***  " << endl;
 
-    cv::Mat inp1 = cv::imread("00000018.tif", CV_LOAD_IMAGE_COLOR);
+    cv::Mat inp1 = cv::imread("00000018.tif", IMREAD_COLOR);//CV_LOAD_IMAGE_COLOR
     cv::cvtColor(inp1, inp1, CV_BGR2RGB);
 
     //put image in vector

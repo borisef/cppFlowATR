@@ -37,11 +37,19 @@ int mainWithInterface()
     }
 
     //load BIG image
-    cv::Mat bigImg = cv::imread(inimage, CV_LOAD_IMAGE_COLOR);
+    #ifdef OPENCV_MAJOR_4
+    cv::Mat bigImg = cv::imread(inimage,  IMREAD_COLOR);//CV_LOAD_IMAGE_COLOR
+    #else
+    cv::Mat bigImg = cv::imread(inimage,  CV_LOAD_IMAGE_COLOR);//CV_LOAD_IMAGE_COLOR
+    #endif
     //create synthetic cycleoutput
     OD::OD_CycleOutput* co = CreateSynthCO(bigImg, 10);
     //load small image
-     cv::Mat smallImg = cv::imread(smallim, CV_LOAD_IMAGE_COLOR);
+     #ifdef OPENCV_MAJOR_4
+     cv::Mat smallImg = cv::imread(smallim,IMREAD_COLOR); // CV_LOAD_IMAGE_COLOR
+     #else
+    cv::Mat smallImg = cv::imread(smallim,CV_LOAD_IMAGE_COLOR); // 
+    #endif
 
 
 
@@ -126,8 +134,11 @@ int testMain()
     {
         auto start = high_resolution_clock::now();
         //img.setTo(cv::Scalar(0.0, 255.0, 0.0));
-        img = cv::imread(imges[sample], CV_LOAD_IMAGE_COLOR);
-
+        #ifdef OPENCV_MAJOR_4
+        img = cv::imread(imges[sample], IMREAD_COLOR);//CV_LOAD_IMAGE_COLOR
+        #else
+        img = cv::imread(imges[sample], CV_LOAD_IMAGE_COLOR);//
+        #endif
         // Manipulate image
         //cv::cvtColor(img, img, CV_BGR2RGB);
         cv::resize(img, img_resized, cv::Size(PATCH_WIDTH, PATCH_HEIGHT));
@@ -172,7 +183,11 @@ int testMain()
     //try batch
     for (size_t sample = 0; sample < BS; sample++)
     {
-        img = cv::imread(imges[sample], CV_LOAD_IMAGE_COLOR);
+        #ifdef OPENCV_MAJOR_4
+        img = cv::imread(imges[sample], IMREAD_COLOR);//CV_LOAD_IMAGE_COLOR=1
+        #else
+        img = cv::imread(imges[sample], CV_LOAD_IMAGE_COLOR);//=1
+        #endif
         cv::resize(img, img_resized, cv::Size(PATCH_WIDTH, PATCH_HEIGHT));
 
         //img_resized_data.assign(img_resized.data, img_resized.data + img_resized.total() * img_resized.channels());

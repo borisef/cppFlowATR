@@ -50,12 +50,20 @@ int main()
   convertYUV420toVector(rawVec, H, W, myVector);
 
   //Read TIF -> mat -> RGB vector to be used in  inference
-  cv::Mat im = cv::imread("orig.tif", CV_LOAD_IMAGE_COLOR);
+  #ifdef OPENCV_MAJOR_4
+  cv::Mat im = cv::imread("orig.tif", IMREAD_COLOR );//CV_LOAD_IMAGE_COLOR
+  #else
+  cv::Mat im = cv::imread("orig.tif", CV_LOAD_IMAGE_COLOR );//
+  #endif
   std::vector<unsigned char> *myVector1;
   convertCvMatToVector(&im, myVector1);
 
   // READ TIF -> convert to buffer
-  cv::Mat imrgb1 = cv::imread("00000018.tif", CV_LOAD_IMAGE_COLOR);
+  #ifdef OPENCV_MAJOR_4
+  cv::Mat imrgb1 = cv::imread("00000018.tif", IMREAD_COLOR );//CV_LOAD_IMAGE_COLOR
+  #else
+  cv::Mat imrgb1 = cv::imread("00000018.tif", CV_LOAD_IMAGE_COLOR );//
+  #endif
   unsigned char *array = new unsigned char(imrgb1.rows * imrgb1.cols * imrgb1.channels());
   if (imrgb1.isContinuous())
     array = imrgb1.data;

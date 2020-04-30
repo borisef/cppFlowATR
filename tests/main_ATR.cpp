@@ -62,7 +62,12 @@ int main()
   std::vector <unsigned char> vv = readBytesFromFile("/home/magshim/cppflowATR/00006160.raw");
 
   //emulate buffer from tif 
+  #ifdef OPENCV_MAJOR_4
+  cv::Mat inp = cv::imread("/home/magshim/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", IMREAD_COLOR);//CV_LOAD_IMAGE_COLOR
+  #else
   cv::Mat inp = cv::imread("/home/magshim/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
+  #endif
+  
   cv::cvtColor(inp, inp, CV_BGR2RGB);
   // //put image in vector
   std::vector<uint8_t > img_data;
@@ -120,7 +125,11 @@ int main()
 
   // Read image
   cv:Mat img, imgS;
+  #ifdef OPENCV_MAJOR_4
+  img = cv::imread("/home/magshim/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", IMREAD_COLOR);//CV_LOAD_IMAGE_COLOR
+  #else
   img = cv::imread("/home/magshim/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
+  #endif
   int rows = img.rows;
   int cols = img.cols;
 

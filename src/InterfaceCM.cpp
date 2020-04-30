@@ -73,7 +73,12 @@ std::vector<float> mbInterfaceCM::RunRGBimage(cv::Mat img)
 
 std::vector<float> mbInterfaceCM::RunRGBImgPath(const unsigned char *ptr)
 {
-    cv::Mat img = cv::imread(string((const char *)ptr), CV_LOAD_IMAGE_COLOR);
+    #ifdef OPENCV_MAJOR_4
+    cv::Mat img = cv::imread(string((const char *)ptr), IMREAD_COLOR);//CV_LOAD_IMAGE_COLOR
+    #else
+    cv::Mat img = cv::imread(string((const char *)ptr), CV_LOAD_IMAGE_COLOR);//CV_LOAD_IMAGE_COLOR
+    #endif
+    
     return (RunRGBimage(img));
 }
 

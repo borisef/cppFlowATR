@@ -29,7 +29,7 @@ int main() {
     // Read image
     cv::Mat img, inp, imgS;
     //img = cv::imread("/home/magshim/MB2/test_videos/magic_box-test_060519/11.8-sortie_1-clip_16_frames/00000018.tif", CV_LOAD_IMAGE_COLOR);
-    img = cv::imread("00000018.tif", CV_LOAD_IMAGE_COLOR);
+    img = cv::imread("00000018.tif", IMREAD_COLOR);//CV_LOAD_IMAGE_COLOR
 
     int rows = img.rows;
     int cols = img.cols;

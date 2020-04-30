@@ -363,7 +363,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_Cyc
     }
     else
     {
-        LOG_F(WARNING, "PrepareOperateObjectDetection:Input cycle is null, skip");
+        LOG_F(WARNING, "PrepareOperateObjectDetection: ImgID_input = %d, Input cycle is null, skip", cycleInput->ImgID_input);
     }
 
 #ifdef TEST_MODE

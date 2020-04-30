@@ -16,7 +16,7 @@ bool nv12ToRGB(char *raw, int width, int height, cv::Mat *outRGB);
 inline void fastNV12ToRGB(char *raw,  int width, int height, cv::Mat *outRGB)
 {
     cv::Mat nv12(height * 3/2, width, CV_8UC1, raw);
-    cvtColor(nv12, *outRGB, CV_YUV2RGB_NV12);
+    cvtColor(nv12, *outRGB, COLOR_YUV2RGB_NV12);//CV_YUV2RGB_NV12=90
 }
 
 

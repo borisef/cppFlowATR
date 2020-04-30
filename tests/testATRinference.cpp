@@ -103,7 +103,11 @@ int main()
 #ifdef WIN32
     cv::Mat inp1 = cv::imread("media/girl.jpg", CV_LOAD_IMAGE_COLOR);
 #else
-    cv::Mat inp1 = cv::imread("media/00000018.tif", CV_LOAD_IMAGE_COLOR);
+    #ifdef OPENCV_MAJOR_4
+    cv::Mat inp1 = cv::imread("media/00000018.tif", IMREAD_COLOR);//CV_LOAD_IMAGE_COLOR
+    #else
+    cv::Mat inp1 = cv::imread("media/00000018.tif", CV_LOAD_IMAGE_COLOR);//
+    #endif
 #endif
 
     cv::cvtColor(inp1, inp1, CV_BGR2RGB);
