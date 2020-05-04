@@ -187,29 +187,27 @@ int main()
     ors4.splicePath = "media/raw/*";
     ors4.imType = e_OD_ColorImageType::YUV422;
     ors4.numRepetiotions = 2;
-    ors4.minDelay = 0;
+    ors4.minDelay = 1000;
     ors4.startFrameID = 100000;
     ors4.toShow = true;
-    //atrManager = OneRun(atrManager, ors4); 
+    atrManager = OneRun(atrManager, ors4); 
     
-    // OneRunStruct ors4nv;
-    // ors4nv.W = 4056;
-    // ors4nv.H = 3040;
-    // ors4nv.splicePath = "media/NV12/*";
-    // ors4nv.imType = e_OD_ColorImageType::NV12;
-    // ors4nv.numRepetiotions = 1;
-    // ors4nv.minDelay = 0;
-    // ors4nv.startFrameID = 100000;
-    // ors4nv.toShow = true;
-    // atrManager = OneRun(atrManager, ors4nv); 
+    OneRunStruct ors4nv;
+    ors4nv.W = 4056;
+    ors4nv.H = 3040;
+    ors4nv.splicePath = "media/NV12/*";
+    ors4nv.imType = e_OD_ColorImageType::NV12;
+    ors4nv.numRepetiotions = 1;
+    ors4nv.minDelay = 1000;
+    ors4nv.startFrameID = 100000;
+    ors4nv.toShow = true;
+    atrManager = OneRun(atrManager, ors4nv); 
 
 
     OneRunStruct ors1;
-    // ors1.H = 108000;
-    // ors1.W = 192000;
     ors1.splicePath = "media/spliced/*";
     ors1.numRepetiotions = 1;
-    ors1.minDelay = 0;
+    ors1.minDelay = 1000;
     ors1.startFrameID = 1;
     atrManager = OneRun(atrManager, ors1);
 
@@ -229,7 +227,7 @@ int main()
     // ors3.H = 186700;
     ors3.splicePath = "media/filterUCLA/*";
     ors3.numRepetiotions = 1;
-    ors3.minDelay = 0;
+    ors3.minDelay = 1000;
     ors3.startFrameID = 100000;
     ors3.toDeleteATRM = false;
     atrManager = OneRun(atrManager, ors3);
