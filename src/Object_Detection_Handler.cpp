@@ -626,6 +626,8 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
     {
         cv::Mat imgS;
         cv::resize(*myRGB, imgS, cv::Size(1365, 720));
+        cv::cvtColor(imgS, imgS, cv::COLOR_RGB2BGR);
+
         cv::imshow("Image", imgS);
 
         char c = (char)cv::waitKey(25);
