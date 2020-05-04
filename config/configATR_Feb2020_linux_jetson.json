@@ -9,7 +9,7 @@
     "logfile_path" : "log/file.log",
     "log_verbosity" : "9",
     "log_stderr_verbosity" : "0",
-    "prePath": "/media/borisef/3734-6230/projects/cppFlowATR/"
+    "prePath": "/media/borisef/nvmeSSD/projects/cppFlowATR/"
   },
   "models": [
     {
@@ -17,7 +17,7 @@
       "task": "ATR",
       "filetype": ".pb",
       "mission": "0",
-      "load_path": "graphs/frozen_inference_graph_all.pb",
+      "load_path": "graphs/frozen_inference_graph_all_MB3.pb",
       "nickname": "default_ATR",
       "max_objects": "300",
       "accuracy": "5",
@@ -25,7 +25,7 @@
       "targets": "ALL",
       "width": "0",
       "height": "0",
-      "imresize_factor": "0.5",
+      "imresize_factor": "1.00",
       "max_batch_size": "1",
       "image_format": "RGB",
       "resolution": "5",
@@ -36,7 +36,7 @@
       "task": "ATR-tiles",
       "filetype": ".pb",
       "mission": "0",
-      "load_path": "graphs/frozen_inference_graph_all.pb",
+      "load_path": "graphs/frozen_inference_graph_all_MB3.pb",
       "nickname": "tiles",
       "max_objects": "300",
       "accuracy": "5",

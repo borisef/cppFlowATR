@@ -84,7 +84,7 @@ int mbInterfaceATR::RunRGBImgPath(const unsigned char *ptr, float resize_factor)
     cv::cvtColor(inp1, inp1, cv::COLOR_BGR2RGB );//CV_BGR2RGB, 4
     #else
     cv::Mat inp1 = cv::imread(string((const char *)ptr), CV_LOAD_IMAGE_COLOR);//
-    cv::cvtColor(inp1, inp1, cv::CV_BGR2RGB );//, 4
+    cv::cvtColor(inp1, inp1, CV_BGR2RGB );//, 4
     #endif 
     if(resize_factor>0 && resize_factor != 1)
     {

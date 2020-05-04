@@ -190,7 +190,7 @@ int main()
     ors4.minDelay = 0;
     ors4.startFrameID = 100000;
     ors4.toShow = true;
-    atrManager = OneRun(atrManager, ors4); 
+    //atrManager = OneRun(atrManager, ors4); 
     
     // OneRunStruct ors4nv;
     // ors4nv.W = 4056;

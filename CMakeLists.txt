@@ -72,9 +72,9 @@ else(OS_WINDOWS) #Linux
 
     if(JETSON) #Linux Jetson ONLY
         add_compile_options(-pthread -lm)
-        include_directories(PRIVATE include /home/borisef/projects/tf_1_13_source)
-	FIND_LIBRARY(MY_TF_LIB NAMES libtensorflow_framework.so PATHS /home/borisef/projects/libs/shared/tensorflow_nano_gpu113 )
-        FIND_LIBRARY(MY_TF_LIB2 NAMES libtensorflow.so PATHS /home/borisef/projects/libs/shared/tensorflow_nano_gpu113 )
+        include_directories(PRIVATE include /media/borisef/nvmeSSD/tf_1_13_source)
+	FIND_LIBRARY(MY_TF_LIB NAMES libtensorflow_framework.so PATHS /media/borisef/nvmeSSD/tensorflow_Jetson )
+        FIND_LIBRARY(MY_TF_LIB2 NAMES libtensorflow.so PATHS /media/borisef/nvmeSSD/tensorflow_Jetson )
     else(JETSON) # Linux PC ONLY
         FIND_LIBRARY(MY_TF_LIB NAMES libtensorflow.so PATHS /home/borisef/projects/cppflowATR/libs/shared/113 )
         set(MY_TF_LIB2 "")
@@ -86,6 +86,8 @@ if(CMAKE_MAJOR_4)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DOPENCV_MAJOR_4")#jic
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DOPENCV_MAJOR_4")#jic
 endif(CMAKE_MAJOR_4)
+
+   
 
 AUX_SOURCE_DIRECTORY(src SRC)
 
@@ -105,7 +107,7 @@ AUX_SOURCE_DIRECTORY(src SRC)
 
 
 add_executable(stressTest tests/testStress.cpp ${SRC})
-target_link_libraries (stressTest  ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+target_link_libraries (stressTest  ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread )
 
 
 add_executable(testTileImages tests/testTileImages.cpp ${SRC})
@@ -143,6 +145,6 @@ FIND_LIBRARY(MY_LIB1 NAMES libmbATR.so PATHS build/
 target_link_libraries (testTamir  ${MY_TF_LIB} ${MY_TF_LIB2} ${OpenCV_LIBS} -lpthread)
 
 #TEMP
-add_executable(stressTest1 tests/testStressTry1.cpp ${SRC})
-target_link_libraries (stressTest1 ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+#add_executable(stressTest1 tests/testStressTry1.cpp ${SRC})
+#target_link_libraries (stressTest1 ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
 
