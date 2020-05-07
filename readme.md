@@ -35,3 +35,5 @@ mkdir build
 cd build
 cmake ..
 make ```
+
+3) Test with build/stressTest or build/videoTest
