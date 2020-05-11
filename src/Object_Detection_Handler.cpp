@@ -215,25 +215,90 @@ std::string ObjectDetectionManagerHandler::DefineATRModel(std::string nickname)
     std::string prepath = m_configParams->run_params["prePath"];
     std::string mo = m_configParams->models[0]["load_path"];
 
-    m_modelIndexInConfig = 0; //replaced after initialization of model 
-    m_ATR_resize_factor = -1; // will read from config, if -1 => no info 
+    m_modelIndexInConfig = 0; //replaced after initialization of model
+    m_ATR_resize_factor = -1; // will read from config, if -1 => no info
+                              // use m_configParams and m_initParams to get model path
 
-    // use m_configParams and m_initParams to get model path
+    bool flagInitByModeSuccess = false;
+    int far_near_all = -1;
+    int cars_humans_any = -1;
+
+    int target_far_near_all = -1;
+    int target_cars_humans_any = -1;
+
+    float r = m_initParams->supportData.rangeInMeters;
+    e_OD_TargetSubClass tc = m_initParams->mbMission.targetClas;
+    if (r > 175)
+        target_far_near_all = 1;
+    else if (r < 10)
+        target_far_near_all = 3;
+    else
+        target_far_near_all = 2;
+
+    if (tc == e_OD_TargetSubClass::OTHER_SUB_CLASS)
+        target_cars_humans_any = 2; //humans
+    else if (tc == e_OD_TargetSubClass::UNKNOWN_SUB_CLASS)
+        target_cars_humans_any = 3; //any
+    else
+        target_cars_humans_any = 1; //car
+
+    // NEAR?FAR?ALL etc
     for (size_t i = 0; i < m_configParams->models.size(); i++)
     {
-#ifdef TEST_MODE
-        std::cout << m_configParams->models[i]["nickname"] << std::endl;
-        std::cout << m_configParams->models[i]["load_path"] << std::endl;
-#endif //TEST_MODE
+        int far_near_all = -1;
+        int cars_humans_any = -1;
 
-        if (m_configParams->models[i]["nickname"].compare(nickname) == 0)
+        std::string modelRange = m_configParams->models[i]["range"];
+        std::string modelTargets = m_configParams->models[i]["targets"];
+        // if(modelRange.length()<=1 ||modelTargets.length()<=1)
+        //     continue;
+        if (modelRange.compare("FAR") == 0 || modelRange.compare("far") == 0)
+            far_near_all = 1;
+        else if (modelRange.compare("NEAR") == 0 || modelRange.compare("near") == 0)
+            far_near_all = 2;
+        else
+            far_near_all = 3;
+
+        if (modelTargets.compare("CARS") == 0 || modelTargets.compare("cars") == 0)
+            cars_humans_any = 1;
+        else if (modelTargets.compare("HUMANS") == 0 || modelTargets.compare("humans") == 0)
+            cars_humans_any = 2;
+        else
+            cars_humans_any = 3;
+
+        if (far_near_all == target_far_near_all && cars_humans_any == target_cars_humans_any)
         {
+            flagInitByModeSuccess = true;
             mo = (m_configParams->models[i]["load_path"]);
             m_modelIndexInConfig = i;
+
             break;
         }
     }
-    if(!m_configParams->models[m_modelIndexInConfig]["imresize_factor"].empty())
+
+    // by nickname
+    if (flagInitByModeSuccess == false)
+        for (size_t i = 0; i < m_configParams->models.size(); i++)
+        {
+#ifdef TEST_MODE
+            std::cout << m_configParams->models[i]["nickname"] << std::endl;
+            std::cout << m_configParams->models[i]["load_path"] << std::endl;
+#endif //TEST_MODE
+
+            if (m_configParams->models[i]["nickname"].compare(nickname) == 0)
+            {
+                mo = (m_configParams->models[i]["load_path"]);
+                m_modelIndexInConfig = i;
+                break;
+            }
+        }
+#ifdef TEST_MODE
+            std::cout << "Selected model "<<m_modelIndexInConfig<<std::endl;
+            std::cout << m_configParams->models[m_modelIndexInConfig]["nickname"] << std::endl;
+            std::cout << m_configParams->models[m_modelIndexInConfig]["load_path"] << std::endl;
+#endif //TEST_MODE
+
+    if (!m_configParams->models[m_modelIndexInConfig]["imresize_factor"].empty())
         m_ATR_resize_factor = std::stof(m_configParams->models[m_modelIndexInConfig]["imresize_factor"]);
     prepath.append(mo).append("\0");
     return prepath;
@@ -251,7 +316,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
     mbInterfaceATR *mbATR = nullptr;
     std::string pathATR;
     // define path for ATR model
-    if(odInitParams->mbMission.missionType != ANALYZE_SAMPLE)
+    if (odInitParams->mbMission.missionType != ANALYZE_SAMPLE)
     {
         pathATR = DefineATRModel("default_ATR");
         LOG_F(INFO, "Defined path for ATR model %s, imresize-factor %g, model index in config %d", pathATR.c_str(), this->m_ATR_resize_factor, this->m_modelIndexInConfig);
@@ -260,7 +325,6 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
     {
         pathATR = DefineATRModel("tiles");
         LOG_F(INFO, "Defined path for tiles ATR model %s, imresize-factor %g, model index in config %d", pathATR.c_str(), this->m_ATR_resize_factor, this->m_modelIndexInConfig);
-
     }
 
     //ATR model initialization
@@ -288,10 +352,10 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
     {
         odInitParams->supportData.imageHeight = 2048;
         odInitParams->supportData.imageWidth = 4096;
-        //get sizes 
-        if(!m_configParams->models[m_modelIndexInConfig]["width"].empty())
+        //get sizes
+        if (!m_configParams->models[m_modelIndexInConfig]["width"].empty())
             odInitParams->supportData.imageWidth = std::stoi(m_configParams->models[m_modelIndexInConfig]["width"]);
-        if(!m_configParams->models[m_modelIndexInConfig]["height"].empty())
+        if (!m_configParams->models[m_modelIndexInConfig]["height"].empty())
             odInitParams->supportData.imageHeight = std::stoi(m_configParams->models[m_modelIndexInConfig]["height"]);
     }
     //Color Model initialization
@@ -385,7 +449,7 @@ void ObjectDetectionManagerHandler::IdleRun()
     //TODO: is it continues in memory ?
     // unsigned char *tempPtr = new unsigned char[m_numImgPixels];
     float resize_factor = 1;
-    if(m_ATR_resize_factor > 0 )
+    if (m_ATR_resize_factor > 0)
         resize_factor = m_ATR_resize_factor;
     int numImgPixels = int(m_initParams->supportData.imageHeight * resize_factor) * int(m_initParams->supportData.imageWidth * resize_factor) * 3;
     std::vector<uint8_t> *img_data = new std::vector<uint8_t>(numImgPixels); //try
@@ -458,7 +522,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
 
     e_OD_ColorImageType colortype = m_initParams->supportData.colorType;
     float resize_factor = 1;
-    if(m_ATR_resize_factor > 0)
+    if (m_ATR_resize_factor > 0)
         resize_factor = m_ATR_resize_factor;
 
     if (colortype == e_OD_ColorImageType::YUV422) // if raw
@@ -724,10 +788,10 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
 #endif //#ifdef TEST_MODE
 
     float rf = 1.0f;
-    if(m_ATR_resize_factor > 0 && m_ATR_resize_factor != 1)
+    if (m_ATR_resize_factor > 0 && m_ATR_resize_factor != 1)
         rf = m_ATR_resize_factor;
 
-    this->m_mbATR->RunRGBVector(ptrTif, bigH, bigW, rf); //TODO: resize factor ? 
+    this->m_mbATR->RunRGBVector(ptrTif, bigH, bigW, rf); //TODO: resize factor ?
 
     OD_CycleOutput *tempCycleOutput = NewOD_CycleOutput(350);
     this->PopulateCycleOutput(tempCycleOutput);

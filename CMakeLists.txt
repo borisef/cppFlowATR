@@ -148,3 +148,6 @@ target_link_libraries (testTamir  ${MY_TF_LIB} ${MY_TF_LIB2} ${OpenCV_LIBS} -lpt
 add_executable(stressTestSmall tests/testStressSmall.cpp ${SRC})
 target_link_libraries (stressTestSmall ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
 
+#testMultiModels
+add_executable(testMultiModels tests/testMultiModels.cpp ${SRC})
+target_link_libraries (testMultiModels ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
