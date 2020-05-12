@@ -52,6 +52,7 @@ std::map<ATR_TargetSubClass_MB, e_OD_TargetSubClass> mapOfATR2SubClass = {
      {ATR_TargetSubClass_MB::ATR_TRUCK,OD::e_OD_TargetSubClass::TRUCK},
      {ATR_TargetSubClass_MB::ATR_VAN,OD::e_OD_TargetSubClass::VAN},
      {ATR_TargetSubClass_MB::ATR_JEEP,OD::e_OD_TargetSubClass::COMMERCIAL},
+     {ATR_TargetSubClass_MB::ATR_PICKUP,OD::e_OD_TargetSubClass::PICKUP},
      {ATR_TargetSubClass_MB::ATR_PICKUP_OPEN,OD::e_OD_TargetSubClass::PICKUP},
      {ATR_TargetSubClass_MB::ATR_PICKUP_CLOSED,OD::e_OD_TargetSubClass::COMMERCIAL},
      {ATR_TargetSubClass_MB::ATR_FORKLIFT,OD::e_OD_TargetSubClass::TRACKTOR},//?
@@ -69,6 +70,7 @@ std::map<ATR_TargetSubClass_MB, e_OD_TargetClass> mapOfATR2Class = {
      {ATR_TargetSubClass_MB::ATR_TRUCK,OD::e_OD_TargetClass::VEHICLE},
      {ATR_TargetSubClass_MB::ATR_VAN,OD::e_OD_TargetClass::VEHICLE},
      {ATR_TargetSubClass_MB::ATR_JEEP,OD::e_OD_TargetClass::VEHICLE},
+     {ATR_TargetSubClass_MB::ATR_PICKUP,OD::e_OD_TargetClass::VEHICLE},
      {ATR_TargetSubClass_MB::ATR_PICKUP_OPEN,OD::e_OD_TargetClass::VEHICLE},
      {ATR_TargetSubClass_MB::ATR_PICKUP_CLOSED,OD::e_OD_TargetClass::VEHICLE},
      {ATR_TargetSubClass_MB::ATR_FORKLIFT,OD::e_OD_TargetClass::VEHICLE},

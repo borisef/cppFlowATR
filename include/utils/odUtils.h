@@ -19,12 +19,13 @@ enum ATR_TargetSubClass_MB //BE
 	ATR_BUS				= 12,
 	ATR_TRUCK			= 13,
 	ATR_VAN				= 14,
-	ATR_JEEP 			= 15,
-	ATR_PICKUP_OPEN 	= 16,
-	ATR_PICKUP_CLOSED 	= 20,
+	ATR_JEEP 			= 7,
+    ATR_PICKUP       	= 19,
+	ATR_PICKUP_OPEN 	= 15,
+	ATR_PICKUP_CLOSED 	= 16,
 	ATR_FORKLIFT 		= 17,
 	ATR_TRACKTOR 		= 18,
-	ATR_STATION 		= 19,
+	ATR_STATION 		= 6,
 	ATR_OTHER			= 999
 };
 
