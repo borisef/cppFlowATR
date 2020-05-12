@@ -657,7 +657,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
 
 int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutput)
 {
-    float LOWER_SCORE_THRESHOLD = 0.1f; //TODO: ini param (?)
+    float LOWER_SCORE_THRESHOLD = 0.7f; //TODO: ini param (?)
 #ifdef TEST_MODE
     cout << "ObjectDetectionManagerHandler::PopulateCycleOutput" << endl;
 #endif //TEST_MODE
