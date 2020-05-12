@@ -616,10 +616,19 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
             cv::rectangle(*myRGB, {(int)x, (int)y}, {(int)right, (int)bottom}, {125, 255, 51}, 2);
             cv::Scalar tColor(124, 200, 10);
             tColor = GetColor2Draw(colorId);
+            if(OD::e_OD_TargetClass(classId) != OD::e_OD_TargetClass::VEHICLE)
+                tColor = cv::Scalar(0, 0, 0);
+                
             std::string colString = GetColorString(colorId);
 
             cv::putText(*myRGB, string("Label:") + std::to_string(classId) + "(" + std::to_string(int(score * 100)) + "%)" + "," + colString + std::to_string(int(co->ObjectsArr[i].tarColorScore * 100)) + "%", cv::Point(x, y - 10), 1, 2, tColor, 3);
-            cv::putText(*myRGB,GetFromMapOfClasses(OD::e_OD_TargetClass(classId)) + "/" + GetFromMapOfSubClasses((co->ObjectsArr[i].tarSubClass)) ,cv::Point(x, y + 15), 1, 2, cv::Scalar(0, 0, 0), 2);
+            if(OD::e_OD_TargetClass(classId) != OD::e_OD_TargetClass::PERSON)
+                cv::putText(*myRGB,GetFromMapOfClasses(OD::e_OD_TargetClass(classId)) + "/" + GetFromMapOfSubClasses((co->ObjectsArr[i].tarSubClass)) ,cv::Point(x, y + 15), 1, 2, cv::Scalar(0, 0, 0), 2);
+            else
+            {
+                cv::putText(*myRGB,GetFromMapOfClasses(OD::e_OD_TargetClass(classId)) ,cv::Point(x, y + 15), 1, 2, cv::Scalar(0, 0, 0), 2);
+            }
+            
         }
     }
 #ifdef TEST_MODE
