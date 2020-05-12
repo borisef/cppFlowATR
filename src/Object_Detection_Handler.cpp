@@ -595,6 +595,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
     for (uint i = 0; i < co->numOfObjects; i++)
     {
         int classId = co->ObjectsArr[i].tarClass;
+
         OD::e_OD_TargetColor colorId = co->ObjectsArr[i].tarColor;
         float score = co->ObjectsArr[i].tarScore;
         OD_BoundingBox bbox_data = co->ObjectsArr[i].tarBoundingBox;
@@ -615,8 +616,10 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
             cv::rectangle(*myRGB, {(int)x, (int)y}, {(int)right, (int)bottom}, {125, 255, 51}, 2);
             cv::Scalar tColor(124, 200, 10);
             tColor = GetColor2Draw(colorId);
+            std::string colString = GetColorString(colorId);
 
-            cv::putText(*myRGB, string("Label:") + std::to_string(classId) + ";" + std::to_string(int(score * 100)) + "%", cv::Point(x, y - 10), 1, 2, tColor, 3);
+            cv::putText(*myRGB, string("Label:") + std::to_string(classId) + "(" + std::to_string(int(score * 100)) + "%)" + "," + colString + std::to_string(int(co->ObjectsArr[i].tarColorScore * 100)) + "%", cv::Point(x, y - 10), 1, 2, tColor, 3);
+            cv::putText(*myRGB,GetFromMapOfClasses(OD::e_OD_TargetClass(classId)) + "/" + GetFromMapOfSubClasses((co->ObjectsArr[i].tarSubClass)) ,cv::Point(x, y + 15), 1, 2, cv::Scalar(0, 0, 0), 2);
         }
     }
 #ifdef TEST_MODE
@@ -674,8 +677,11 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
     cycleOutput->numOfObjects = N;
     for (int i = 0; i < N; i++)
     {
-        e_OD_TargetClass aa = e_OD_TargetClass(1);
-        odi[i].tarClass = e_OD_TargetClass(m_mbATR->GetResultClasses(i));
+        e_OD_TargetClass tempClass = e_OD_TargetClass(1);
+        e_OD_TargetSubClass tempSubClass;
+        MapATR_Classes(ATR_TargetSubClass_MB(m_mbATR->GetResultClasses(i)),tempClass,tempSubClass);
+        odi[i].tarClass = tempClass; //e_OD_TargetClass(m_mbATR->GetResultClasses(i));
+        odi[i].tarSubClass = tempSubClass;
         odi[i].tarScore = m_mbATR->GetResultScores(i);
         if (odi[i].tarScore < LOWER_SCORE_THRESHOLD) // we suppose detections are sorted by score !!!
         {
@@ -943,6 +949,7 @@ bool ObjectDetectionManagerHandler::InitCM()
     }
     m_mbCM->m_tileMargin = tileMargin;
     LOG_F(INFO, "Loaded CM: %s\ninname: %s\noutname:%s", modelPath, inname, outname);
+    LOG_F(INFO, "CM margin %g\n",tileMargin);
     return true;
 }
 
