@@ -175,7 +175,7 @@ std::string GetStringInitParams(OD::OD_InitParams ip)
     mystr.append("ip.supportData.colorType = ").append(std::to_string(ip.supportData.colorType)).append("\n");
     mystr.append("ip.supportData.imageHeight = ").append(std::to_string(ip.supportData.imageHeight)).append("\n");
     mystr.append("ip.supportData.imageWidth = ").append(std::to_string(ip.supportData.imageWidth)).append("\n");
-    mystr.append("ip.mbMission.targetClas = ").append(std::to_string(ip.mbMission.targetClas)).append("\n");
+    mystr.append("ip.mbMission.targetSubClass = ").append(std::to_string(ip.mbMission.targetSubClass)).append("\n");
 
     return mystr;
 }

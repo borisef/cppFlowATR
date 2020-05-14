@@ -94,7 +94,8 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
     // Mission
     MB_Mission mission = {
         MB_MissionType::MATMON,       //mission1.missionType
-        e_OD_TargetSubClass::PRIVATE, //mission1.targetClas
+         e_OD_TargetClass::VEHICLE, //mission1.targetSubClass
+        e_OD_TargetSubClass::PRIVATE, //mission1.targetSubClass
         e_OD_TargetColor::WHITE       //mission1.targetColor
     };
 
@@ -116,11 +117,11 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
         supportData.rangeInMeters = 0;
 
     if(ors.enum_target==enumTarget::CARS)
-       mission.targetClas = e_OD_TargetSubClass::PRIVATE; 
+       mission.targetClass = e_OD_TargetClass::VEHICLE; 
     else if(ors.enum_target==enumTarget::HUMANS)
-        mission.targetClas = e_OD_TargetSubClass::OTHER_SUB_CLASS; 
+        mission.targetClass = e_OD_TargetClass::PERSON; 
     else //ALL
-        mission.targetClas = e_OD_TargetSubClass::UNKNOWN_SUB_CLASS;
+        mission.targetClass = e_OD_TargetClass::UNKNOWN_CLASS;
     
 
 

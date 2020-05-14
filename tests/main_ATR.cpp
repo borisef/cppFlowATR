@@ -31,7 +31,8 @@ int main()
   // MATMON MISSION
   MB_Mission mission1 = {
       MB_MissionType::MATMON,       //mission1.missionType
-      e_OD_TargetSubClass::PRIVATE, //mission1.targetClas
+       e_OD_TargetClass::VEHICLE, //mission1.targetClass
+      e_OD_TargetSubClass::PRIVATE, //mission1.targetSubClass
       e_OD_TargetColor::WHITE       //mission1.targetColor
   };
 

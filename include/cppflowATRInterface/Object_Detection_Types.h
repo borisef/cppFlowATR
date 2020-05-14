@@ -48,6 +48,14 @@ enum MB_MissionType //BE
 
 };
 
+enum e_OD_TargetClass
+{
+	UNKNOWN_CLASS = 1,
+	VEHICLE = 2,
+	PERSON = 3,
+	OTHER_CLASS = 999
+};
+
 enum e_OD_TargetSubClass
 {
 	UNKNOWN_SUB_CLASS = 1,
@@ -80,7 +88,8 @@ enum e_OD_TargetColor
 struct MB_Mission //BE
 {
 	MB_MissionType missionType;
-	e_OD_TargetSubClass targetClas;
+	e_OD_TargetClass targetClass;
+	e_OD_TargetSubClass targetSubClass;
 	e_OD_TargetColor targetColor;
 };
 
@@ -112,13 +121,7 @@ struct OD_BoundingBox
 	float y2; //bottom right point
 };
 
-enum e_OD_TargetClass
-{
-	UNKNOWN_CLASS = 1,
-	VEHICLE = 2,
-	PERSON = 3,
-	OTHER_CLASS = 999
-};
+
 
 // enum e_OD_TargetSubClass_MB //BE
 // {

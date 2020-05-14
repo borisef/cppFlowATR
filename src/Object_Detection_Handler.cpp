@@ -227,7 +227,7 @@ std::string ObjectDetectionManagerHandler::DefineATRModel(std::string nickname)
     int target_cars_humans_any = -1;
 
     float r = m_initParams->supportData.rangeInMeters;
-    e_OD_TargetSubClass tc = m_initParams->mbMission.targetClas;
+    e_OD_TargetClass tc = m_initParams->mbMission.targetClass;
     if (r > 175)
         target_far_near_all = 1;
     else if (r < 10)
@@ -235,9 +235,9 @@ std::string ObjectDetectionManagerHandler::DefineATRModel(std::string nickname)
     else
         target_far_near_all = 2;
 
-    if (tc == e_OD_TargetSubClass::OTHER_SUB_CLASS)
+    if (tc == e_OD_TargetClass::PERSON)
         target_cars_humans_any = 2; //humans
-    else if (tc == e_OD_TargetSubClass::UNKNOWN_SUB_CLASS)
+    else if (tc == e_OD_TargetClass::UNKNOWN_CLASS)
         target_cars_humans_any = 3; //any
     else
         target_cars_humans_any = 1; //car

@@ -59,7 +59,8 @@ int main()
     // Mission
     MB_Mission mission = {
         MB_MissionType::ANALYZE_SAMPLE,         //mission1.missionType
-        e_OD_TargetSubClass::UNKNOWN_SUB_CLASS, //mission1.targetClas
+         e_OD_TargetClass::UNKNOWN_CLASS, //mission1.targetSubClass
+        e_OD_TargetSubClass::UNKNOWN_SUB_CLASS, //mission1.targetSubClass
         e_OD_TargetColor::UNKNOWN_COLOR         //mission1.targetColor
     };
     // support data

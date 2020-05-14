@@ -166,7 +166,7 @@ OD_InitParams *LoadConfig()
     MB_Mission *mission1 = new MB_Mission();
     *mission1 = {
         MB_MissionType::MATMON,       //mission1.missionType
-        e_OD_TargetSubClass::PRIVATE, //mission1.targetClas
+        e_OD_TargetSubClass::PRIVATE, //mission1.targetSubClass
         e_OD_TargetColor::WHITE       //mission1.targetColor
     };
 
