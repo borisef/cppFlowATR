@@ -3,6 +3,83 @@
 using namespace cv;
 using namespace std;
 
+
+
+	// ATR_PERSON		= 1,
+	// ATR_CAR				= 5,
+	// ATR_BICYCLE			= 10,
+	// ATR_MOTORCYCLE		= 11,
+	// ATR_BUS				= 12,
+	// ATR_TRUCK			= 13,
+	// ATR_VAN				= 14,
+	// ATR_JEEP 			= 15,
+	// ATR_PICKUP_OPEN 	= 16,
+	// ATR_PICKUP_CLOSED 	= 20,
+	// ATR_FORKLIFT 		= 17,
+	// ATR_TRACKTOR 		= 18,
+	// ATR_STATION 		= 19,
+	// ATR_OTHER			= 999
+
+
+// enum e_OD_TargetClass
+// {
+// 	UNKNOWN_CLASS = 1,
+// 	VEHICLE = 2,
+// 	PERSON = 3,
+// 	OTHER_CLASS = 999
+// };
+
+// enum e_OD_TargetSubClass
+// {
+// 	UNKNOWN_SUB_CLASS = 1,//used for human
+// 	PRIVATE = 2,
+// 	COMMERCIAL = 3,
+// 	PICKUP = 4,
+// 	TRUCK = 5,
+// 	BUS = 6,
+// 	VAN = 7,
+// 	TRACKTOR = 8,
+// 	OTHER_SUB_CLASS = 999 // used for any 
+// };
+
+
+std::map<ATR_TargetSubClass_MB, e_OD_TargetSubClass> mapOfATR2SubClass = {
+    {ATR_TargetSubClass_MB::ATR_PERSON,OD::e_OD_TargetSubClass::UNKNOWN_SUB_CLASS},
+     {ATR_TargetSubClass_MB::ATR_BICYCLE,OD::e_OD_TargetSubClass::UNKNOWN_SUB_CLASS},
+      {ATR_TargetSubClass_MB::ATR_MOTORCYCLE,OD::e_OD_TargetSubClass::UNKNOWN_SUB_CLASS},
+     {ATR_TargetSubClass_MB::ATR_CAR,OD::e_OD_TargetSubClass::PRIVATE},
+     {ATR_TargetSubClass_MB::ATR_BUS,OD::e_OD_TargetSubClass::BUS},
+     {ATR_TargetSubClass_MB::ATR_TRUCK,OD::e_OD_TargetSubClass::TRUCK},
+     {ATR_TargetSubClass_MB::ATR_VAN,OD::e_OD_TargetSubClass::VAN},
+     {ATR_TargetSubClass_MB::ATR_JEEP,OD::e_OD_TargetSubClass::COMMERCIAL},
+     {ATR_TargetSubClass_MB::ATR_PICKUP,OD::e_OD_TargetSubClass::PICKUP},
+     {ATR_TargetSubClass_MB::ATR_PICKUP_OPEN,OD::e_OD_TargetSubClass::PICKUP},
+     {ATR_TargetSubClass_MB::ATR_PICKUP_CLOSED,OD::e_OD_TargetSubClass::COMMERCIAL},
+     {ATR_TargetSubClass_MB::ATR_FORKLIFT,OD::e_OD_TargetSubClass::TRACKTOR},//?
+     {ATR_TargetSubClass_MB::ATR_TRACKTOR,OD::e_OD_TargetSubClass::TRACKTOR},
+     {ATR_TargetSubClass_MB::ATR_STATION,OD::e_OD_TargetSubClass::COMMERCIAL},
+     {ATR_TargetSubClass_MB::ATR_OTHER,OD::e_OD_TargetSubClass::OTHER_SUB_CLASS}
+     };
+
+std::map<ATR_TargetSubClass_MB, e_OD_TargetClass> mapOfATR2Class = {
+    {ATR_TargetSubClass_MB::ATR_PERSON,OD::e_OD_TargetClass::PERSON},
+     {ATR_TargetSubClass_MB::ATR_BICYCLE,OD::e_OD_TargetClass::PERSON},
+     {ATR_TargetSubClass_MB::ATR_MOTORCYCLE,OD::e_OD_TargetClass::PERSON},
+     {ATR_TargetSubClass_MB::ATR_CAR,OD::e_OD_TargetClass::VEHICLE},
+     {ATR_TargetSubClass_MB::ATR_BUS,OD::e_OD_TargetClass::VEHICLE},
+     {ATR_TargetSubClass_MB::ATR_TRUCK,OD::e_OD_TargetClass::VEHICLE},
+     {ATR_TargetSubClass_MB::ATR_VAN,OD::e_OD_TargetClass::VEHICLE},
+     {ATR_TargetSubClass_MB::ATR_JEEP,OD::e_OD_TargetClass::VEHICLE},
+     {ATR_TargetSubClass_MB::ATR_PICKUP,OD::e_OD_TargetClass::VEHICLE},
+     {ATR_TargetSubClass_MB::ATR_PICKUP_OPEN,OD::e_OD_TargetClass::VEHICLE},
+     {ATR_TargetSubClass_MB::ATR_PICKUP_CLOSED,OD::e_OD_TargetClass::VEHICLE},
+     {ATR_TargetSubClass_MB::ATR_FORKLIFT,OD::e_OD_TargetClass::VEHICLE},
+     {ATR_TargetSubClass_MB::ATR_TRACKTOR,OD::e_OD_TargetClass::VEHICLE},
+     {ATR_TargetSubClass_MB::ATR_STATION,OD::e_OD_TargetClass::VEHICLE},
+     {ATR_TargetSubClass_MB::ATR_OTHER,OD::e_OD_TargetClass::OTHER_CLASS}
+     };
+
+
 std::map<OD::e_OD_TargetColor, char *> mapOfcolors = {
     {OD::e_OD_TargetColor::BLACK, "black"},
     {OD::e_OD_TargetColor::BLUE, "blue"},
@@ -167,6 +244,37 @@ cv::Scalar GetColor2Draw(OD::e_OD_TargetColor color_id)
     return cv::Scalar(0, 255, 255);
 }
 
+std::string GetColorString(OD::e_OD_TargetColor color_id)
+{
+    switch (color_id)
+    {
+    case OD::e_OD_TargetColor::WHITE:
+        return(std::string("white"));
+        break;
+    case OD::e_OD_TargetColor::BLACK:
+        return(std::string("black"));
+        break;
+    case OD::e_OD_TargetColor::GRAY:
+        return(std::string("gray"));
+        break;
+    case OD::e_OD_TargetColor::RED:
+        return(std::string("red"));
+        break;
+    case OD::e_OD_TargetColor::GREEN:
+        return(std::string("green"));
+        break;
+    case OD::e_OD_TargetColor::BLUE:
+        return(std::string("blue"));
+        break;
+    case OD::e_OD_TargetColor::YELLOW:
+        return(std::string("yellow"));
+        break;
+    }
+
+    return(std::string("weird"));
+
+}
+
 std::string GetStringInitParams(OD::OD_InitParams ip)
 {
     std::string mystr = "OD_InitParams: ";
@@ -183,25 +291,27 @@ std::string GetStringInitParams(OD::OD_InitParams ip)
 std::string BB2LogString(OD_BoundingBox bb)
 {
     std::string mystr = "(";
-    mystr.append(std::to_string(bb.x1)).append(",");
-    mystr.append(std::to_string(bb.x2)).append(",");
-    mystr.append(std::to_string(bb.y1)).append(",");
-    mystr.append(std::to_string(bb.y2)).append(")");
+    mystr.append(std::to_string(int(bb.x1))).append(",");
+    mystr.append(std::to_string(int(bb.x2))).append(",");
+    mystr.append(std::to_string(int(bb.y1))).append(",");
+    mystr.append(std::to_string(int(bb.y2))).append(")");
     return mystr;
 }
 
 std::string DetectionItem2LogString(OD_DetectionItem di)
 {
     std::string mystr = "";
-    mystr.append(BB2LogString(di.tarBoundingBox)).append(",");
+    mystr.append(GetFromMapOfClasses(di.tarClass)).append("/");
+    mystr.append(GetFromMapOfSubClasses(di.tarSubClass)); 
+    mystr.append("(").append(std::to_string(di.tarClass)).append("/");
+    mystr.append(std::to_string(di.tarSubClass)).append("),");
+    mystr.append("bb:").append(BB2LogString(di.tarBoundingBox)).append(",");
   //  mystr.append(mapOfClasses[di.tarClass]).append(",");
-  mystr.append(std::to_string(di.tarClass)).append(",");
-  //  mystr.append(mapOfSubclasses[di.tarSubClass]).append(",");
-  mystr.append(std::to_string(di.tarSubClass)).append(",");
-    mystr.append(std::to_string(di.tarScore)).append(",");
+    mystr.append("sc:").append(std::to_string(int(100*di.tarScore))).append(",");
    // mystr.append(mapOfcolors[di.tarColor]).append(",");
-    mystr.append(std::to_string(di.tarColor)).append(",");
-    mystr.append(std::to_string(di.tarColorScore)).append(",");
+    mystr.append(GetColorString(di.tarColor)).append("(");
+    mystr.append(std::to_string(di.tarColor)).append("),");
+    mystr.append("col_sc:").append(std::to_string(int(100*(di.tarColorScore)))).append("");
     mystr.append("\n");
     return mystr;
 }
@@ -220,3 +330,36 @@ std::string CycleOutput2LogString(OD_CycleOutput* co)
     return mystr;
 
 }
+
+std::string GetFromMapOfClasses(e_OD_TargetClass cl)
+{
+
+    char* rrr = mapOfClasses[cl];
+    if(rrr == 0x0)
+        return ("UNKNOW_CLASS");    
+    return (std::string(rrr));
+
+}
+std::string GetFromMapOfSubClasses(e_OD_TargetSubClass scl)
+{
+
+    char* rrr = mapOfSubclasses[scl];
+    if(rrr == 0x0)
+        return ("UNKNOW_SUBCLASS");
+    return (std::string(rrr));
+
+}
+
+void MapATR_Classes(ATR_TargetSubClass_MB inClass, OD::e_OD_TargetClass& outClass, OD::e_OD_TargetSubClass& outSubClass)
+{
+    outClass = mapOfATR2Class[inClass];
+    outSubClass = mapOfATR2SubClass[inClass];
+
+    if(outClass==0)
+        outClass = OD::e_OD_TargetClass::UNKNOWN_CLASS;
+
+    if(outSubClass==0)
+        outSubClass = OD::e_OD_TargetSubClass::UNKNOWN_SUB_CLASS;
+    
+};
+

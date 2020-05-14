@@ -58,15 +58,15 @@ enum e_OD_TargetClass
 
 enum e_OD_TargetSubClass
 {
-	UNKNOWN_SUB_CLASS = 1,
+	UNKNOWN_SUB_CLASS = 1,//used for human
 	PRIVATE = 2,
-	COMMERCIAL = 3,
-	PICKUP = 4,
+	COMMERCIAL = 3,//pickup closed + station + jeep 
+	PICKUP = 4, // pickup open 
 	TRUCK = 5,
 	BUS = 6,
 	VAN = 7,
 	TRACKTOR = 8,
-	OTHER_SUB_CLASS = 999
+	OTHER_SUB_CLASS = 999 // used for any 
 };
 
 
@@ -123,23 +123,7 @@ struct OD_BoundingBox
 
 
 
-// enum e_OD_TargetSubClass_MB //BE
-// {
-// 	PERSON			= 1,
-// 	CAR				= 5,
-// 	BICYCLE			= 10,
-// 	MOTORCYCLE		= 11,
-// 	BUS				= 12,
-// 	TRUCK			= 13,
-// 	VAN				= 14,
-// 	JEEP 			= 15,
-// 	PICKUP_OPEN 	= 16,
-// 	PICKUP_CLOSED 	= 20,
-// 	FORKLIFT 		= 17,
-// 	TRACKTOR 		= 18,
-// 	STATION 		= 19,
-// 	OTHER			= 999
-// };
+
 
 struct OD_DetectionItem
 {

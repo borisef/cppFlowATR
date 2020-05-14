@@ -182,7 +182,17 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
             //crop
             OD::OD_BoundingBox bb = co->ObjectsArr[i].tarBoundingBox;
              //TODO: take tileMargin into account
-            cv::Rect myROI(bb.x1, bb.y1, bb.x2 - bb.x1, bb.y2 - bb.y1);
+            float dw = bb.x2-bb.x1;
+            float dh = bb.y2-bb.y1;
+            float x1 = bb.x1 - dw*m_tileMargin;
+            float y1 = bb.y1 - dh*m_tileMargin;
+            float x2 = x1 + dw*(1.0f+2.0f*m_tileMargin);
+            float y2 = y1 + dh*(1.0f+2.0f*m_tileMargin);
+            cv::Rect myROI;
+            if(x1 > 0 && y1 > 0 && y2 < img.rows && x2 < img.cols )
+                myROI = cv::Rect(x1, y1, x2 - x1, y2 - y1);
+            else    
+                myROI = cv::Rect(bb.x1, bb.y1, bb.x2 - bb.x1, bb.y2 - bb.y1);
 
 #ifdef TEST_MODE
             cv::rectangle(debugImg, myROI, cv::Scalar(0, 255, 0), 5);
