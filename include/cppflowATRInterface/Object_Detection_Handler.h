@@ -75,4 +75,10 @@ protected:
     static InitParams *m_configParams;
     std::string m_lastPathATR = "";
 
+    bool m_nms = true; // use NMS as post-processing?
+    int m_nms_abs_thresh = 50; // min manhatten distance between 2 for sure distinc objects
+    float m_nms_IoU_thresh = 0.5; // max IoU between 2 for sure distinc objects
+    
+
+
 };

@@ -12,7 +12,10 @@
     "log_verbosity" : "9",
     "log_stderr_verbosity" : "0",
     "prePath": "e:/projects/MB2/cppFlowATR/",
-    "os": "WIN"
+    "os": "WIN",
+    "nms": "1",
+    "nms_abs_thresh": "50",
+    "nms_IoU_thresh": "0.5"
   },
 "_comment": "--- Models go here --",
 "_comment": "Remark, most of params are not yet in use",

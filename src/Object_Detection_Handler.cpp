@@ -367,6 +367,9 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
         m_withActiveCM = initCMsuccess;
     }
 
+    //TODO: nms initialization 
+
+
     setParams(odInitParams);
 
 #ifdef TEST_MODE
@@ -734,7 +737,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
 
 int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutput)
 {
-    float LOWER_SCORE_THRESHOLD = 0.7f; //TODO: ini param (?)
+    float LOWER_SCORE_THRESHOLD = 0.1f; //TODO: ini param (?)
 #ifdef TEST_MODE
     cout << "ObjectDetectionManagerHandler::PopulateCycleOutput" << endl;
 #endif //TEST_MODE
@@ -746,6 +749,13 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
 #ifdef TEST_MODE
     cout << "PopulateCycleOutput: Num detections total " << N << endl;
 #endif //TEST_MODE
+
+
+    if(m_nms)//do NMS
+    {
+        //TODO
+    }
+
 
     auto bbox_data = m_mbATR->GetResultBoxes();
     unsigned int w = this->m_initParams->supportData.imageWidth;

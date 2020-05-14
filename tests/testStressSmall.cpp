@@ -190,9 +190,9 @@ int main()
 {
     OD::ObjectDetectionManager *atrManager = nullptr;
     OneRunStruct ors2;
-    ors2.splicePath = "media/filter/*";
+    ors2.splicePath = "media/spliced/*";
     ors2.numRepetiotions = 1;
-    ors2.minDelay = 100;
+    ors2.minDelay = 5000;
     ors2.startFrameID = 1;
 
     atrManager = OneRun(atrManager, ors2);
