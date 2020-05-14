@@ -52,12 +52,12 @@ struct OneRunStruct
     e_OD_ColorImageType imType = e_OD_ColorImageType::RGB;
 
 #ifdef WIN32
-    string iniFile = (char *)"config/configATR_Feb2020_win.json";
+    string iniFile = (char *)"config/configATR_May2020_win.json";
 #elif OS_LINUX
     #ifdef JETSON
-        string iniFile = (char *)"config/configATR_Feb2020_linux_jetson.json";
+        string iniFile = (char *)"config/configATR_May2020_linux_jetson.json";
     #else
-        string iniFile = (char *)"config/configATR_Feb2020_linux.json";
+        string iniFile = (char *)"config/configATR_May2020_linux.json";
     #endif
 #endif
 

@@ -52,7 +52,7 @@ struct OneRunStruct
     e_OD_ColorImageType imType = e_OD_ColorImageType::RGB;
 
 #ifdef WIN32
-    string iniFile = (char *)"config/configATR_Feb2020_win.json";
+    string iniFile = (char *)"config/configATR_May2020_win.json";
 #elif OS_LINUX
     #ifdef JETSON
         string iniFile = (char *)"config/configATR_Feb2020_linux_jetson.json";
@@ -190,9 +190,9 @@ int main()
 {
     OD::ObjectDetectionManager *atrManager = nullptr;
     OneRunStruct ors2;
-    ors2.splicePath = "media/filter/*";
+    ors2.splicePath = "media/spliced/*";
     ors2.numRepetiotions = 1;
-    ors2.minDelay = 100;
+    ors2.minDelay = 1000;
     ors2.startFrameID = 1;
 
     atrManager = OneRun(atrManager, ors2);
