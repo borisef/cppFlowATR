@@ -15,7 +15,10 @@
     "os": "WIN",
     "nms": "1",
     "nms_abs_thresh": "50",
-    "nms_IoU_thresh": "0.5"
+    "nms_IoU_thresh": "0.1",
+    "nms_IoU_thresh_VEHICLE2VEHICLE": "0.3",
+    "nms_IoU_thresh_VEHICLE2HUMAN": "0.7",
+    "nms_IoU_thresh_HUMAN2HUMAN": "0.5"
   },
 "_comment": "--- Models go here --",
 "_comment": "Remark, most of params are not yet in use",

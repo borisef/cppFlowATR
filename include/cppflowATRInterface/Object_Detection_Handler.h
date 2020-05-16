@@ -47,6 +47,8 @@ public:
     mbInterfaceATR *m_mbATR = nullptr;
     static mbInterfaceCM *m_mbCM;
 
+    int ApplyNMS(OD_CycleOutput *co);
+
 protected:
     bool InitCM();
     void DeleteAllInnerCycleInputs();
@@ -76,9 +78,10 @@ protected:
     std::string m_lastPathATR = "";
 
     bool m_nms = true; // use NMS as post-processing?
-    int m_nms_abs_thresh = 50; // min manhatten distance between 2 for sure distinc objects
-    float m_nms_IoU_thresh = 0.5; // max IoU between 2 for sure distinc objects
+    int m_nms_abs_thresh = 100; // min manhatten distance between 2 for sure distinc objects
+    float m_nms_IoU_thresh = 0.3; // max IoU between 2 for sure distinc objects
+    float m_nms_IoU_thresh_VEHICLE2VEHICLE = 0.3; // max IoU between 2 for sure distinc objects
+    float m_nms_IoU_thresh_VEHICLE2HUMAN = 0.7; // max IoU between 2 for sure distinc objects
+    float m_nms_IoU_thresh_HUMAN2HUMAN = 0.5; // max IoU between 2 for sure distinc objects
     
-
-
 };

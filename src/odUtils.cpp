@@ -325,7 +325,7 @@ std::string CycleOutput2LogString(OD_CycleOutput* co)
         mystr.append(DetectionItem2LogString(co->ObjectsArr[i]));
     }
     
-    mystr.append("TODO=").append("TODO").append("\n");
+    //mystr.append("TODO=").append("TODO").append("\n");
 
     return mystr;
 

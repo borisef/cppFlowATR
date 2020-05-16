@@ -367,7 +367,23 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
         m_withActiveCM = initCMsuccess;
     }
 
-    //TODO: nms initialization 
+    //: nms initialization 
+    if (!m_configParams->run_params["nms"].empty())
+            m_nms = (bool)(std::stoi(m_configParams->run_params["nms"]));
+    if (!m_configParams->run_params["nms_abs_thresh"].empty())
+            m_nms_abs_thresh = (std::stoi(m_configParams->run_params["nms_abs_thresh"]));
+    if (!m_configParams->run_params["nms_IoU_thresh"].empty())
+            m_nms_IoU_thresh = (std::stof(m_configParams->run_params["nms_IoU_thresh"]));
+    if (!m_configParams->run_params["nms_IoU_thresh_VEHICLE2VEHICLE"].empty())
+            m_nms_IoU_thresh_VEHICLE2VEHICLE = (std::stof(m_configParams->run_params["nms_IoU_thresh_VEHICLE2VEHICLE"]));
+    if (!m_configParams->run_params["nms_IoU_thresh_VEHICLE2HUMAN"].empty())
+            m_nms_IoU_thresh_VEHICLE2HUMAN = (std::stof(m_configParams->run_params["nms_IoU_thresh_VEHICLE2HUMAN"]));
+    if (!m_configParams->run_params["nms_IoU_thresh_HUMAN2HUMAN"].empty())
+            m_nms_IoU_thresh_HUMAN2HUMAN = (std::stof(m_configParams->run_params["nms_IoU_thresh_HUMAN2HUMAN"]));
+
+
+
+
 
 
     setParams(odInitParams);
@@ -623,7 +639,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
     m_mutexOnPrev.unlock();
     //glob_mutexOnPrev.unlock();
 
-    float drawThresh = 0; //if 0 draw all
+    float drawThresh = 0.01; //if 0 draw all
     //TODO: make sure m_prevCycleInput->ImgID_input is like co->ImgID
     unsigned int fi = tempci->ImgID_input;
     unsigned int h = m_initParams->supportData.imageHeight;
@@ -751,10 +767,7 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
 #endif //TEST_MODE
 
 
-    if(m_nms)//do NMS
-    {
-        //TODO
-    }
+   
 
 
     auto bbox_data = m_mbATR->GetResultBoxes();
@@ -783,6 +796,11 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
         }
 
         odi[i].tarBoundingBox = {bbox_data[i * 4 + 1] * w, bbox_data[i * 4 + 3] * w, bbox_data[i * 4] * h, bbox_data[i * 4 + 2] * h};
+    }
+
+    if(m_nms)//do NMS
+    {
+        ApplyNMS(cycleOutput);
     }
 
     return cycleOutput->numOfObjects;
@@ -1093,3 +1111,62 @@ bool ObjectDetectionManagerHandler::InitConfigParamsFromFile(const char *iniFile
 
     return true;
 }
+
+ int ObjectDetectionManagerHandler::ApplyNMS(OD_CycleOutput *co)
+ {
+     int N = co->numOfObjects;
+     int N1 = N;
+     float eps = 0.001;
+     for (size_t i1 = 0; i1 < N; i1++)
+     {
+         if(co->ObjectsArr[i1].tarScore < eps)
+            continue;
+         float x1a = co->ObjectsArr[i1].tarBoundingBox.x1;
+         float y1a = co->ObjectsArr[i1].tarBoundingBox.y1;
+         for (size_t i2 = i1 + 1; i2 < N; i2++)
+         {
+             if((co->ObjectsArr[i2].tarScore < eps) || (std::abs(x1a - (co->ObjectsArr[i2].tarBoundingBox.x1)) > m_nms_abs_thresh) || (std::abs(y1a - co->ObjectsArr[i2].tarBoundingBox.y1) > m_nms_abs_thresh ))
+                continue;
+             float iou = IoU((co->ObjectsArr[i1].tarBoundingBox),(co->ObjectsArr[i2].tarBoundingBox));
+             //: threshold depends on classes 
+             if((iou > m_nms_IoU_thresh_VEHICLE2VEHICLE && co->ObjectsArr[i1].tarClass==e_OD_TargetClass::VEHICLE &&  co->ObjectsArr[i2].tarClass==e_OD_TargetClass::VEHICLE)\
+             ||(iou > m_nms_IoU_thresh_HUMAN2HUMAN && co->ObjectsArr[i1].tarClass==e_OD_TargetClass::PERSON &&  co->ObjectsArr[i2].tarClass==e_OD_TargetClass::PERSON)\
+             ||(iou > m_nms_IoU_thresh_VEHICLE2HUMAN && co->ObjectsArr[i1].tarClass==e_OD_TargetClass::PERSON &&  co->ObjectsArr[i2].tarClass==e_OD_TargetClass::VEHICLE)\
+             ||(iou > m_nms_IoU_thresh_VEHICLE2HUMAN && co->ObjectsArr[i2].tarClass==e_OD_TargetClass::PERSON &&  co->ObjectsArr[i1].tarClass==e_OD_TargetClass::VEHICLE)\
+             ||(iou > m_nms_IoU_thresh))
+                {
+                    #ifdef TEST_MODE
+                    std::cout << " NMS merged "<<std::endl<<  DetectionItem2LogString(co->ObjectsArr[i1]) \
+                    << DetectionItem2LogString(co->ObjectsArr[i2]) << std::endl;
+                    #endif //#ifdef TEST_MODE
+                    co->ObjectsArr[i2].tarScore = 0;
+                    N1--;
+                }
+            
+         }
+     }
+     //: squeeze inplace
+      int move2=1;
+     for (size_t i = 1; i < N; i++)
+     {
+        if(co->ObjectsArr[i].tarScore > eps)
+        {
+            if(move2<i)
+            {
+                //:move i into move2
+                co->ObjectsArr[move2].tarScore=co->ObjectsArr[i].tarScore;
+                co->ObjectsArr[move2].tarColorScore=co->ObjectsArr[i].tarColorScore;
+                co->ObjectsArr[move2].occlusionScore=co->ObjectsArr[i].occlusionScore;
+                co->ObjectsArr[move2].tarClass=co->ObjectsArr[i].tarClass;
+                co->ObjectsArr[move2].tarBoundingBox=co->ObjectsArr[i].tarBoundingBox;
+                co->ObjectsArr[move2].tarColor=co->ObjectsArr[i].tarColor;
+                co->ObjectsArr[move2].tarSubClass=co->ObjectsArr[i].tarSubClass;
+            }
+            move2=move2+1;
+           
+        }
+     }
+     co->numOfObjects = N1;
+     LOG_F(INFO, "ApplyNMS: before NMS N = %d , after NMS: N = %d ", N, N1);
+     return N1;
+ }
