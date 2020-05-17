@@ -10,7 +10,15 @@
     "logfile_path" : "logs/file.log",
     "log_verbosity" : "9",
     "log_stderr_verbosity" : "0",
-    "prePath": "/home/borisef/projects/cppFlowATR/"
+    "prePath": "/home/borisef/projects/cppFlowATR/",
+    "os": "LINUX_PC",
+    "nms": "1",
+    "nms_abs_thresh": "50",
+    "nms_IoU_thresh": "0.1",
+    "nms_IoU_thresh_VEHICLE2VEHICLE_SAME_SUB": "0.3",
+    "nms_IoU_thresh_VEHICLE2VEHICLE": "0.3",
+    "nms_IoU_thresh_VEHICLE2HUMAN": "0.7",
+    "nms_IoU_thresh_HUMAN2HUMAN": "0.5"
   },
   "models": [
     {

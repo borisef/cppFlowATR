@@ -2,6 +2,8 @@
 #include <vector>
 //#include <e:/Installs/opencv/sources/include/opencv2/opencv.hpp>
 #include <opencv2/opencv.hpp>
+#include <cppflowATRInterface/Object_Detection_Types.h>
+
 using namespace std;
 using namespace cv;
 
@@ -34,6 +36,7 @@ unsigned char *ParseImage(String path);
 unsigned char *ParseRaw(String path);
 unsigned char *ParseCvMat(cv::Mat inp1);
 float IoU(float* , float*);
+float IoU(OD::OD_BoundingBox bb1, OD::OD_BoundingBox bb2);
 
 uint argmax_vector(std::vector<float> prob_vec);
 

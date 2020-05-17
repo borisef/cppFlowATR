@@ -54,7 +54,11 @@ std::string GetFromMapOfSubClasses(e_OD_TargetSubClass scl);
 
 void MapATR_Classes(ATR_TargetSubClass_MB inClass, OD::e_OD_TargetClass& outClass, OD::e_OD_TargetSubClass& outSubClass);
 
+int FilterCycleOutputByClassNoSqueeze(OD_CycleOutput* co, e_OD_TargetClass class2remove);
 
+int FilterCycleOutputBySubClassNoSqueeze(OD_CycleOutput* co, e_OD_TargetSubClass subclass2remove);
+
+int SqueezeCycleOutputInplace(OD_CycleOutput* co);
 
 
 

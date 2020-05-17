@@ -63,8 +63,8 @@ std::map<ATR_TargetSubClass_MB, e_OD_TargetSubClass> mapOfATR2SubClass = {
 
 std::map<ATR_TargetSubClass_MB, e_OD_TargetClass> mapOfATR2Class = {
     {ATR_TargetSubClass_MB::ATR_PERSON,OD::e_OD_TargetClass::PERSON},
-     {ATR_TargetSubClass_MB::ATR_BICYCLE,OD::e_OD_TargetClass::PERSON},
-     {ATR_TargetSubClass_MB::ATR_MOTORCYCLE,OD::e_OD_TargetClass::PERSON},
+     {ATR_TargetSubClass_MB::ATR_BICYCLE,OD::e_OD_TargetClass::OTHER_CLASS},
+     {ATR_TargetSubClass_MB::ATR_MOTORCYCLE,OD::e_OD_TargetClass::OTHER_CLASS},
      {ATR_TargetSubClass_MB::ATR_CAR,OD::e_OD_TargetClass::VEHICLE},
      {ATR_TargetSubClass_MB::ATR_BUS,OD::e_OD_TargetClass::VEHICLE},
      {ATR_TargetSubClass_MB::ATR_TRUCK,OD::e_OD_TargetClass::VEHICLE},
@@ -325,7 +325,7 @@ std::string CycleOutput2LogString(OD_CycleOutput* co)
         mystr.append(DetectionItem2LogString(co->ObjectsArr[i]));
     }
     
-    mystr.append("TODO=").append("TODO").append("\n");
+    //mystr.append("TODO=").append("TODO").append("\n");
 
     return mystr;
 
@@ -363,3 +363,55 @@ void MapATR_Classes(ATR_TargetSubClass_MB inClass, OD::e_OD_TargetClass& outClas
     
 };
 
+int SqueezeCycleOutputInplace(OD_CycleOutput* co)
+{
+    int N = co->numOfObjects;
+    float eps = 0.001;
+    int move2=0;
+     for (size_t i = 0; i < N; i++)
+     {
+        if(co->ObjectsArr[i].tarScore > eps)
+        {
+            if(move2<i)
+            {
+                //move i into move2
+                co->ObjectsArr[move2].tarScore=co->ObjectsArr[i].tarScore;
+                co->ObjectsArr[move2].tarColorScore=co->ObjectsArr[i].tarColorScore;
+                co->ObjectsArr[move2].occlusionScore=co->ObjectsArr[i].occlusionScore;
+                co->ObjectsArr[move2].tarClass=co->ObjectsArr[i].tarClass;
+                co->ObjectsArr[move2].tarBoundingBox=co->ObjectsArr[i].tarBoundingBox;
+                co->ObjectsArr[move2].tarColor=co->ObjectsArr[i].tarColor;
+                co->ObjectsArr[move2].tarSubClass=co->ObjectsArr[i].tarSubClass;
+            }
+            move2=move2+1;
+           
+        }
+        else
+        {
+            co->numOfObjects= co->numOfObjects-1;
+        }
+        
+     }
+    
+    return(co->numOfObjects);
+}
+
+int FilterCycleOutputByClassNoSqueeze(OD_CycleOutput* co, e_OD_TargetClass class2remove)
+{
+    int N = co->numOfObjects;
+     for (size_t i = 0; i < N; i++)
+     {
+         if(co->ObjectsArr[i].tarClass==class2remove)
+            co->ObjectsArr[i].tarScore = 0.0f;
+     }
+}
+
+int FilterCycleOutputBySubClassNoSqueeze(OD_CycleOutput* co, e_OD_TargetSubClass subclass2remove)
+{
+    int N = co->numOfObjects;
+     for (size_t i = 1; i < N; i++)
+     {
+         if(co->ObjectsArr[i].tarSubClass==subclass2remove)
+            co->ObjectsArr[i].tarScore = 0.0f;
+     }
+}

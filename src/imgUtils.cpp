@@ -31,6 +31,35 @@ float IoU(float *box1, float *box2)
   }
 }
 
+float IoU(OD::OD_BoundingBox bb1, OD::OD_BoundingBox bb2)
+{
+  float minx1 = bb1.x1;
+  float maxx1 = bb1.x2;
+  float miny1 = bb1.y1;
+  float maxy1 = bb1.y2;
+
+  float minx2 = bb2.x1;
+  float maxx2 = bb2.x2;
+  float miny2 = bb2.y1;
+  float maxy2 = bb2.y2;
+
+  if (minx1 > maxx2 || maxx1 < minx2 || miny1 > maxy2 || maxy1 < miny2)
+    return 0.0f;
+  else
+  {
+    float dx = std::min(maxx2, maxx1) - std::max(minx2, minx1);
+    float dy = std::min(maxy2, maxy1) - std::max(miny2, miny1);
+    float area1 = (maxx1 - minx1) * (maxy1 - miny1);
+    float area2 = (maxx2 - minx2) * (maxy2 - miny2);
+    float inter = dx * dy;             // Intersection
+    float uni = area1 + area2 - inter; // Union
+    float IoU = inter / (uni + 0.000001);
+    return IoU;
+  }
+
+
+}
+
 Mat rotate(Mat src, double angle)
 {
   Mat dst;
