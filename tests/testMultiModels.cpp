@@ -226,9 +226,9 @@ int main()
 
 
     OneRunStruct ors1;
-    ors1.splicePath = "media/spliced/*";
+    ors1.splicePath = "media/filter/*";
     ors1.numRepetiotions = 1;
-    ors1.minDelay = 30;
+    ors1.minDelay = 0;
     ors1.startFrameID = 1;
     
     ors1.toDeleteATRM = false;
