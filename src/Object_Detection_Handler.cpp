@@ -376,6 +376,9 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
             m_nms_IoU_thresh = (std::stof(m_configParams->run_params["nms_IoU_thresh"]));
     if (!m_configParams->run_params["nms_IoU_thresh_VEHICLE2VEHICLE"].empty())
             m_nms_IoU_thresh_VEHICLE2VEHICLE = (std::stof(m_configParams->run_params["nms_IoU_thresh_VEHICLE2VEHICLE"]));
+    if (!m_configParams->run_params["nms_IoU_thresh_VEHICLE2VEHICLE_SAME_SUB"].empty())
+            m_nms_IoU_thresh_VEHICLE2VEHICLE_SAME_SUB = (std::stof(m_configParams->run_params["nms_IoU_thresh_VEHICLE2VEHICLE_SAME_SUB"]));
+            
     if (!m_configParams->run_params["nms_IoU_thresh_VEHICLE2HUMAN"].empty())
             m_nms_IoU_thresh_VEHICLE2HUMAN = (std::stof(m_configParams->run_params["nms_IoU_thresh_VEHICLE2HUMAN"]));
     if (!m_configParams->run_params["nms_IoU_thresh_HUMAN2HUMAN"].empty())
@@ -797,6 +800,36 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
 
         odi[i].tarBoundingBox = {bbox_data[i * 4 + 1] * w, bbox_data[i * 4 + 3] * w, bbox_data[i * 4] * h, bbox_data[i * 4 + 2] * h};
     }
+    //TODO: filter by targetClass
+    e_OD_TargetClass tc = m_initParams->mbMission.targetClass;
+    if(tc == e_OD_TargetClass::VEHICLE)
+    {
+       //remove  HUMANS
+       FilterCycleOutputByClassNoSqueeze(cycleOutput,e_OD_TargetClass::PERSON);
+        FilterCycleOutputByClassNoSqueeze(cycleOutput,e_OD_TargetClass::OTHER_CLASS);
+       FilterCycleOutputByClassNoSqueeze(cycleOutput,e_OD_TargetClass::UNKNOWN_CLASS);
+       SqueezeCycleOutputInplace(cycleOutput);
+    }
+    else if(tc == e_OD_TargetClass::PERSON)
+    {
+      //remove  CARS
+       FilterCycleOutputByClassNoSqueeze(cycleOutput,e_OD_TargetClass::VEHICLE);
+       FilterCycleOutputByClassNoSqueeze(cycleOutput,e_OD_TargetClass::OTHER_CLASS);
+       FilterCycleOutputByClassNoSqueeze(cycleOutput,e_OD_TargetClass::UNKNOWN_CLASS);
+       SqueezeCycleOutputInplace(cycleOutput);
+    }
+    else if(tc == e_OD_TargetClass::UNKNOWN_CLASS) //ANY
+    {
+        FilterCycleOutputByClassNoSqueeze(cycleOutput,e_OD_TargetClass::OTHER_CLASS);
+        FilterCycleOutputByClassNoSqueeze(cycleOutput,e_OD_TargetClass::UNKNOWN_CLASS);
+        SqueezeCycleOutputInplace(cycleOutput);
+    }
+
+    
+    
+
+
+
 
     if(m_nms)//do NMS
     {
@@ -1129,7 +1162,8 @@ bool ObjectDetectionManagerHandler::InitConfigParamsFromFile(const char *iniFile
                 continue;
              float iou = IoU((co->ObjectsArr[i1].tarBoundingBox),(co->ObjectsArr[i2].tarBoundingBox));
              //: threshold depends on classes 
-             if((iou > m_nms_IoU_thresh_VEHICLE2VEHICLE && co->ObjectsArr[i1].tarClass==e_OD_TargetClass::VEHICLE &&  co->ObjectsArr[i2].tarClass==e_OD_TargetClass::VEHICLE)\
+             if((iou > m_nms_IoU_thresh_VEHICLE2VEHICLE && co->ObjectsArr[i1].tarClass==e_OD_TargetClass::VEHICLE &&  co->ObjectsArr[i2].tarClass==e_OD_TargetClass::VEHICLE && co->ObjectsArr[i1].tarSubClass != co->ObjectsArr[i2].tarSubClass)\
+             ||(iou > m_nms_IoU_thresh_VEHICLE2VEHICLE_SAME_SUB && co->ObjectsArr[i1].tarClass==e_OD_TargetClass::VEHICLE &&  co->ObjectsArr[i2].tarClass==e_OD_TargetClass::VEHICLE && co->ObjectsArr[i1].tarSubClass == co->ObjectsArr[i2].tarSubClass)\
              ||(iou > m_nms_IoU_thresh_HUMAN2HUMAN && co->ObjectsArr[i1].tarClass==e_OD_TargetClass::PERSON &&  co->ObjectsArr[i2].tarClass==e_OD_TargetClass::PERSON)\
              ||(iou > m_nms_IoU_thresh_VEHICLE2HUMAN && co->ObjectsArr[i1].tarClass==e_OD_TargetClass::PERSON &&  co->ObjectsArr[i2].tarClass==e_OD_TargetClass::VEHICLE)\
              ||(iou > m_nms_IoU_thresh_VEHICLE2HUMAN && co->ObjectsArr[i2].tarClass==e_OD_TargetClass::PERSON &&  co->ObjectsArr[i1].tarClass==e_OD_TargetClass::VEHICLE)\
@@ -1145,27 +1179,28 @@ bool ObjectDetectionManagerHandler::InitConfigParamsFromFile(const char *iniFile
             
          }
      }
-     //: squeeze inplace
-      int move2=1;
-     for (size_t i = 1; i < N; i++)
-     {
-        if(co->ObjectsArr[i].tarScore > eps)
-        {
-            if(move2<i)
-            {
-                //:move i into move2
-                co->ObjectsArr[move2].tarScore=co->ObjectsArr[i].tarScore;
-                co->ObjectsArr[move2].tarColorScore=co->ObjectsArr[i].tarColorScore;
-                co->ObjectsArr[move2].occlusionScore=co->ObjectsArr[i].occlusionScore;
-                co->ObjectsArr[move2].tarClass=co->ObjectsArr[i].tarClass;
-                co->ObjectsArr[move2].tarBoundingBox=co->ObjectsArr[i].tarBoundingBox;
-                co->ObjectsArr[move2].tarColor=co->ObjectsArr[i].tarColor;
-                co->ObjectsArr[move2].tarSubClass=co->ObjectsArr[i].tarSubClass;
-            }
-            move2=move2+1;
+     SqueezeCycleOutputInplace(co);
+    //  //: squeeze inplace
+    //   int move2=1;
+    //  for (size_t i = 1; i < N; i++)
+    //  {
+    //     if(co->ObjectsArr[i].tarScore > eps)
+    //     {
+    //         if(move2<i)
+    //         {
+    //             //:move i into move2
+    //             co->ObjectsArr[move2].tarScore=co->ObjectsArr[i].tarScore;
+    //             co->ObjectsArr[move2].tarColorScore=co->ObjectsArr[i].tarColorScore;
+    //             co->ObjectsArr[move2].occlusionScore=co->ObjectsArr[i].occlusionScore;
+    //             co->ObjectsArr[move2].tarClass=co->ObjectsArr[i].tarClass;
+    //             co->ObjectsArr[move2].tarBoundingBox=co->ObjectsArr[i].tarBoundingBox;
+    //             co->ObjectsArr[move2].tarColor=co->ObjectsArr[i].tarColor;
+    //             co->ObjectsArr[move2].tarSubClass=co->ObjectsArr[i].tarSubClass;
+    //         }
+    //         move2=move2+1;
            
-        }
-     }
+    //     }
+    //  }
      co->numOfObjects = N1;
      LOG_F(INFO, "ApplyNMS: before NMS N = %d , after NMS: N = %d ", N, N1);
      return N1;
