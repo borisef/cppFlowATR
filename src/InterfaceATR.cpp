@@ -75,6 +75,11 @@ int mbInterfaceATR::RunRGBimage(cv::Mat inp)
     m_model->run(m_inpName, {m_outTensorNumDetections, m_outTensorScores, m_outTensorBB, m_outTensorClasses});
 
     inp.copyTo(m_keepImg);
+
+#ifdef TEST_MODE
+    cv::imwrite("m_keepImg.png", m_keepImg);
+#endif //TEST_MODE
+
     return 1;
 }
 int mbInterfaceATR::RunRGBImgPath(const unsigned char *ptr, float resize_factor)
@@ -127,6 +132,11 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
     cv::cvtColor(tempIm, tempIm, cv::COLOR_RGB2BGR);
     //tempIm.copyTo(m_keepImg);//TODO: clone instead ? 
     m_keepImg = tempIm.clone();
+
+#ifdef TEST_MODE
+    cv::imwrite("m_keepImg.png", m_keepImg);
+#endif //TEST_MODE
+
     if(resize_factor>0 && resize_factor != 1)
     {
         //imresize of tempIm inplace
@@ -182,6 +192,9 @@ int mbInterfaceATR::RunRawImage(const unsigned char *ptr, int height, int width)
 
     img_data.assign(myRGB->data, myRGB->data + myRGB->total() * myRGB->channels());
     myRGB->copyTo(m_keepImg);
+#ifdef TEST_MODE
+    cv::imwrite("m_keepImg.png", m_keepImg);
+#endif //TEST_MODE
     delete myRGB; //??? TODO: is it safe?
     int status = RunRGBVector(img_data, height, width);
 
@@ -205,7 +218,15 @@ int mbInterfaceATR::RunRawImageFast(const unsigned char *ptr, int height, int wi
     // save JPG for debug
     cv::imwrite("debug_raw2rgb.tif", *myRGB);
 #endif //TEST_MODE
+    //TODO: BGR -> RGB 
+
      myRGB->copyTo(m_keepImg);
+      cv::cvtColor(m_keepImg, m_keepImg, cv::COLOR_BGR2RGB); //because we do on original buffer
+
+#ifdef TEST_MODE
+    cv::imwrite("m_keepImg.png", m_keepImg);
+#endif //TEST_MODE
+
     if(resize_factor>0 && resize_factor != 1)
     {
         //imresize of myRGB inplace
