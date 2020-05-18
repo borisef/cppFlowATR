@@ -190,13 +190,20 @@ int main()
 {
     OD::ObjectDetectionManager *atrManager = nullptr;
     OneRunStruct ors2;
-    ors2.splicePath = "media/NV12_1/*";
+   
     ors2.numRepetiotions = 1;
     ors2.minDelay = 50;
     ors2.startFrameID = 1;
     ors2.W = 4056;
     ors2.H = 3040;
 
+    ors2.splicePath = "media/NV12_1/*";
+    atrManager = OneRun(atrManager, ors2);
+    
+ors2.splicePath = "media/NV12_2/*";
+    atrManager = OneRun(atrManager, ors2);
+    
+ors2.splicePath = "media/NV12_3/*";
     atrManager = OneRun(atrManager, ors2);
     
     OD::TerminateObjectDetection(atrManager);
