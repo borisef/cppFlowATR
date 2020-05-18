@@ -639,11 +639,15 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
         // deep copy m_prevCycleInput
         tempci = NewCopyCycleInput(m_prevCycleInput, this->m_numPtrPixels);
     }
-    
+    m_mutexOnPrev.unlock();
     //glob_mutexOnPrev.unlock();
 
     float drawThresh = 0.01; //if 0 draw all
-    //TODO: make sure m_prevCycleInput->ImgID_input is like co->ImgID
+    //make sure m_prevCycleInput->ImgID_input is like co->ImgID
+    if(m_prevCycleInput->ImgID_input != co->ImgID_output)
+    {
+        LOG_F(WARNING, "ObjectDetectionManagerHandler::SaveResultsATRimage: m_prevCycleInput->ImgID_input != co->ImgID_output, skipping show"); 
+    }
     unsigned int fi = tempci->ImgID_input;
     unsigned int h = m_initParams->supportData.imageHeight;
     unsigned int w = m_initParams->supportData.imageWidth;
@@ -751,7 +755,6 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
     cout << " Done cleaning image" << endl;
 #endif //#ifdef TEST_MODE
     DeleteCycleInput(tempci);
-    m_mutexOnPrev.unlock();
     return true;
 }
 

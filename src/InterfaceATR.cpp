@@ -125,7 +125,8 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
 #endif //TEST_MODE
 
     cv::cvtColor(tempIm, tempIm, cv::COLOR_RGB2BGR);
-    tempIm.copyTo(m_keepImg);//TODO: clone instead ? 
+    //tempIm.copyTo(m_keepImg);//TODO: clone instead ? 
+    m_keepImg = tempIm.clone();
     if(resize_factor>0 && resize_factor != 1)
     {
         //imresize of tempIm inplace
