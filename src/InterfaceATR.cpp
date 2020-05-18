@@ -118,13 +118,14 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
     cout << " RunRGBVector:copy buffer to cv::Mat* " << endl;
 #endif                    //TEST_MODE
     tempIm.data = buffer; //risky
+    //TODO: tempIm.data = (unsigned char *)ptr;
 
 #ifdef TEST_MODE
     cv::imwrite("tempim.png", tempIm);
 #endif //TEST_MODE
 
     cv::cvtColor(tempIm, tempIm, cv::COLOR_RGB2BGR);
-    tempIm.copyTo(m_keepImg);
+    tempIm.copyTo(m_keepImg);//TODO: clone instead ? 
     if(resize_factor>0 && resize_factor != 1)
     {
         //imresize of tempIm inplace

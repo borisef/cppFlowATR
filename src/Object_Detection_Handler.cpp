@@ -628,7 +628,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
 {
     OD_CycleInput *tempci = nullptr;
     m_mutexOnPrev.lock();
-    //glob_mutexOnPrev.lock();
+  
     if (!(m_prevCycleInput && m_prevCycleInput->ptr))
     {
         LOG_F(WARNING, "ObjectDetectionManagerHandler::SaveResultsATRimage: No m_prevCycleInput data, skipping");
@@ -639,7 +639,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
         // deep copy m_prevCycleInput
         tempci = NewCopyCycleInput(m_prevCycleInput, this->m_numPtrPixels);
     }
-    m_mutexOnPrev.unlock();
+    
     //glob_mutexOnPrev.unlock();
 
     float drawThresh = 0.01; //if 0 draw all
@@ -751,6 +751,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
     cout << " Done cleaning image" << endl;
 #endif //#ifdef TEST_MODE
     DeleteCycleInput(tempci);
+    m_mutexOnPrev.unlock();
     return true;
 }
 

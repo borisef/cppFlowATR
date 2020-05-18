@@ -185,8 +185,8 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
             }
 
             ci->ptr = ptrTif;
-            if(i % 10 != 0)
-                    ci->ptr = nullptr;
+            // if(i % 10 != 0)
+            //         ci->ptr = nullptr;
             statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
             if (lastReadyFrame != co->ImgID_output)
             { //draw
