@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.10)
 project(cppFlowATR)
 set(CMAKE_CXX_STANDARD 17)
 
+message($ENV{USER})
+
+#DEFINE PATHS
+# IF($ENV{USER} STREQUAL "magshim")
+
+# elseif()
+
 
 
 set(TEST_MODE TRUE)
@@ -76,7 +83,7 @@ else(OS_WINDOWS) #Linux
 	FIND_LIBRARY(MY_TF_LIB NAMES libtensorflow_framework.so PATHS /media/borisef/nvmeSSD/tensorflow_Jetson )
         FIND_LIBRARY(MY_TF_LIB2 NAMES libtensorflow.so PATHS /media/borisef/nvmeSSD/tensorflow_Jetson )
     else(JETSON) # Linux PC ONLY
-        FIND_LIBRARY(MY_TF_LIB NAMES libtensorflow.so PATHS /home/borisef/projects/cppflowATR/libs/shared/113 )
+        FIND_LIBRARY(MY_TF_LIB NAMES libtensorflow.so PATHS /home/magshim/projects/cppflowATR/libs/shared/113 )
         set(MY_TF_LIB2 "")
     endif(JETSON)
 endif(OS_WINDOWS)
