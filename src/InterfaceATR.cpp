@@ -221,7 +221,7 @@ int mbInterfaceATR::RunRawImageFast(const unsigned char *ptr, int height, int wi
     //TODO: BGR -> RGB 
 
      myRGB->copyTo(m_keepImg);
-      cv::cvtColor(m_keepImg, m_keepImg, cv::COLOR_BGR2RGB); //because we do on original buffer
+      cv::cvtColor(m_keepImg, m_keepImg, cv::COLOR_BGR2RGB); //???
 
 #ifdef TEST_MODE
     cv::imwrite("m_keepImg.png", m_keepImg);
