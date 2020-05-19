@@ -241,7 +241,7 @@ int main()
     atrManager = OneRun(atrManager, ors1);
     OD::TerminateObjectDetection(atrManager); atrManager = nullptr;
 
-  if(0){}
+  if(0){
     ors1.enum_range = enumRange::NEAR;
     ors1.enum_target = enumTarget::ANY;
     ors1.startFrameID += 1000;
