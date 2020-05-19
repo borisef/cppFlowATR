@@ -48,6 +48,8 @@ public:
     static mbInterfaceCM *m_mbCM;
 
     int ApplyNMS(OD_CycleOutput *co);
+    int ApplySizeMatch(OD_CycleOutput *co);
+
 
 protected:
     bool InitCM();

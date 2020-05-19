@@ -162,3 +162,7 @@ target_link_libraries (stressTestSmall_NV12 ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF
 #testMultiModels
 add_executable(testMultiModels tests/testMultiModels.cpp ${SRC})
 target_link_libraries (testMultiModels ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+
+add_executable(sizeMatching tests/sizeMatching_test.cpp ${SRC})
+target_link_libraries (sizeMatching ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+
