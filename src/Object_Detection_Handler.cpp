@@ -1205,7 +1205,7 @@ int ObjectDetectionManagerHandler::ApplySizeMatch(OD_CycleOutput *co)
             range = j["PERSON"].get<std::vector<float>>();
         }
         else if (co->ObjectsArr[i].tarClass == VEHICLE)
-        {
+        {// TODO: filter by subclass 
             range = j["CAR"].get<std::vector<float>>();
         }
         else if (co->ObjectsArr[i].tarClass == 1)
@@ -1214,6 +1214,7 @@ int ObjectDetectionManagerHandler::ApplySizeMatch(OD_CycleOutput *co)
         }
 
         float longSideMeters = convertPixelsMeters(m_initParams->supportData.rangeInMeters, longSide, m_initParams->supportData.cameraAngle, m_initParams->supportData.imageHeight);
+        
         std::cout << IsInBounds(longSideMeters, range[0], range[1]) << ": " << longSideMeters << std::endl;
 
         if (IsInBounds(longSideMeters, range[0], range[1]) == 0)

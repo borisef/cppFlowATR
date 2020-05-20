@@ -59,12 +59,12 @@ enum e_OD_TargetClass
 enum e_OD_TargetSubClass
 {
 	UNKNOWN_SUB_CLASS = 1,//used for human
-	PRIVATE = 2,
-	COMMERCIAL = 3,//pickup closed + station + jeep 
-	PICKUP = 4, // pickup open 
+	PRIVATE = 2, //small car
+	COMMERCIAL = 3,//pickup closed + station + jeep //small car
+	PICKUP = 4, // pickup open //small car
 	TRUCK = 5,
-	BUS = 6,
-	VAN = 7,
+	BUS = 6,//large vehicle
+	VAN = 7,//small car
 	TRACKTOR = 8,
 	OTHER_SUB_CLASS = 999 // used for any 
 };
