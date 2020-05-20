@@ -1184,9 +1184,7 @@ float convertPixelsMeters(int dist, float pixels, int FOV, int imgHeight)
 int ObjectDetectionManagerHandler::ApplySizeMatch(OD_CycleOutput *co)
 {
     std::string ranges_serialized;
-    if (m_configParams->run_params["size_matching_ranges"].empty() 
-    || m_configParams->run_params["size_filter"].empty() 
-    || m_configParams->run_params["size_filter"] == "0")
+    if (m_configParams->run_params["size_matching_ranges"].empty() || m_configParams->run_params["size_filter"].empty() || m_configParams->run_params["size_filter"] == "0")
     {
         return -1;
     }
@@ -1208,26 +1206,26 @@ int ObjectDetectionManagerHandler::ApplySizeMatch(OD_CycleOutput *co)
         }
         else if (co->ObjectsArr[i].tarClass == VEHICLE)
         {
-            switch(co->ObjectsArr[i].tarSubClass)
+            switch (co->ObjectsArr[i].tarSubClass)
             {
-                case PRIVATE:
-                case COMMERCIAL:
-                case PICKUP:
-                case VAN:
-                    range = j["CAR"].get<std::vector<float>>();
-                    break;
-                case BUS:
-                    range = j["LARGE_CAR"].get<std::vector<float>>();
-                    break;
-                case TRUCK:
-                case TRACKTOR:
-                    range = j["AMBIGUOUS"].get<std::vector<float>>();
-                    break;
+            case PRIVATE:
+            case COMMERCIAL:
+            case PICKUP:
+            case VAN:
+                range = j["CAR"].get<std::vector<float>>();
+                break;
+            case BUS:
+                range = j["LARGE_CAR"].get<std::vector<float>>();
+                break;
+            case TRUCK:
+            case TRACKTOR:
+                range = j["AMBIGUOUS"].get<std::vector<float>>();
+                break;
             }
         }
 
         float longSideMeters = convertPixelsMeters(m_initParams->supportData.rangeInMeters, longSide, m_initParams->supportData.cameraAngle, m_initParams->supportData.imageHeight);
-        
+
         //std::cout << IsInBounds(longSideMeters, range[0], range[1]) << ": " << longSideMeters << std::endl;
 
         if (IsInBounds(longSideMeters, range[0], range[1]) == 0)
@@ -1236,10 +1234,10 @@ int ObjectDetectionManagerHandler::ApplySizeMatch(OD_CycleOutput *co)
             numObjects--;
         }
     }
-    
-    #ifdef TEST_MODE
+
+#ifdef TEST_MODE
     std::cout << "Num of objects removed: " << (co->numOfObjects - numObjects) << std::endl;
-    #endif
+#endif
 
     SqueezeCycleOutputInplace(co);
     co->numOfObjects = numObjects;
