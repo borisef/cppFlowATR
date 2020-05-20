@@ -1176,14 +1176,16 @@ bool IsInBounds(const T &value, const T &low, const T &high)
     return !(value < low) && (value < high);
 }
 
-float convertPixelsMeters(int dist, float pixels, int FOV, int imgHeight)
+float getPixelToMeterRatio(int dist, int FOV, int imgHeight)
 {
-    return (dist * tan(FOV / 2)) / (imgHeight / 2) * pixels;
+    return (dist * tan(FOV / 2)) / (imgHeight / 2) ;
 }
 
 int ObjectDetectionManagerHandler::ApplySizeMatch(OD_CycleOutput *co)
 {
     std::string ranges_serialized;
+    float pixelToMeterRatio = getPixelToMeterRatio((m_initParams->supportData.rangeInMeters, m_initParams->supportData.cameraAngle, m_initParams->supportData.imageHeight);
+    
     if (m_configParams->run_params["size_matching_ranges"].empty() || m_configParams->run_params["size_filter"].empty() || m_configParams->run_params["size_filter"] == "0")
     {
         return -1;
@@ -1224,7 +1226,7 @@ int ObjectDetectionManagerHandler::ApplySizeMatch(OD_CycleOutput *co)
             }
         }
 
-        float longSideMeters = convertPixelsMeters(m_initParams->supportData.rangeInMeters, longSide, m_initParams->supportData.cameraAngle, m_initParams->supportData.imageHeight);
+        float longSideMeters = pixelToMeterRatio * longSide;
 
         //std::cout << IsInBounds(longSideMeters, range[0], range[1]) << ": " << longSideMeters << std::endl;
 
