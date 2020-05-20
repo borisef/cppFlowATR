@@ -1170,11 +1170,15 @@ int ObjectDetectionManagerHandler::ApplyNMS(OD_CycleOutput *co)
     return N1;
 }
 
-
 template <typename T>
 bool IsInBounds(const T &value, const T &low, const T &high)
 {
     return !(value < low) && (value < high);
+}
+
+float convertPixelsMeters(int dist, float pixels, int FOV, int imgHeight)
+{
+    return (dist * tan(FOV / 2)) / (imgHeight / 2) * pixels;
 }
 
 int ObjectDetectionManagerHandler::ApplySizeMatch(OD_CycleOutput *co)
@@ -1188,24 +1192,40 @@ int ObjectDetectionManagerHandler::ApplySizeMatch(OD_CycleOutput *co)
     ranges_serialized = (m_configParams->run_params["size_matching_ranges"]);
     auto j = json::parse(ranges_serialized);
 
+    int numObjects = co->numOfObjects;
+
     for (size_t i = 0; i < co->numOfObjects; i++)
     {
         OD::OD_BoundingBox bbox = co->ObjectsArr[i].tarBoundingBox;
 
         float longSide = std::max(abs(bbox.x2 - bbox.x1), abs(bbox.y2 - bbox.y1));
         std::vector<float> range;
-        if(co->ObjectsArr[i].tarClass == PERSON){
+        if (co->ObjectsArr[i].tarClass == PERSON)
+        {
             range = j["PERSON"].get<std::vector<float>>();
         }
-        else if(co->ObjectsArr[i].tarClass == VEHICLE){
+        else if (co->ObjectsArr[i].tarClass == VEHICLE)
+        {
             range = j["CAR"].get<std::vector<float>>();
         }
-        else if(co->ObjectsArr[i].tarClass == 1){ //large car?
+        else if (co->ObjectsArr[i].tarClass == 1)
+        { //large car?
             range = j["LARGE_CAR"].get<std::vector<float>>();
         }
-        
-        std::cout << IsInBounds(longSide, range[0], range[1]) << std::endl;
+
+        float longSideMeters = convertPixelsMeters(m_initParams->supportData.rangeInMeters, longSide, m_initParams->supportData.cameraAngle, m_initParams->supportData.imageHeight);
+        std::cout << IsInBounds(longSideMeters, range[0], range[1]) << ": " << longSideMeters << std::endl;
+
+        if (IsInBounds(longSideMeters, range[0], range[1]) == 0)
+        {
+            co->ObjectsArr[i].tarScore = 0;
+            numObjects--;
+        }
     }
+    
+    std::cout << "Num of objects removed: " << (co->numOfObjects - numObjects) << std::endl;
+    SqueezeCycleOutputInplace(co);
+    co->numOfObjects = numObjects;
 
     return 0;
 }
