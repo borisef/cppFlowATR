@@ -229,7 +229,7 @@ int main()
     ors1.splicePath = "media/filter/*";
     ors1.numRepetiotions = 1;
 
-    ors1.minDelay = 1000;
+    ors1.minDelay = 10;
     ors1.startFrameID = 1;
     
     ors1.toDeleteATRM = false;
@@ -241,7 +241,7 @@ int main()
     atrManager = OneRun(atrManager, ors1);
     OD::TerminateObjectDetection(atrManager); atrManager = nullptr;
 
-  if(0){
+ // if(0){
     ors1.enum_range = enumRange::NEAR;
     ors1.enum_target = enumTarget::ANY;
     ors1.startFrameID += 1000;
@@ -300,7 +300,7 @@ int main()
     atrManager = OneRun(atrManager, ors1);
     OD::TerminateObjectDetection(atrManager); atrManager = nullptr;
 
-}
+//}
     cout << "Ended StressTest Normally" << endl;
     return 0;
 }

@@ -637,7 +637,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
     else
     {
         // deep copy m_prevCycleInput
-        tempci = NewCopyCycleInput(m_prevCycleInput, this->m_numPtrPixels);
+        tempci = SafeNewCopyCycleInput(m_prevCycleInput, this->m_numPtrPixels);
     }
     m_mutexOnPrev.unlock();
     //glob_mutexOnPrev.unlock();
