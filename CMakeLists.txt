@@ -56,7 +56,8 @@ if(OS_WINDOWS)
     set(MY_TF_LIB2 "")
 else(OS_WINDOWS) #Linux
     include_directories(PRIVATE include)
-    find_package( OpenCV REQUIRED)
+    set(OpenCV_DIR /usr/lib/x86_64-linux-gnu/cmake/opencv4)
+    find_package(OpenCV REQUIRED)
     
     message("OpenCV_VERSION_MAJOR=" ${OpenCV_VERSION_MAJOR})
     IF((${OpenCV_VERSION_MAJOR} MATCHES "4"))
@@ -73,10 +74,11 @@ else(OS_WINDOWS) #Linux
     if(JETSON) #Linux Jetson ONLY
         add_compile_options(-pthread -lm)
         include_directories(PRIVATE include /media/borisef/nvmeSSD/tf_1_13_source)
-	FIND_LIBRARY(MY_TF_LIB NAMES libtensorflow_framework.so PATHS /media/borisef/nvmeSSD/tensorflow_Jetson )
+        FIND_LIBRARY(MY_TF_LIB NAMES libtensorflow_framework.so PATHS /media/borisef/nvmeSSD/tensorflow_Jetson )
         FIND_LIBRARY(MY_TF_LIB2 NAMES libtensorflow.so PATHS /media/borisef/nvmeSSD/tensorflow_Jetson )
     else(JETSON) # Linux PC ONLY
-        FIND_LIBRARY(MY_TF_LIB NAMES libtensorflow.so PATHS /home/borisef/projects/cppflowATR/libs/shared/113 )
+        include_directories(PRIVATE include tensorflow/include)
+        FIND_LIBRARY(MY_TF_LIB NAMES libtensorflow.so PATHS tensorflow/lib)
         set(MY_TF_LIB2 "")
     endif(JETSON)
 endif(OS_WINDOWS)
