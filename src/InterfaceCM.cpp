@@ -97,13 +97,6 @@ void mbInterfaceCM::IdleRun()
     this->m_model->run(m_inTensorPatches, m_outTensorScores);
 }
 
-std::vector<float> mbInterfaceCM::GetResultScores(int i)
-{
-    //TODO: check if results do exist
-
-    return (m_outTensorScores->get_data<float>());
-}
-
 std::vector<float> mbInterfaceCM::RunImgBB(cv::Mat img, OD::OD_BoundingBox bb)
 {
     cv::Mat croppedRef, img_resized;
