@@ -8,7 +8,7 @@
 using namespace OD;
 using namespace std;
 
-mbInterfaceCM *ObjectDetectionManagerHandler::m_mbCM = nullptr;
+mbInterfaceCMbase *ObjectDetectionManagerHandler::m_mbCM = nullptr;
 InitParams *ObjectDetectionManagerHandler::m_configParams = nullptr;
 
 OD_CycleInput *NewCopyCycleInput(OD_CycleInput *tocopy, uint bufferSize)
@@ -1086,6 +1086,7 @@ bool ObjectDetectionManagerHandler::InitCM()
         LOG_F(WARNING, "The color model file: %s  is missing... Skipping", modelPath);
         return false;
     }
+    //TODO: (eyal) implementation dependent instantiation here:
     m_mbCM = new mbInterfaceCM();
     if (!m_mbCM->LoadNewModel(modelPath, ckpt, inname, outname))
     {
