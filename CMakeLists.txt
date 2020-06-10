@@ -155,3 +155,11 @@ target_link_libraries (stressTestSmall_NV12 ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF
 #testMultiModels
 add_executable(testMultiModels tests/testMultiModels.cpp ${SRC})
 target_link_libraries (testMultiModels ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+
+#NV12toTIFF
+add_executable(NV12toTIFF tests/NV12toTIFF.cpp ${SRC})
+target_link_libraries (NV12toTIFF ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+
+#testOnFolderRecurse
+add_executable(testOnFolderRecurse tests/testOnFolderRecurse.cpp ${SRC})
+target_link_libraries (testOnFolderRecurse ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
