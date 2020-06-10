@@ -20,26 +20,12 @@ using namespace std;
 using namespace std::chrono;
 using namespace OD;
 
-enum enumRange
-{ 
-	ALL = 1,
-	NEAR = 2,
-	FAR = 3
-};
-
-enum enumTarget
-{ 
-	ANY = 1,
-	CARS = 2,
-	HUMANS = 3
-};
-
-
+//unsigned char *ParseImage(String path);
 vector<String> GetFileNames();
 
 void MyWait(string s, float ms)
 {
-#ifdef TEST_MODE
+    #ifdef TEST_MODE
     std::cout << s << " Waiting sec:" << (ms / 1000.0) << endl;
 #endif//#ifdef TEST_MODE
     std::this_thread::sleep_for(std::chrono::milliseconds((uint)ms));
@@ -60,6 +46,7 @@ struct OneRunStruct
     int H;
     int W;
     string splicePath;
+    string spliceExt;
     int numRepetiotions = 2;
     float minDelay = 0;
     bool toShow = true;
@@ -75,15 +62,9 @@ struct OneRunStruct
     #endif
 #endif
 
-    bool toDeleteATRM = true; // delete at the end
+    bool toDeleteATRM = true;
     bool doNotInit = false;
     int startFrameID = 1;
-
-    enumRange enum_range = enumRange::ALL;
-    enumTarget enum_target = enumTarget::ANY;
-    
-
-
 };
 
 OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRunStruct ors)
@@ -94,7 +75,7 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
     // Mission
     MB_Mission mission = {
         MB_MissionType::MATMON,       //mission1.missionType
-         e_OD_TargetClass::VEHICLE, //mission1.targetSubClass
+        e_OD_TargetClass::UNKNOWN_CLASS, //mission1.targetClass
         e_OD_TargetSubClass::PRIVATE, //mission1.targetSubClass
         e_OD_TargetColor::WHITE       //mission1.targetColor
     };
@@ -104,26 +85,10 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
         ors.H, ors.W, //imageHeight//imageWidth
         ors.imType,   //colorType;
         100,          //rangeInMeters
-        70.0f,        //fcameraAngle; //BE
+        80.0f,        //fcameraAngle; //BE
         0,            //TEMP:cameraParams[10];//BE
         0             //TEMP: float	spare[3];
     };
-
-    if(ors.enum_range==NEAR)
-       supportData.rangeInMeters = 100; 
-    else if(ors.enum_range==FAR)
-        supportData.rangeInMeters = 250;
-    else
-        supportData.rangeInMeters = 0;
-
-    if(ors.enum_target==enumTarget::CARS)
-       mission.targetClass = e_OD_TargetClass::VEHICLE; 
-    else if(ors.enum_target==enumTarget::HUMANS)
-        mission.targetClass = e_OD_TargetClass::PERSON; 
-    else //ALL
-        mission.targetClass = e_OD_TargetClass::UNKNOWN_CLASS;
-    
-
 
     // TO Avoid errors
     if (ors.imType == e_OD_ColorImageType::RGB)
@@ -181,22 +146,24 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
             {
                 //ptrTif = ParseRaw(ff[i]);
                 ptrTif = (unsigned char*)fastParseRaw(ff[i]);
-                
             }
 
             ci->ptr = ptrTif;
-            // if(i % 10 != 0)
-            //         ci->ptr = nullptr;
+            cout<<"Done forming frame "<<ci->ImgID_input<<endl;
+            // if((i>=16 && i<25) || (i>=26 && i<35)|| (i>=36 && i<45)|| (i>=46 && i<55)|| (i>=56 && i<65) ){
+            //     ci->ptr = nullptr;
+            // }
+           
             statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
+            
+           
             if (lastReadyFrame != co->ImgID_output)
             { //draw
-                if(i % 10 != 0)
-                    cout << " *** This input is nullptr ***" << "frame "<< i <<  endl;
-
-                cout << " Detected new results for frame " << co->ImgID_output << endl;
+                 cout << " . Detected new results for frame " << co->ImgID_output << endl;
                 string outName = "outRes/out_res3_" + std::to_string(co->ImgID_output) + ".png";
                 lastReadyFrame = co->ImgID_output;
                 atrManager->SaveResultsATRimage(co, (char *)outName.c_str(), ors.toShow);
+ //               cout << " . . Detected new results for frame " << co->ImgID_output << endl;
             }
             MyWait("Small pause", ors.minDelay);
             delete ptrTif;
@@ -209,7 +176,7 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
         atrManager = nullptr;
     }
     else
-         ((ObjectDetectionManagerHandler *)atrManager)->WaitForThread();
+        ((ObjectDetectionManagerHandler *)atrManager)->WaitForThread();
     //release OD_CycleInput
     delete ci;
 
@@ -222,85 +189,18 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
 
 int main()
 {
+    //const char* aaa = TF_Version();
     OD::ObjectDetectionManager *atrManager = nullptr;
+    OneRunStruct ors2;
+    ors2.splicePath = "media/ATR_sample/*.tif";
+    ors2.spliceExt = ".tif";
+    ors2.numRepetiotions = 1;
+    ors2.minDelay = 1000;
+    ors2.startFrameID = 1;
 
-
-    OneRunStruct ors1;
-    ors1.splicePath = "media/filter/*";
-    ors1.numRepetiotions = 1;
-
-    ors1.minDelay = 10;
-    ors1.startFrameID = 1;
+    atrManager = OneRun(atrManager, ors2);
     
-    ors1.toDeleteATRM = false;
-
-    ors1.startFrameID += 1000;
-    ors1.enum_range = enumRange::ALL;
-    ors1.enum_target = enumTarget::ANY;
-
-    atrManager = OneRun(atrManager, ors1);
-    OD::TerminateObjectDetection(atrManager); atrManager = nullptr;
-
- // if(0){
-    ors1.enum_range = enumRange::NEAR;
-    ors1.enum_target = enumTarget::ANY;
-    ors1.startFrameID += 1000;
-    
-    atrManager = OneRun(atrManager, ors1);
-    OD::TerminateObjectDetection(atrManager); atrManager = nullptr;
-
-    ors1.enum_range = enumRange::FAR;
-    ors1.enum_target = enumTarget::ANY;
-    ors1.startFrameID += 1000;
-    
-    atrManager = OneRun(atrManager, ors1);
-    OD::TerminateObjectDetection(atrManager); atrManager = nullptr;
-
-    ors1.startFrameID += 1000;
-    ors1.enum_range = enumRange::ALL;
-    ors1.enum_target = enumTarget::CARS;
-
-    atrManager = OneRun(atrManager, ors1);
-    OD::TerminateObjectDetection(atrManager); atrManager = nullptr;
-
-  
-    ors1.enum_range = enumRange::NEAR;
-    ors1.enum_target= enumTarget::CARS;
-    ors1.startFrameID += 1000;
-    
-    atrManager = OneRun(atrManager, ors1);
-    OD::TerminateObjectDetection(atrManager); atrManager = nullptr;
-
-    ors1.enum_range = enumRange::FAR;
-    ors1.enum_target= enumTarget::CARS;
-    ors1.startFrameID += 1000;
-    
-    atrManager = OneRun(atrManager, ors1);
-    OD::TerminateObjectDetection(atrManager); atrManager = nullptr;
-
-    ors1.startFrameID += 1000;
-    ors1.enum_range = enumRange::ALL;
-    ors1.enum_target= enumTarget::HUMANS;
-
-    atrManager = OneRun(atrManager, ors1);
-    OD::TerminateObjectDetection(atrManager); atrManager = nullptr;
-
-  
-    ors1.enum_range = enumRange::NEAR;
-    ors1.enum_target= enumTarget::HUMANS;
-    ors1.startFrameID += 1000;
-    
-    atrManager = OneRun(atrManager, ors1);
-    OD::TerminateObjectDetection(atrManager); atrManager = nullptr;
-
-    ors1.enum_range = enumRange::FAR;
-    ors1.enum_target= enumTarget::HUMANS;
-    ors1.startFrameID += 1000;
-    
-    atrManager = OneRun(atrManager, ors1);
-    OD::TerminateObjectDetection(atrManager); atrManager = nullptr;
-
-//}
+    OD::TerminateObjectDetection(atrManager);
     cout << "Ended StressTest Normally" << endl;
     return 0;
 }
