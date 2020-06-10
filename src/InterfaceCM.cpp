@@ -5,7 +5,9 @@
 #include <stdlib.h>
 
 //constructors/destructors
-mbInterfaceCM::mbInterfaceCM()
+mbInterfaceCM::mbInterfaceCM() : mbInterfaceCM(0,0,0,0,false) { }
+
+mbInterfaceCM::mbInterfaceCM(int h, int w, int nc, int bs, bool hbs) //: mbInterfaceCMbase(h, w, nc, bs, hbs)
 {
 #ifdef TEST_MODE
     cout << "Construct mbInterfaceCM" << endl;
@@ -15,6 +17,7 @@ mbInterfaceCM::mbInterfaceCM()
     m_inTensorPatches = nullptr;
     m_outTensorScores = nullptr;
 }
+
 mbInterfaceCM::~mbInterfaceCM()
 {
 #ifdef TEST_MODE

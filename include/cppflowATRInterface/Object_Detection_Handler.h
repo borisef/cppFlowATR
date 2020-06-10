@@ -2,6 +2,7 @@
 
 #include <cppflowATRInterface/Object_Detection_API.h>
 #include <cppflowATR/InterfaceATR.h>
+#include <cppflowCM/InterfaceCMbase.h>
 #include <cppflowCM/InterfaceCM.h>
 #include <cppflowATR/InitParams.h>
 #include <future>
@@ -45,7 +46,7 @@ public:
     ~ObjectDetectionManagerHandler();
 
     mbInterfaceATR *m_mbATR = nullptr;
-    static mbInterfaceCM *m_mbCM;
+    static mbInterfaceCMbase *m_mbCM;
 
     int ApplyNMS(OD_CycleOutput *co);
     int ApplySizeMatch(OD_CycleOutput *co);
