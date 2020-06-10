@@ -2,6 +2,7 @@
 #include <utils/imgUtils.h>
 #include <utils/odUtils.h>
 #include <iostream>
+#include <stdlib.h>
 
 //constructors/destructors
 mbInterfaceCM::mbInterfaceCM()
@@ -199,6 +200,13 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
 #endif //#ifdef TEST_MODE
 
             croppedRef = img(myROI);
+
+#ifdef TEST_MODE
+            int r = 1 + (rand() % 100000);
+            string aaa = string("debugTiles/cropped_").append(std::to_string(r)).append(".png");
+            cv::imwrite(aaa, croppedRef);
+#endif //#ifdef TEST_MODE
+
             //resize
             cv::resize(croppedRef, img_resized, cv::Size(m_patchWidth, m_patchHeight));
 
@@ -211,7 +219,7 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
         }
 #ifdef TEST_MODE
         cv::imwrite("color_batch.png", debugImg);
-#endif //#ifdef TEST_MODE \
+#endif //#ifdef TEST_MODE 
     // Put vector in Tensor
         this->m_inTensorPatches->set_data(inVec, {BS, m_patchHeight, m_patchWidth, 3});
 
