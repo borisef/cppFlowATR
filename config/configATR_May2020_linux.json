@@ -18,7 +18,9 @@
     "nms_IoU_thresh_VEHICLE2VEHICLE_SAME_SUB": "0.3",
     "nms_IoU_thresh_VEHICLE2VEHICLE": "0.3",
     "nms_IoU_thresh_VEHICLE2HUMAN": "0.7",
-    "nms_IoU_thresh_HUMAN2HUMAN": "0.5"
+    "nms_IoU_thresh_HUMAN2HUMAN": "0.01",
+    "size_filter": "1",
+    "size_matching_ranges": "{\"PERSON\":[0.15, 2.25], \"CAR\": [2, 7], \"LARGE_CAR\" : [5, 17], \"AMBIGUOUS\" : [2, 17]}"
   },
   "models": [
     {

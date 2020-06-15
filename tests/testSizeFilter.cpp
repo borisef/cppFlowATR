@@ -66,7 +66,7 @@ struct OneRunStruct
     int startFrameID = 1;
 };
 
-OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRunStruct ors)
+OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRunStruct ors, int range)
 {
     vector<String> ff = GetFileNames((char *)ors.splicePath.c_str());
     int N = ff.size();
@@ -83,7 +83,7 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
     OD_SupportData supportData = {
         ors.H, ors.W, //imageHeight//imageWidth
         ors.imType,   //colorType;
-        100,          //rangeInMeters
+        range,          //rangeInMeters
         80.0f,        //fcameraAngle; //BE
         0,            //TEMP:cameraParams[10];//BE
         0             //TEMP: float	spare[3];
@@ -190,12 +190,20 @@ int main()
 {
     OD::ObjectDetectionManager *atrManager = nullptr;
     OneRunStruct ors2;
-    ors2.splicePath = "media/spliced/*";
+    ors2.splicePath = "media/fff/*";
     ors2.numRepetiotions = 1;
     ors2.minDelay = 1000;
     ors2.startFrameID = 1;
 
-    atrManager = OneRun(atrManager, ors2);
+    int range = 10;
+    for (size_t t = 0; t < 100; t++ )
+    {
+         atrManager = OneRun(atrManager, ors2, range);
+         range = range + 25;
+         if(range > 1000)
+            break;
+        cout << "*********************** NEW RAAAAANNNNGEEE" << range << endl;
+    }  
     
     OD::TerminateObjectDetection(atrManager);
     cout << "Ended StressTest Normally" << endl;

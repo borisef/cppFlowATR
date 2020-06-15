@@ -15,3 +15,7 @@ media/00000018.MP4
 
 CMakeLists.txt
 *.log
+CMakeLists_Linux_Feb2020.txt
+prepare_remote_debug.sh
+tests/testStressTry.cpp
+tests/testStressTry1.cpp
