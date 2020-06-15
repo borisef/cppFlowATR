@@ -173,12 +173,9 @@ target_link_libraries (NV12toTIFF ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lp
 add_executable(testOnFolderRecurse tests/testOnFolderRecurse.cpp ${SRC})
 target_link_libraries (testOnFolderRecurse ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
 
-<<<<<<< HEAD
 # add_executable(sizeMatching tests/sizeMatching_test.cpp ${SRC})
 # target_link_libraries (sizeMatching ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
 
 #testSizeFilter
 add_executable(testSizeFilter tests/testSizeFilter.cpp ${SRC})
 target_link_libraries (testSizeFilter ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
-=======
->>>>>>> 443bf233959b625784be99179370230ef49b9880
