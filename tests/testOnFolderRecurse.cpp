@@ -75,7 +75,7 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
     // Mission
     MB_Mission mission = {
         MB_MissionType::MATMON,       //mission1.missionType
-        e_OD_TargetClass::UNKNOWN_CLASS, //mission1.targetClass
+        e_OD_TargetClass::VEHICLE, //mission1.targetClass
         e_OD_TargetSubClass::PRIVATE, //mission1.targetSubClass
         e_OD_TargetColor::WHITE       //mission1.targetColor
     };
@@ -84,7 +84,7 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
     OD_SupportData supportData = {
         ors.H, ors.W, //imageHeight//imageWidth
         ors.imType,   //colorType;
-        100,          //rangeInMeters
+        0,          //rangeInMeters
         80.0f,        //fcameraAngle; //BE
         0,            //TEMP:cameraParams[10];//BE
         0             //TEMP: float	spare[3];
@@ -192,10 +192,10 @@ int main()
     //const char* aaa = TF_Version();
     OD::ObjectDetectionManager *atrManager = nullptr;
     OneRunStruct ors2;
-    ors2.splicePath = "media/ATR_sample/*.tif";
+    ors2.splicePath = "media/exp10/*.tif";
     ors2.spliceExt = ".tif";
     ors2.numRepetiotions = 1;
-    ors2.minDelay = 1000;
+    ors2.minDelay = 0;
     ors2.startFrameID = 1;
 
     atrManager = OneRun(atrManager, ors2);
