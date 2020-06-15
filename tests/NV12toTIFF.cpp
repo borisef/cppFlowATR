@@ -153,10 +153,25 @@ int main()
     
     // ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp7/20200601_132641_MM";
     // ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp7/20200601_132641_MM_tif/";
-    ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp8/exp8_20200604_122419_MM/";
-    ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp8/exp8_20200604_122419_MM_tif/";
+    // ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp8/exp8_20200604_122419_MM/";
+    // ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp8/exp8_20200604_122419_MM_tif/";
+    // ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp10/20200611_094647_MM/";
+    // ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp10/20200611_094647_MM_tif/";
+    // OneRunConvertAndSave(ors2);
 
+    // ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp10/20200611_110747_MM/";
+    // ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp10/20200611_110747_MM_tif/";
+    // OneRunConvertAndSave(ors2);
+
+    // ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp10/20200611_115249_MM/";
+    // ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp10/20200611_115249_MM_tif/";
+    // OneRunConvertAndSave(ors2);
+
+    ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp10/20200611_123346_MM/";
+    ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp10/20200611_123346_MM_tif/";
     OneRunConvertAndSave(ors2);
+    
+   
 
     cout << "Ended OneRunConvertAndSave Normally" << endl;
     return 0;
