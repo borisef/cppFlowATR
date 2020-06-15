@@ -390,6 +390,12 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
         if(!m_configParams->run_params["size_matching_ranges"].empty())
             m_size_filter = (bool)(std::stoi(m_configParams->run_params["size_filter"]));
 
+    //per class score
+    if (!m_configParams->run_params["do_per_class_score_threshold"].empty())
+        if(!m_configParams->run_params["per_class_score_threshold"].empty())
+            m_do_per_class_score_threshold = (bool)(std::stoi(m_configParams->run_params["do_per_class_score_threshold"]));
+
+
     setParams(odInitParams);
 
 #ifdef TEST_MODE
@@ -759,6 +765,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
 int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutput)
 {
     float LOWER_SCORE_THRESHOLD = 0.1f; //TODO: ini param (?)
+    
 #ifdef TEST_MODE
     cout << "ObjectDetectionManagerHandler::PopulateCycleOutput" << endl;
 #endif //TEST_MODE
@@ -798,7 +805,7 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
 
         odi[i].tarBoundingBox = {bbox_data[i * 4 + 1] * w, bbox_data[i * 4 + 3] * w, bbox_data[i * 4] * h, bbox_data[i * 4 + 2] * h};
     }
-    //TODO: filter by targetClass
+    //filter by targetClass
     e_OD_TargetClass tc = m_initParams->mbMission.targetClass;
     if (tc == e_OD_TargetClass::VEHICLE)
     {
@@ -828,8 +835,10 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
         ApplyNMS(cycleOutput);
     }
 
-    if(m_size_filter)
+    if(m_size_filter) // filter by size of distance 
         ApplySizeMatch(cycleOutput);
+    
+    //TODO: filter by fine-tune scores 
 
     return cycleOutput->numOfObjects;
 }
@@ -1240,9 +1249,65 @@ int ObjectDetectionManagerHandler::ApplySizeMatch(OD_CycleOutput *co)
             co->ObjectsArr[i].tarScore = 0;
             numObjects--;
         }
-        else
+        
+    }
+
+#ifdef TEST_MODE
+    std::cout << "ApplySizeMatch: Num of objects removed: " << (co->numOfObjects - numObjects) << std::endl;
+#endif
+
+    SqueezeCycleOutputInplace(co);
+    co->numOfObjects = numObjects;
+
+    return 0;
+}
+
+int  ObjectDetectionManagerHandler::ApplyPerClassThreshold(OD_CycleOutput *co)
+{
+    std::string thresholds_serialized;
+    
+
+    thresholds_serialized = (m_configParams->run_params["per_class_score_threshold"]);
+    auto j = json::parse(thresholds_serialized);
+
+    int numObjects = co->numOfObjects;
+
+    for (size_t i = 0; i < co->numOfObjects; i++)
+    {
+       
+        std::vector<float> range;
+        if (co->ObjectsArr[i].tarClass == PERSON)
         {
-            std::cout<<"inbounds"<<std::endl;
+            range = j["PERSON"].get<std::vector<float>>();
+        }
+        else if (co->ObjectsArr[i].tarClass == VEHICLE)
+        {
+            switch (co->ObjectsArr[i].tarSubClass)
+            {
+            case PRIVATE:
+            case COMMERCIAL:
+            case PICKUP:
+            case VAN:
+             
+            case BUS:
+                
+            case TRUCK:
+            case TRACKTOR:
+                
+                break;
+            }
+        }
+
+       
+        
+        //TODO: co->ObjectsArr[i].tarScore compare 
+        if (co->ObjectsArr[i].tarScore < 0.7)//TEMP
+        {
+#ifdef TEST_MODE
+            std::cout << "ApplySizeMatch: Will remove object: " <<  DetectionItem2LogString(co->ObjectsArr[i]) << std::endl;
+#endif
+            co->ObjectsArr[i].tarScore = 0;
+            numObjects--;
         }
         
     }
@@ -1253,6 +1318,8 @@ int ObjectDetectionManagerHandler::ApplySizeMatch(OD_CycleOutput *co)
 
     SqueezeCycleOutputInplace(co);
     co->numOfObjects = numObjects;
+
+
 
     return 0;
 }

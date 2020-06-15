@@ -20,7 +20,10 @@
     "nms_IoU_thresh_VEHICLE2HUMAN": "0.7",
     "nms_IoU_thresh_HUMAN2HUMAN": "0.01",
     "size_filter": "1",
-    "size_matching_ranges": "{\"PERSON\":[0.15, 2.25], \"CAR\": [2, 7], \"LARGE_CAR\" : [5, 17], \"AMBIGUOUS\" : [2, 17]}"
+    "size_matching_ranges": "{\"PERSON\":[0.15, 2.25], \"CAR\": [2, 7], \"LARGE_CAR\" : [5, 17], \"AMBIGUOUS\" : [2, 17]}", 
+    "do_per_class_score_threshold": "0",
+    "per_class_score_threshold": "{\"PERSON\":0.7, \"PRIVATE\": 0.7, \"COMMERCIAL\" : 0.7, \"PICKUP\" : 0.7, \"TRUCK\" : 0.7, \"BUS\" : 0.7, \"VAN\" : 0.7, \"TRACKTOR\" : 0.6, \"OTHER_SUB_CLASS\" : 0.7 }"
+
   },
   "models": [
     {
