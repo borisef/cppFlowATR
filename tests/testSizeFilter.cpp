@@ -190,15 +190,19 @@ int main()
 {
     OD::ObjectDetectionManager *atrManager = nullptr;
     OneRunStruct ors2;
-    ors2.splicePath = "media/spliced/*";
+    ors2.splicePath = "media/fff/*";
     ors2.numRepetiotions = 1;
     ors2.minDelay = 1000;
     ors2.startFrameID = 1;
 
-    for (size_t range = 1; range < 300; )
+    int range = 10;
+    for (size_t t = 0; t < 100; t++ )
     {
          atrManager = OneRun(atrManager, ors2, range);
-         range = range + 50;
+         range = range + 25;
+         if(range > 1000)
+            break;
+        cout << "*********************** NEW RAAAAANNNNGEEE" << range << endl;
     }  
     
     OD::TerminateObjectDetection(atrManager);
