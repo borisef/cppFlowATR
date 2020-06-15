@@ -385,6 +385,11 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
     if (!m_configParams->run_params["nms_IoU_thresh_HUMAN2HUMAN"].empty())
         m_nms_IoU_thresh_HUMAN2HUMAN = (std::stof(m_configParams->run_params["nms_IoU_thresh_HUMAN2HUMAN"]));
 
+    // size filter init 
+    if (!m_configParams->run_params["size_filter"].empty())
+        if(!m_configParams->run_params["size_matching_ranges"].empty())
+            m_size_filter = (bool)(std::stoi(m_configParams->run_params["size_filter"]));
+
     setParams(odInitParams);
 
 #ifdef TEST_MODE
@@ -823,7 +828,8 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
         ApplyNMS(cycleOutput);
     }
 
-    ApplySizeMatch(cycleOutput);
+    if(m_size_filter)
+        ApplySizeMatch(cycleOutput);
 
     return cycleOutput->numOfObjects;
 }
@@ -1184,12 +1190,8 @@ float getPixelToMeterRatio(int dist, int FOV, int imgHeight)
 int ObjectDetectionManagerHandler::ApplySizeMatch(OD_CycleOutput *co)
 {
     std::string ranges_serialized;
-    float pixelToMeterRatio = getPixelToMeterRatio((m_initParams->supportData.rangeInMeters, m_initParams->supportData.cameraAngle, m_initParams->supportData.imageHeight);
+    float pixelToMeterRatio = getPixelToMeterRatio(m_initParams->supportData.rangeInMeters, m_initParams->supportData.cameraAngle, m_initParams->supportData.imageHeight);
     
-    if (m_configParams->run_params["size_matching_ranges"].empty() || m_configParams->run_params["size_filter"].empty() || m_configParams->run_params["size_filter"] == "0")
-    {
-        return -1;
-    }
 
     ranges_serialized = (m_configParams->run_params["size_matching_ranges"]);
     auto j = json::parse(ranges_serialized);
@@ -1228,17 +1230,20 @@ int ObjectDetectionManagerHandler::ApplySizeMatch(OD_CycleOutput *co)
 
         float longSideMeters = pixelToMeterRatio * longSide;
 
-        //std::cout << IsInBounds(longSideMeters, range[0], range[1]) << ": " << longSideMeters << std::endl;
+        
 
         if (IsInBounds(longSideMeters, range[0], range[1]) == 0)
         {
+#ifdef TEST_MODE
+            std::cout << "ApplySizeMatch: Will remove object: " <<  DetectionItem2LogString(co->ObjectsArr[i]) << std::endl;
+#endif
             co->ObjectsArr[i].tarScore = 0;
             numObjects--;
         }
     }
 
 #ifdef TEST_MODE
-    std::cout << "Num of objects removed: " << (co->numOfObjects - numObjects) << std::endl;
+    std::cout << "ApplySizeMatch: Num of objects removed: " << (co->numOfObjects - numObjects) << std::endl;
 #endif
 
     SqueezeCycleOutputInplace(co);

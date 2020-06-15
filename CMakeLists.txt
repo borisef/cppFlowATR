@@ -166,3 +166,6 @@ target_link_libraries (testMultiModels ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2
 add_executable(sizeMatching tests/sizeMatching_test.cpp ${SRC})
 target_link_libraries (sizeMatching ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
 
+#testSizeFilter
+add_executable(testSizeFilter tests/testSizeFilter.cpp ${SRC})
+target_link_libraries (testSizeFilter ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)

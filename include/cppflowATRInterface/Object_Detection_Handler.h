@@ -80,6 +80,7 @@ protected:
     std::string m_lastPathATR = "";
 
     bool m_nms = true; // use NMS as post-processing?
+    bool m_size_filter = false; // use size-filter as post-processing?
     int m_nms_abs_thresh = 100; // min manhatten distance between 2 for sure distinc objects
     float m_nms_IoU_thresh = 0.3; // max IoU between 2 for sure distinc objects
     float m_nms_IoU_thresh_VEHICLE2VEHICLE = 0.3; // max IoU between 2 for sure distinc objects
