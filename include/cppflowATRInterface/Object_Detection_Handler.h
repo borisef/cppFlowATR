@@ -49,6 +49,7 @@ public:
 
     int ApplyNMS(OD_CycleOutput *co);
     int ApplySizeMatch(OD_CycleOutput *co);
+    int ApplyPerClassThreshold(OD_CycleOutput *co);
 
 
 protected:
@@ -88,5 +89,6 @@ protected:
     float m_nms_IoU_thresh_VEHICLE2HUMAN = 0.7; // max IoU between 2 for sure distinc objects
     float m_nms_IoU_thresh_HUMAN2HUMAN = 0.5; // max IoU between 2 for sure distinc objects
     float m_nms_IoU_thresh_VEHICLE2VEHICLE_SAME_SUB = 0.3; // max IoU between 2 for sure distinc objects
+    float m_lower_score_threshold = 0.2;
     
 };

@@ -368,6 +368,9 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
         m_withActiveCM = initCMsuccess;
     }
 
+    if (!m_configParams->run_params["lower_score_threshold"].empty())
+        m_lower_score_threshold = (std::stof(m_configParams->run_params["lower_score_threshold"]));
+    
     //: nms initialization
     if (!m_configParams->run_params["nms"].empty())
         m_nms = (bool)(std::stoi(m_configParams->run_params["nms"]));
@@ -764,7 +767,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
 
 int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutput)
 {
-    float LOWER_SCORE_THRESHOLD = 0.1f; //TODO: ini param (?)
+    float LOWER_SCORE_THRESHOLD = m_lower_score_threshold;
     
 #ifdef TEST_MODE
     cout << "ObjectDetectionManagerHandler::PopulateCycleOutput" << endl;
@@ -838,7 +841,9 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
     if(m_size_filter) // filter by size of distance 
         ApplySizeMatch(cycleOutput);
     
-    //TODO: filter by fine-tune scores 
+    //filter by fine-tune scores 
+    if(m_do_per_class_score_threshold) // filter by size of distance 
+        ApplyPerClassThreshold(cycleOutput);
 
     return cycleOutput->numOfObjects;
 }
@@ -1271,40 +1276,50 @@ int  ObjectDetectionManagerHandler::ApplyPerClassThreshold(OD_CycleOutput *co)
     auto j = json::parse(thresholds_serialized);
 
     int numObjects = co->numOfObjects;
+    float classThresh = 0.7; 
 
     for (size_t i = 0; i < co->numOfObjects; i++)
     {
-       
-        std::vector<float> range;
+        
         if (co->ObjectsArr[i].tarClass == PERSON)
         {
-            range = j["PERSON"].get<std::vector<float>>();
+            classThresh = j["PERSON"].get<float>();
         }
         else if (co->ObjectsArr[i].tarClass == VEHICLE)
         {
             switch (co->ObjectsArr[i].tarSubClass)
             {
             case PRIVATE:
+                classThresh = j["PRIVATE"].get<float>();
+                break;
             case COMMERCIAL:
+                classThresh = j["COMMERCIAL"].get<float>();
+                break;
             case PICKUP:
+                classThresh = j["PICKUP"].get<float>();
+                break;
             case VAN:
-             
+                classThresh = j["VAN"].get<float>();
+                break;
             case BUS:
-                
+                classThresh = j["BUS"].get<float>();
+                break;
             case TRUCK:
+                classThresh = j["TRUCK"].get<float>();
+                break;
             case TRACKTOR:
-                
+                classThresh = j["TRACKTOR"].get<float>();
                 break;
             }
         }
 
        
         
-        //TODO: co->ObjectsArr[i].tarScore compare 
-        if (co->ObjectsArr[i].tarScore < 0.7)//TEMP
+        // co->ObjectsArr[i].tarScore compare 
+        if (co->ObjectsArr[i].tarScore < classThresh)
         {
 #ifdef TEST_MODE
-            std::cout << "ApplySizeMatch: Will remove object: " <<  DetectionItem2LogString(co->ObjectsArr[i]) << std::endl;
+            std::cout << "ApplyPerClassThreshold: Will remove object: " <<  DetectionItem2LogString(co->ObjectsArr[i]) << std::endl;
 #endif
             co->ObjectsArr[i].tarScore = 0;
             numObjects--;
@@ -1313,7 +1328,7 @@ int  ObjectDetectionManagerHandler::ApplyPerClassThreshold(OD_CycleOutput *co)
     }
 
 #ifdef TEST_MODE
-    std::cout << "ApplySizeMatch: Num of objects removed: " << (co->numOfObjects - numObjects) << std::endl;
+    std::cout << "ApplyPerClassThreshold: Num of objects removed: " << (co->numOfObjects - numObjects) << std::endl;
 #endif
 
     SqueezeCycleOutputInplace(co);
