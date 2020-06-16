@@ -1198,7 +1198,10 @@ bool IsInBounds(const T &value, const T &low, const T &high)
 
 float getPixelToMeterRatio(int dist, int FOV, int imgHeight)
 {
-    return (imgHeight / 2)/(dist * tan(FOV*3.1415/ (2*180)))  ;
+
+    //return (imgHeight / 2)/(dist * tan(FOV*3.1415/ (2*180)))  ;
+    float H_FOV = 67.0;
+    return (imgHeight / 2)/(dist * tan(H_FOV*3.1415/ (2*180)))  ;
 }
 
 int ObjectDetectionManagerHandler::ApplySizeMatch(OD_CycleOutput *co)
