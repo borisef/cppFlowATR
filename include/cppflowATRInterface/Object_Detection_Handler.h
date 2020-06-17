@@ -3,6 +3,7 @@
 #include <cppflowATRInterface/Object_Detection_API.h>
 #include <cppflowATR/InterfaceATR.h>
 #include <cppflowCM/InterfaceCMbase.h>
+#include <cppflowCM/InterfaceCMTrt.h>
 #include <cppflowCM/InterfaceCM.h>
 #include <cppflowATR/InitParams.h>
 #include <future>

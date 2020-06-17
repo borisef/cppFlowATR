@@ -1045,6 +1045,7 @@ bool ObjectDetectionManagerHandler::InitCM()
     const char *ckpt;
     const char *inname;
     const char *outname;
+    std::string modelFileType;
     float tileMargin = 0.2;
 
     bool flag = false;
@@ -1059,6 +1060,7 @@ bool ObjectDetectionManagerHandler::InitCM()
         if (m_configParams->models[i]["nickname"].compare("default_CM") == 0)
         {
             modelPath = prepath.append(m_configParams->models[i]["load_path"]).c_str();
+            modelFileType = m_configParams->models[i]["filetype"].c_str();
             inname = m_configParams->models[i]["input_layer"].c_str();
             outname = m_configParams->models[i]["output_layer"].c_str();
             tileMargin = std::stof(m_configParams->models[i]["margin"]);
@@ -1075,6 +1077,7 @@ bool ObjectDetectionManagerHandler::InitCM()
     {
         LOG_F(INFO, "default_CM is not specified,  `default` default CM loaded");
         modelPath = "graphs/output_graph.pb";
+        modelFileType = ".pb";
         ckpt = nullptr;
         inname = "conv2d_input";
         outname = "dense_1/Softmax";
@@ -1086,8 +1089,23 @@ bool ObjectDetectionManagerHandler::InitCM()
         LOG_F(WARNING, "The color model file: %s  is missing... Skipping", modelPath);
         return false;
     }
-    //TODO: (eyal) implementation dependent instantiation here:
-    m_mbCM = new mbInterfaceCM();
+
+    if (modelFileType == ".engine")
+    {
+        LOG_F(INFO, "modelFileType is .engine");
+        m_mbCM = new mbInterfaceCMTrt();
+    }
+    else if (modelFileType == ".pb")
+    {
+        LOG_F(INFO, "modelFileType is .pb");
+        m_mbCM = new mbInterfaceCM();
+    }
+    else
+    {
+        LOG_F(ERROR, "Failed to load CM: Unsupported model type %s (model file path is: %s)", modelFileType, modelPath);
+        return false;
+    }
+
     if (!m_mbCM->LoadNewModel(modelPath, ckpt, inname, outname))
     {
         LOG_F(ERROR, "Failed to load CM: %s\ninname: %s\noutname:%s", modelPath, inname, outname);
