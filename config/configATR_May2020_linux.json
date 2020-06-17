@@ -10,7 +10,7 @@
     "logfile_path" : "logs/file.log",
     "log_verbosity" : "9",
     "log_stderr_verbosity" : "0",
-    "prePath": "/home/borisef/projects/cppFlowATR/",
+    "prePath": "",
     "os": "LINUX_PC"
   },
   "models": [
