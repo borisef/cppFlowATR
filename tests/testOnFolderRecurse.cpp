@@ -48,7 +48,7 @@ struct OneRunStruct
     string splicePath;
     string spliceExt;
     int numRepetiotions = 2;
-    float minDelay = 0;
+    float minDelay = 1000;
     bool toShow = true;
     e_OD_ColorImageType imType = e_OD_ColorImageType::RGB;
 
