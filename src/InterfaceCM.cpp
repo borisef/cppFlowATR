@@ -154,6 +154,10 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
     cv::Mat debugImg = img.clone();
 #endif //#ifdef TEST_MODE
 
+    //TRY:
+    cv::cvtColor(img, img, cv::COLOR_RGB2BGR); 
+
+
     int N = co->numOfObjects; // N can be smaller or bigger than BS
     int origStopInd = stopInd;
 
