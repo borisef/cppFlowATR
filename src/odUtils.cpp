@@ -80,7 +80,7 @@ std::map<ATR_TargetSubClass_MB, e_OD_TargetClass> mapOfATR2Class = {
      };
 
 
-std::map<OD::e_OD_TargetColor, char *> mapOfcolors = {
+std::map<OD::e_OD_TargetColor, const char *> mapOfcolors = {
     {OD::e_OD_TargetColor::BLACK, "black"},
     {OD::e_OD_TargetColor::BLUE, "blue"},
     {OD::e_OD_TargetColor::YELLOW, "yellow"},
@@ -91,13 +91,13 @@ std::map<OD::e_OD_TargetColor, char *> mapOfcolors = {
     {OD::e_OD_TargetColor::SILVER, "silver"},
     {OD::e_OD_TargetColor::BROWN, "brown"}};
 
-std::map<MB_MissionType, char *> mapOfmissions = {
+std::map<MB_MissionType, const char *> mapOfmissions = {
     {MB_MissionType::ANALYZE_SAMPLE, "ANALYZE_SAMPLE"},
     {MB_MissionType::MATMON, "MATMON"},
     {MB_MissionType::STATIC_CHASER, "STATIC_CHASER"},
     {MB_MissionType::DYNAMIC_CHASER, "DYNAMIC_CHASER"}};
 
-std::map<e_OD_ColorImageType, char *> mapOfImgTypes = {
+std::map<e_OD_ColorImageType, const char *> mapOfImgTypes = {
     {COLOR, "COLOR"},
     {BLACK_WHITE, "BLACK_WHITE"},
     {YUV422, "YUV422"},
@@ -107,7 +107,7 @@ std::map<e_OD_ColorImageType, char *> mapOfImgTypes = {
     {RGB_IMG_PATH, "RGB_IMG_PATH"},
     {NV12, "NV12"}};
 
-std::map<e_OD_TargetSubClass, char *> mapOfSubclasses = {
+std::map<e_OD_TargetSubClass, const char *> mapOfSubclasses = {
     {UNKNOWN_SUB_CLASS, "UNKNOWN_SUB_CLASS"},
     {PRIVATE, "PRIVATE"},
     {COMMERCIAL, "COMMERCIAL"},
@@ -118,7 +118,7 @@ std::map<e_OD_TargetSubClass, char *> mapOfSubclasses = {
     {TRACKTOR, "TRACKTOR"},
     {OTHER_SUB_CLASS, "OTHER_SUB_CLASS"}};
 
-std::map<e_OD_TargetClass, char *> mapOfClasses = {
+std::map<e_OD_TargetClass, const char *> mapOfClasses = {
     {UNKNOWN_CLASS, "UNKNOWN_CLASS"},
     {VEHICLE, "VEHICLE"},
     {PERSON, "PERSON"},
@@ -334,16 +334,16 @@ std::string CycleOutput2LogString(OD_CycleOutput* co)
 std::string GetFromMapOfClasses(e_OD_TargetClass cl)
 {
 
-    char* rrr = mapOfClasses[cl];
+    const char* rrr = mapOfClasses[cl];
     if(rrr == 0x0)
-        return ("UNKNOW_CLASS");    
+        return ("UNKNOW_CLASS");
     return (std::string(rrr));
 
 }
 std::string GetFromMapOfSubClasses(e_OD_TargetSubClass scl)
 {
 
-    char* rrr = mapOfSubclasses[scl];
+    const char* rrr = mapOfSubclasses[scl];
     if(rrr == 0x0)
         return ("UNKNOW_SUBCLASS");
     return (std::string(rrr));
