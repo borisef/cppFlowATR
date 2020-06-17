@@ -264,14 +264,57 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
 
 OD::e_OD_TargetColor mbInterfaceCM::TargetColor(uint cid)
 {
-    switch (cid)
+//     switch (cid)
+//     {
+//     case 0:
+// #ifdef TEST_MODE
+//         cout << "Color: white" << endl;
+// #endif //#ifdef TEST_MODE
+//         return OD::e_OD_TargetColor::WHITE;
+//     case 1:
+// #ifdef TEST_MODE
+//         cout << "Color: black" << endl;
+// #endif //#ifdef TEST_MODE
+//         return OD::e_OD_TargetColor::BLACK;
+//     case 2:
+// #ifdef TEST_MODE
+//         cout << "Color: gray" << endl;
+// #endif //#ifdef TEST_MODE
+//         return OD::e_OD_TargetColor::GRAY;
+//     case 3:
+// #ifdef TEST_MODE
+//         cout << "Color: red" << endl;
+// #endif //#ifdef TEST_MODE
+//         return OD::e_OD_TargetColor::RED;
+//     case 4:
+// #ifdef TEST_MODE
+//         cout << "Color: green" << endl;
+// #endif //#ifdef TEST_MODE
+//         return OD::e_OD_TargetColor::GREEN;
+//     case 5:
+// #ifdef TEST_MODE
+//         cout << "Color: blue" << endl;
+// #endif //#ifdef TEST_MODE
+//         return OD::e_OD_TargetColor::BLUE;
+//     case 6:
+// #ifdef TEST_MODE
+//         cout << "Color: yellow" << endl;
+// #endif //#ifdef TEST_MODE
+//         return OD::e_OD_TargetColor::YELLOW;
+//     default:
+// #ifdef TEST_MODE
+//         cout << "Color: UNKNOWN_COLOR" << endl;
+// #endif //#ifdef TEST_MODE
+//         return OD::e_OD_TargetColor::UNKNOWN_COLOR;
+//     }
+switch (cid)
     {
-    case 0:
+    case 5:
 #ifdef TEST_MODE
         cout << "Color: white" << endl;
 #endif //#ifdef TEST_MODE
         return OD::e_OD_TargetColor::WHITE;
-    case 1:
+    case 0:
 #ifdef TEST_MODE
         cout << "Color: black" << endl;
 #endif //#ifdef TEST_MODE
@@ -281,17 +324,17 @@ OD::e_OD_TargetColor mbInterfaceCM::TargetColor(uint cid)
         cout << "Color: gray" << endl;
 #endif //#ifdef TEST_MODE
         return OD::e_OD_TargetColor::GRAY;
-    case 3:
+    case 4:
 #ifdef TEST_MODE
         cout << "Color: red" << endl;
 #endif //#ifdef TEST_MODE
         return OD::e_OD_TargetColor::RED;
-    case 4:
+    case 3:
 #ifdef TEST_MODE
         cout << "Color: green" << endl;
 #endif //#ifdef TEST_MODE
         return OD::e_OD_TargetColor::GREEN;
-    case 5:
+    case 1:
 #ifdef TEST_MODE
         cout << "Color: blue" << endl;
 #endif //#ifdef TEST_MODE
