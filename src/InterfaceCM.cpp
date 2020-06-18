@@ -263,7 +263,7 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
                     int r = 1 + (rand() % 100000);
                     string cols= GetColorString(co->ObjectsArr[si].tarColor);
                     string aaa = string("debugTiles/cropped_").append(std::to_string(r)).append("_").append(cols).append(".png");
-                    if(dataModeIsBGR)
+                    if(!dataModeIsBGR)
                         cv::cvtColor(croppedRef1, croppedRef1, cv::COLOR_RGB2BGR); 
                     cv::imwrite(aaa, croppedRef1);
                 }
