@@ -212,7 +212,7 @@
       "task": "CM",
       "filetype": ".pb",
       "mission": "0",
-      "load_path": "graphs/cm/output_graph.pb",
+      "load_path": "graphs/cm/output_graph_mnist_18_06_20.pb",
       "nickname": "default_CM",
       "max_objects": "300",
       "accuracy": "5",
