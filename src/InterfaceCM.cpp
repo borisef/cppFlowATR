@@ -155,7 +155,7 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
 #endif //#ifdef TEST_MODE
 
     //TRY:
-    cv::cvtColor(img, img, cv::COLOR_RGB2BGR); 
+    //cv::cvtColor(img, img, cv::COLOR_RGB2BGR); 
 
 
     int N = co->numOfObjects; // N can be smaller or bigger than BS
@@ -170,6 +170,7 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
 
     int tempStopInd = stopInd;
     int ind = 0;
+    cv::Rect myROI;
     while (1)
     {
         ind = 0;
@@ -193,7 +194,7 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
             float y1 = bb.y1 - dh*m_tileMargin;
             float x2 = x1 + dw*(1.0f+2.0f*m_tileMargin);
             float y2 = y1 + dh*(1.0f+2.0f*m_tileMargin);
-            cv::Rect myROI;
+            
             if(x1 > 0 && y1 > 0 && y2 < img.rows && x2 < img.cols )
                 myROI = cv::Rect(x1, y1, x2 - x1, y2 - y1);
             else    
@@ -206,9 +207,11 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
             croppedRef = img(myROI);
 
 #ifdef TEST_MODE
-            int r = 1 + (rand() % 100000);
-            string aaa = string("debugTiles/cropped_").append(std::to_string(r)).append(".png");
-            cv::imwrite(aaa, croppedRef);
+            if(BS!=1){
+                int r = 1 + (rand() % 100000);
+                string aaa = string("debugTiles/cropped_").append(std::to_string(r)).append(".png");
+                cv::imwrite(aaa, croppedRef);
+                }
 #endif //#ifdef TEST_MODE
 
             //resize
@@ -243,16 +246,25 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
                 //argmax
                 uint color_id = std::distance(outRes.begin(), std::max_element(outRes.begin(), outRes.end()));
 
+
+    // copy res into co
+                co->ObjectsArr[si].tarColor = TargetColor(color_id);
+                co->ObjectsArr[si].tarColorScore = outRes[color_id];
+                ind++;
 #ifdef TEST_MODE
                 cout << "color id = " << color_id << endl;
                 PrintColor(color_id);
                 // score
                 cout << "Net score: " << outRes[color_id] << endl;
-#endif //#ifdef TEST_MODE \
-    // copy res into co
-                co->ObjectsArr[si].tarColor = TargetColor(color_id);
-                co->ObjectsArr[si].tarColorScore = outRes[color_id];
-                ind++;
+                if(BS==1){
+                    cv::Mat croppedRef1;
+                    croppedRef1 = img(myROI);
+                    int r = 1 + (rand() % 100000);
+                    string cols= GetColorString(co->ObjectsArr[si].tarColor);
+                    string aaa = string("debugTiles/cropped_").append(std::to_string(r)).append("_").append(cols).append(".png");
+                    cv::imwrite(aaa, croppedRef1);
+                }
+#endif //#ifdef TEST_MODE 
             }
         }
         if (tempStopInd >= origStopInd)
