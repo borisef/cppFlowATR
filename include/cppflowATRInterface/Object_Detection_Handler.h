@@ -50,6 +50,9 @@ public:
     static mbInterfaceCMbase *m_mbCM;
 
     int ApplyNMS(OD_CycleOutput *co);
+    int ApplySizeMatch(OD_CycleOutput *co);
+    int ApplyPerClassThreshold(OD_CycleOutput *co);
+
 
 protected:
     bool InitCM();
@@ -80,11 +83,14 @@ protected:
     std::string m_lastPathATR = "";
 
     bool m_nms = true; // use NMS as post-processing?
+    bool m_size_filter = false; // use size-filter as post-processing?
+    bool m_do_per_class_score_threshold = false; //do_per_class_score_threshold ?
     int m_nms_abs_thresh = 100; // min manhatten distance between 2 for sure distinc objects
     float m_nms_IoU_thresh = 0.3; // max IoU between 2 for sure distinc objects
     float m_nms_IoU_thresh_VEHICLE2VEHICLE = 0.3; // max IoU between 2 for sure distinc objects
     float m_nms_IoU_thresh_VEHICLE2HUMAN = 0.7; // max IoU between 2 for sure distinc objects
     float m_nms_IoU_thresh_HUMAN2HUMAN = 0.5; // max IoU between 2 for sure distinc objects
     float m_nms_IoU_thresh_VEHICLE2VEHICLE_SAME_SUB = 0.3; // max IoU between 2 for sure distinc objects
+    float m_lower_score_threshold = 0.2;
     
 };

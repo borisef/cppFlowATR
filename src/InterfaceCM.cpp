@@ -2,6 +2,7 @@
 #include <utils/imgUtils.h>
 #include <utils/odUtils.h>
 #include <iostream>
+#include <stdlib.h>
 
 //constructors/destructors
 mbInterfaceCM::mbInterfaceCM():mbInterfaceCMbase()
@@ -157,6 +158,10 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
     cv::Mat debugImg = img.clone();
 #endif //#ifdef TEST_MODE
 
+    //TRY:
+    //cv::cvtColor(img, img, cv::COLOR_RGB2BGR); 
+
+
     int N = co->numOfObjects; // N can be smaller or bigger than BS
     int origStopInd = stopInd;
 
@@ -169,6 +174,7 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
 
     int tempStopInd = stopInd;
     int ind = 0;
+    cv::Rect myROI;
     while (1)
     {
         ind = 0;
@@ -192,7 +198,7 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
             float y1 = bb.y1 - dh * m_tileMargin;
             float x2 = x1 + dw * (1.0f + 2.0f * m_tileMargin);
             float y2 = y1 + dh * (1.0f + 2.0f * m_tileMargin);
-            cv::Rect myROI;
+            
             if (x1 > 0 && y1 > 0 && y2 < img.rows && x2 < img.cols)
                 myROI = cv::Rect(x1, y1, x2 - x1, y2 - y1);
             else
@@ -203,6 +209,15 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
 #endif //#ifdef TEST_MODE
 
             croppedRef = img(myROI);
+
+#ifdef TEST_MODE
+            if(BS!=1){
+                int r = 1 + (rand() % 100000);
+                string aaa = string("debugTiles/cropped_").append(std::to_string(r)).append(".png");
+                cv::imwrite(aaa, croppedRef);
+                }
+#endif //#ifdef TEST_MODE
+
             //resize
             cv::resize(croppedRef, img_resized, cv::Size(m_patchWidth, m_patchHeight));
 
@@ -215,7 +230,7 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
         }
 #ifdef TEST_MODE
         cv::imwrite("color_batch.png", debugImg);
-#endif //#ifdef TEST_MODE \
+#endif //#ifdef TEST_MODE 
     // Put vector in Tensor
         this->m_inTensorPatches->set_data(inVec, {BS, m_patchHeight, m_patchWidth, 3});
 
@@ -235,16 +250,25 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
                 //argmax
                 uint color_id = std::distance(outRes.begin(), std::max_element(outRes.begin(), outRes.end()));
 
+
+    // copy res into co
+                co->ObjectsArr[si].tarColor = TargetColor(color_id);
+                co->ObjectsArr[si].tarColorScore = outRes[color_id];
+                ind++;
 #ifdef TEST_MODE
                 cout << "color id = " << color_id << endl;
                 PrintColor(color_id);
                 // score
                 cout << "Net score: " << outRes[color_id] << endl;
-#endif //#ifdef TEST_MODE \
-    // copy res into co
-                co->ObjectsArr[si].tarColor = TargetColor(color_id);
-                co->ObjectsArr[si].tarColorScore = outRes[color_id];
-                ind++;
+                if(BS==1){
+                    cv::Mat croppedRef1;
+                    croppedRef1 = img(myROI);
+                    int r = 1 + (rand() % 100000);
+                    string cols= GetColorString(co->ObjectsArr[si].tarColor);
+                    string aaa = string("debugTiles/cropped_").append(std::to_string(r)).append("_").append(cols).append(".png");
+                    cv::imwrite(aaa, croppedRef1);
+                }
+#endif //#ifdef TEST_MODE 
             }
         }
         if (tempStopInd >= origStopInd)
@@ -261,14 +285,57 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
 /*
 OD::e_OD_TargetColor mbInterfaceCM::TargetColor(uint cid)
 {
-    switch (cid)
+//     switch (cid)
+//     {
+//     case 0:
+// #ifdef TEST_MODE
+//         cout << "Color: white" << endl;
+// #endif //#ifdef TEST_MODE
+//         return OD::e_OD_TargetColor::WHITE;
+//     case 1:
+// #ifdef TEST_MODE
+//         cout << "Color: black" << endl;
+// #endif //#ifdef TEST_MODE
+//         return OD::e_OD_TargetColor::BLACK;
+//     case 2:
+// #ifdef TEST_MODE
+//         cout << "Color: gray" << endl;
+// #endif //#ifdef TEST_MODE
+//         return OD::e_OD_TargetColor::GRAY;
+//     case 3:
+// #ifdef TEST_MODE
+//         cout << "Color: red" << endl;
+// #endif //#ifdef TEST_MODE
+//         return OD::e_OD_TargetColor::RED;
+//     case 4:
+// #ifdef TEST_MODE
+//         cout << "Color: green" << endl;
+// #endif //#ifdef TEST_MODE
+//         return OD::e_OD_TargetColor::GREEN;
+//     case 5:
+// #ifdef TEST_MODE
+//         cout << "Color: blue" << endl;
+// #endif //#ifdef TEST_MODE
+//         return OD::e_OD_TargetColor::BLUE;
+//     case 6:
+// #ifdef TEST_MODE
+//         cout << "Color: yellow" << endl;
+// #endif //#ifdef TEST_MODE
+//         return OD::e_OD_TargetColor::YELLOW;
+//     default:
+// #ifdef TEST_MODE
+//         cout << "Color: UNKNOWN_COLOR" << endl;
+// #endif //#ifdef TEST_MODE
+//         return OD::e_OD_TargetColor::UNKNOWN_COLOR;
+//     }
+switch (cid)
     {
-    case 0:
+    case 5:
 #ifdef TEST_MODE
         cout << "Color: white" << endl;
 #endif //#ifdef TEST_MODE
         return OD::e_OD_TargetColor::WHITE;
-    case 1:
+    case 0:
 #ifdef TEST_MODE
         cout << "Color: black" << endl;
 #endif //#ifdef TEST_MODE
@@ -278,17 +345,17 @@ OD::e_OD_TargetColor mbInterfaceCM::TargetColor(uint cid)
         cout << "Color: gray" << endl;
 #endif //#ifdef TEST_MODE
         return OD::e_OD_TargetColor::GRAY;
-    case 3:
+    case 4:
 #ifdef TEST_MODE
         cout << "Color: red" << endl;
 #endif //#ifdef TEST_MODE
         return OD::e_OD_TargetColor::RED;
-    case 4:
+    case 3:
 #ifdef TEST_MODE
         cout << "Color: green" << endl;
 #endif //#ifdef TEST_MODE
         return OD::e_OD_TargetColor::GREEN;
-    case 5:
+    case 1:
 #ifdef TEST_MODE
         cout << "Color: blue" << endl;
 #endif //#ifdef TEST_MODE

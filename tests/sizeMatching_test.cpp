@@ -25,9 +25,9 @@ vector<String> GetFileNames();
 
 void MyWait(string s, float ms)
 {
-    #ifdef TEST_MODE
+#ifdef TEST_MODE
     std::cout << s << " Waiting sec:" << (ms / 1000.0) << endl;
-#endif//#ifdef TEST_MODE
+#endif //#ifdef TEST_MODE
     std::this_thread::sleep_for(std::chrono::milliseconds((uint)ms));
 }
 
@@ -39,7 +39,6 @@ vector<String> GetFileNames(const char *pa)
 
     return fn;
 }
-
 
 struct OneRunStruct
 {
@@ -54,11 +53,11 @@ struct OneRunStruct
 #ifdef WIN32
     string iniFile = (char *)"config/configATR_May2020_win.json";
 #elif OS_LINUX
-    #ifdef JETSON
-        string iniFile = (char *)"config/configATR_May2020_linux_jetson.json";
-    #else
-        string iniFile = (char *)"config/configATR_May2020_linux.json";
-    #endif
+#ifdef JETSON
+    string iniFile = (char *)"config/configATR_May2020_linux_jetson.json";
+#else
+    string iniFile = (char *)"config/configATR_May2020_linux.json";
+#endif
 #endif
 
     bool toDeleteATRM = true;
@@ -66,25 +65,25 @@ struct OneRunStruct
     int startFrameID = 1;
 };
 
-OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRunStruct ors)
+OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRunStruct ors, int range)
 {
     vector<String> ff = GetFileNames((char *)ors.splicePath.c_str());
     int N = ff.size();
 
     // Mission
     MB_Mission mission = {
-        MB_MissionType::MATMON,       //mission1.missionType
+        MB_MissionType::MATMON,          //mission1.missionType
         e_OD_TargetClass::UNKNOWN_CLASS, //mission1.targetClass
-        e_OD_TargetSubClass::PRIVATE, //mission1.targetSubClass
-        e_OD_TargetColor::WHITE       //mission1.targetColor
+        e_OD_TargetSubClass::PRIVATE,    //mission1.targetSubClass
+        e_OD_TargetColor::WHITE          //mission1.targetColor
     };
 
     // support data
     OD_SupportData supportData = {
-        (unsigned)ors.H, (unsigned)ors.W, //imageHeight//imageWidth
+        ors.H, ors.W, //imageHeight//imageWidth
         ors.imType,   //colorType;
-        100,          //rangeInMeters
-        80.0f,        //fcameraAngle; //BE
+        range,          //rangeInMeters
+        70.0f,        //fcameraAngle; //BE
         0,            //TEMP:cameraParams[10];//BE
         0             //TEMP: float	spare[3];
     };
@@ -111,7 +110,7 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
             atrManager = OD::CreateObjectDetector(&initParams); //first mission
 #ifdef TEST_MODE
         cout << " ***  ObjectDetectionManager created  *** " << endl;
-#endif//#ifdef TEST_MODE
+#endif //#ifdef TEST_MODE
 
         //  new mission
         OD::InitObjectDetection(atrManager, &initParams);
@@ -144,25 +143,24 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
             else
             {
                 //ptrTif = ParseRaw(ff[i]);
-                ptrTif = (unsigned char*)fastParseRaw(ff[i]);
+                ptrTif = (unsigned char *)fastParseRaw(ff[i]);
             }
 
             ci->ptr = ptrTif;
-            cout<<"Done forming frame "<<ci->ImgID_input<<endl;
+            cout << "Done forming frame " << ci->ImgID_input << endl;
             // if((i>=16 && i<25) || (i>=26 && i<35)|| (i>=36 && i<45)|| (i>=46 && i<55)|| (i>=56 && i<65) ){
             //     ci->ptr = nullptr;
             // }
-           
+
             statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
-            
-           
+
             if (lastReadyFrame != co->ImgID_output)
             { //draw
-                 cout << " . Detected new results for frame " << co->ImgID_output << endl;
+                cout << " . Detected new results for frame " << co->ImgID_output << endl;
                 string outName = "outRes/out_res3_" + std::to_string(co->ImgID_output) + ".png";
                 lastReadyFrame = co->ImgID_output;
                 atrManager->SaveResultsATRimage(co, (char *)outName.c_str(), ors.toShow);
- //               cout << " . . Detected new results for frame " << co->ImgID_output << endl;
+                //               cout << " . . Detected new results for frame " << co->ImgID_output << endl;
             }
             MyWait("Small pause", ors.minDelay);
             delete ptrTif;
@@ -192,11 +190,16 @@ int main()
     OneRunStruct ors2;
     ors2.splicePath = "media/spliced/*";
     ors2.numRepetiotions = 1;
-    ors2.minDelay = 1000;
+    ors2.minDelay = 10;
     ors2.startFrameID = 1;
 
-    atrManager = OneRun(atrManager, ors2);
+    atrManager = OneRun(atrManager, ors2, 50);
+
+    atrManager = OneRun(atrManager, ors2, 100);
+
+    atrManager = OneRun(atrManager, ors2, 200);
     
+
     OD::TerminateObjectDetection(atrManager);
     cout << "Ended StressTest Normally" << endl;
     return 0;

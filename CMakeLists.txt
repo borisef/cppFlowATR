@@ -2,9 +2,16 @@ cmake_minimum_required(VERSION 3.10)
 project(cppFlowATR)
 set(CMAKE_CXX_STANDARD 17)
 
+message($ENV{USER})
+
+#DEFINE PATHS
+# IF($ENV{USER} STREQUAL "magshim")
+
+# elseif()
 
 
-set(TEST_MODE FALSE)
+
+set(TEST_MODE TRUE)
 set(CMAKE_MAJOR_4 FALSE)
 
 if(TEST_MODE)
@@ -181,3 +188,20 @@ target_link_libraries (stressTestSmall_NV12 ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF
 #testMultiModels
 add_executable(testMultiModels tests/testMultiModels.cpp ${SRC})
 target_link_libraries (testMultiModels ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} ${MY_CUDA_LIBS} -lpthread)
+
+
+#NV12toTIFF
+add_executable(NV12toTIFF tests/NV12toTIFF.cpp ${SRC})
+target_link_libraries (NV12toTIFF ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+
+
+#testOnFolderRecurse
+add_executable(testOnFolderRecurse tests/testOnFolderRecurse.cpp ${SRC})
+target_link_libraries (testOnFolderRecurse ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+
+# add_executable(sizeMatching tests/sizeMatching_test.cpp ${SRC})
+# target_link_libraries (sizeMatching ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+
+#testSizeFilter
+add_executable(testSizeFilter tests/testSizeFilter.cpp ${SRC})
+target_link_libraries (testSizeFilter ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)

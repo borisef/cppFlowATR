@@ -157,22 +157,22 @@ void PrintColor(int color_id)
 {
     switch (color_id)
     {
-    case 0:
+    case 5:
         cout << "Color: white" << endl;
         break;
-    case 1:
+    case 0:
         cout << "Color: black" << endl;
         break;
     case 2:
         cout << "Color: gray" << endl;
         break;
-    case 3:
+    case 4:
         cout << "Color: red" << endl;
         break;
-    case 4:
+    case 3:
         cout << "Color: green" << endl;
         break;
-    case 5:
+    case 1:
         cout << "Color: blue" << endl;
         break;
     case 6:

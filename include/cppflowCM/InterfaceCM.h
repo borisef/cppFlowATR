@@ -22,6 +22,8 @@ protected:
   // int m_numColors = 7;
   // bool m_hardBatchSize = false;
   //float m_tileMargin = 0.2;
+#endif
+  
 
 public:
   //constructors/destructors
