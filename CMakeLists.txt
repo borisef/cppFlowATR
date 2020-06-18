@@ -65,7 +65,7 @@ else(OS_WINDOWS) #Linux
     include_directories(PRIVATE include)
     set(OpenCV_DIR /usr/lib/x86_64-linux-gnu/cmake/opencv4)
     find_package(OpenCV REQUIRED)
-    
+
     message("OpenCV_VERSION_MAJOR=" ${OpenCV_VERSION_MAJOR})
     IF((${OpenCV_VERSION_MAJOR} MATCHES "4"))
         set(CMAKE_MAJOR_4 TRUE)
@@ -77,6 +77,31 @@ else(OS_WINDOWS) #Linux
     include_directories(${OpenCV_INCLUDE_DIRS})
 
     message(${OpenCV_INCLUDE_DIRS})
+
+    message("locating cuda and TensorRT ...")
+    find_package(CUDA REQUIRED)
+    include_directories(${CUDA_INCLUDE_DIRS})
+    link_directories(${CUDA_TOOLKIT_ROOT_DIR}/lib64)
+
+    # Sets variable to a value if variable is unset.
+    macro(set_ifndef var val)
+        if (NOT ${var})
+            set(${var} ${val})
+        endif()
+        message(STATUS "Configurable variable ${var} set to ${${var}}")
+    endmacro()
+
+    set_ifndef(TRT_LIB /usr/lib/x86_64-linux-gnu)
+    set_ifndef(TRT_INCLUDE /usr/include/x86_64-linux-gnu)
+
+    # TensorRT's nvinfer lib
+    find_library(_NVINFER_LIB nvinfer HINTS ${TRT_LIB} PATH_SUFFIXES lib lib64)
+    set_ifndef(NVINFER_LIB ${_NVINFER_LIB})
+    find_library(_NVINFER_PLUGIN_LIB nvinfer_plugin HINTS ${TRT_LIB} PATH_SUFFIXES lib lib64)
+    set_ifndef(NVINFER_PLUGIN_LIB ${_NVINFER_PLUGIN_LIB})
+
+    include_directories(${TRT_INCLUDE})
+    set(MY_CUDA_LIBS ${CUDA_CUDART_LIBRARY} ${NVINFER_LIB} ${NVINFER_PLUGIN_LIB})
 
     if(JETSON) #Linux Jetson ONLY
         add_compile_options(-pthread -lm)
@@ -96,7 +121,6 @@ if(CMAKE_MAJOR_4)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DOPENCV_MAJOR_4")#jic
 endif(CMAKE_MAJOR_4)
 
-   
 
 AUX_SOURCE_DIRECTORY(src SRC)
 
@@ -116,54 +140,54 @@ AUX_SOURCE_DIRECTORY(src SRC)
 
 
 add_executable(stressTest tests/testStress.cpp ${SRC})
-target_link_libraries (stressTest  ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread )
+target_link_libraries (stressTest  ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} ${MY_CUDA_LIBS} -lpthread )
 
 
 add_executable(testTileImages tests/testTileImages.cpp ${SRC})
-target_link_libraries (testTileImages  ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+target_link_libraries (testTileImages  ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} ${MY_CUDA_LIBS} -lpthread)
 
 add_executable(testLikeMnist tests/testLikeMnist.cpp ${SRC})
-target_link_libraries (testLikeMnist  ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+target_link_libraries (testLikeMnist  ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} ${MY_CUDA_LIBS} -lpthread)
 
 add_executable(testColorNet tests/testColorNet.cpp ${SRC})
-target_link_libraries (testColorNet ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+target_link_libraries (testColorNet ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} ${MY_CUDA_LIBS} -lpthread)
 
 add_executable(jsonTest tests/jsonTest.cpp ${SRC})
-target_link_libraries (jsonTest ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+target_link_libraries (jsonTest ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} ${MY_CUDA_LIBS} -lpthread)
 
 add_executable(testIniFromJson tests/testIniFromJson.cpp ${SRC})
-target_link_libraries (testIniFromJson ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+target_link_libraries (testIniFromJson ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} ${MY_CUDA_LIBS} -lpthread)
 
 add_executable(logtest tests/logtest.cpp ${SRC})
-target_link_libraries (logtest  ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+target_link_libraries (logtest  ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} ${MY_CUDA_LIBS} -lpthread)
 
 add_executable(videoTest tests/testvideo.cpp ${SRC})
-target_link_libraries (videoTest  ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+target_link_libraries (videoTest  ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} ${MY_CUDA_LIBS} -lpthread)
 
 add_executable(testCmake tests/testCmake.cpp ${SRC})
-target_link_libraries (testCmake  ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+target_link_libraries (testCmake  ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} ${MY_CUDA_LIBS} -lpthread)
 
-#SO 
+#SO
 add_library(mbATR SHARED   ${SRC})
 target_link_libraries (mbATR ${MY_TF_LIB} ${MY_TF_LIB2} ${OpenCV_LIBS} -lpthread)
 
 # #(3) Test stressTest but with SO dependencies
 add_executable(testTamir tests/testStress.cpp  ${SRC})
 FIND_LIBRARY(MY_LIB1 NAMES libmbATR.so PATHS build/
-                                             build/libs/shared/ATR)               
-target_link_libraries (testTamir  ${MY_TF_LIB} ${MY_TF_LIB2} ${OpenCV_LIBS} -lpthread)
+                                             build/libs/shared/ATR)
+target_link_libraries (testTamir  ${MY_TF_LIB} ${MY_TF_LIB2} ${OpenCV_LIBS} ${MY_CUDA_LIBS} -lpthread)
 
 #TEMP
 add_executable(stressTestSmall tests/testStressSmall.cpp ${SRC})
-target_link_libraries (stressTestSmall ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+target_link_libraries (stressTestSmall ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} ${MY_CUDA_LIBS} -lpthread)
 
 add_executable(stressTestSmall_NV12 tests/testStressSmall_NV12.cpp ${SRC})
-target_link_libraries (stressTestSmall_NV12 ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+target_link_libraries (stressTestSmall_NV12 ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} ${MY_CUDA_LIBS} -lpthread)
 
 
 #testMultiModels
 add_executable(testMultiModels tests/testMultiModels.cpp ${SRC})
-target_link_libraries (testMultiModels ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+target_link_libraries (testMultiModels ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} ${MY_CUDA_LIBS} -lpthread)
 
 
 #NV12toTIFF
