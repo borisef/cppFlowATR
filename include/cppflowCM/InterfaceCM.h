@@ -16,7 +16,13 @@ protected:
 
   int m_patchHeight = 128;
   int m_patchWidth = 128;
+
+#ifdef TEST_MODE
+  int m_batchSize = 1;
+#else
   int m_batchSize = 32;
+#endif
+  
   int m_numColors = 7;
   bool m_hardBatchSize = false;
  
