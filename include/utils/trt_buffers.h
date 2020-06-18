@@ -50,6 +50,7 @@
 #ifndef TENSORRT_BUFFERS_H
 #define TENSORRT_BUFFERS_H
 
+#include <memory>
 #include <cassert>
 #include <numeric>
 
