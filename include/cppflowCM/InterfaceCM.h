@@ -19,12 +19,13 @@ protected:
 
 #ifdef TEST_MODE
   int m_batchSize = 1;
+  bool m_hardBatchSize = true;
 #else
   int m_batchSize = 32;
+  bool m_hardBatchSize = false;
 #endif
   
   int m_numColors = 7;
-  bool m_hardBatchSize = false;
  
 
 public:

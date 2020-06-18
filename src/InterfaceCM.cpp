@@ -89,8 +89,8 @@ void mbInterfaceCM::IdleRun()
         return;
 
     int BS = 1;
-    if (m_hardBatchSize > 1)
-        BS = m_hardBatchSize;
+    if (m_hardBatchSize)
+        BS = m_batchSize;
     std::vector<float> inVec(BS * m_patchHeight * m_patchWidth * 3);
 
     // Put vector in Tensor
