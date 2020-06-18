@@ -155,7 +155,7 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
     cv::Mat debugImg = img.clone();
 #endif //#ifdef TEST_MODE
 
-    if(dataModeIsBGR)
+    if(!dataModeIsBGR)
         cv::cvtColor(img, img, cv::COLOR_RGB2BGR); 
 
 
