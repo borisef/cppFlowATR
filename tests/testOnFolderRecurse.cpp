@@ -192,8 +192,8 @@ int main()
     //const char* aaa = TF_Version();
     OD::ObjectDetectionManager *atrManager = nullptr;
     OneRunStruct ors2;
-    //ors2.splicePath = "media/exp10/*.tif";
-    ors2.splicePath = "media/MB_Isufim/*.tif";
+    ors2.splicePath = "media/exp10/*.tif";
+    //ors2.splicePath = "media/MB_Isufim/*.tif";
     ors2.spliceExt = ".tif";
     ors2.numRepetiotions = 1;
     ors2.minDelay = 0;
