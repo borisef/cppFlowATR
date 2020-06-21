@@ -59,7 +59,7 @@ protected:
     int CleanWrongTileDetections(OD_CycleOutput *co1, std::list<float *> *tarList);
     bool InitConfigParamsFromFile(const char *iniFilePath);
     bool InitializeLogger();
-    std::string DefineATRModel(std::string nickname );
+    std::string DefineATRModel(std::string nickname, bool useNickFirst);
     
 
 

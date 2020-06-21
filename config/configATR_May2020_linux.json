@@ -11,20 +11,7 @@
     "log_verbosity" : "9",
     "log_stderr_verbosity" : "0",
     "prePath": "/home/borisef/projects/cppFlowATR/",
-    "os": "LINUX_PC",
-    "nms": "1",
-    "nms_abs_thresh": "50",
-    "nms_IoU_thresh": "0.1",
-    "nms_IoU_thresh_VEHICLE2VEHICLE_SAME_SUB": "0.3",
-    "nms_IoU_thresh_VEHICLE2VEHICLE": "0.3",
-    "nms_IoU_thresh_VEHICLE2HUMAN": "0.7",
-    "nms_IoU_thresh_HUMAN2HUMAN": "0.01",
-    "size_filter": "0",
-    "size_matching_ranges": "{\"PERSON\":[0.2, 3.0], \"CAR\": [2, 7], \"LARGE_CAR\" : [5, 17], \"AMBIGUOUS\" : [2, 17]}",
-    "lower_score_threshold": "0.5",
-    "do_per_class_score_threshold": "1",
-    "per_class_score_threshold": "{\"PERSON\":0.7, \"PRIVATE\": 0.9, \"COMMERCIAL\" : 0.8, \"PICKUP\" : 0.75, \"TRUCK\" : 0.8, \"BUS\" : 0.6, \"VAN\" : 0.7, \"TRACKTOR\" : 0.6 }"
-
+    "os": "LINUX_PC"
   },
   "models": [
     {
@@ -224,8 +211,8 @@
       "max_batch_size": "64",
       "image_format": "RGB",
       "resolution": "5",
-      "input_layer":"conv2d_input",
-      "output_layer":"dense_1/Softmax",
+      "input_layer":"conv2d_input_3",
+      "output_layer":"dense_1_1/Softmax",
       "ckpt": "nullptr",
       "additional": "-nms 0 -opp 3"
     },
@@ -246,6 +233,7 @@
       "max_batch_size": "1",
       "image_format": "RGB",
       "resolution": "5",
+      "range": "ALL",
       "additional": "-nms 0 -opp 3"
     }
   ]

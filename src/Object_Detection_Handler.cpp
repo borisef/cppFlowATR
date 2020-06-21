@@ -210,7 +210,7 @@ void ObjectDetectionManagerHandler::DeleteAllInnerCycleInputs()
     }
 }
 
-std::string ObjectDetectionManagerHandler::DefineATRModel(std::string nickname)
+std::string ObjectDetectionManagerHandler::DefineATRModel(std::string nickname, bool useNickFirst = false)
 {
 
     std::string prepath = m_configParams->run_params["prePath"];
@@ -278,7 +278,7 @@ std::string ObjectDetectionManagerHandler::DefineATRModel(std::string nickname)
     }
 
     // by nickname
-    if (flagInitByModeSuccess == false)
+    if (flagInitByModeSuccess == false || useNickFirst)
         for (size_t i = 0; i < m_configParams->models.size(); i++)
         {
 #ifdef TEST_MODE
@@ -319,12 +319,13 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
     // define path for ATR model
     if (odInitParams->mbMission.missionType != ANALYZE_SAMPLE)
     {
-        pathATR = DefineATRModel("default_ATR");
+        pathATR = DefineATRModel("default_ATR", false);
         LOG_F(INFO, "Defined path for ATR model %s, imresize-factor %g, model index in config %d", pathATR.c_str(), this->m_ATR_resize_factor, this->m_modelIndexInConfig);
     }
     else
     {
-        pathATR = DefineATRModel("tiles");
+        pathATR = DefineATRModel("tiles", true);
+        //this->m_ATR_resize_factor = -1; // cancel any resize 
         LOG_F(INFO, "Defined path for tiles ATR model %s, imresize-factor %g, model index in config %d", pathATR.c_str(), this->m_ATR_resize_factor, this->m_modelIndexInConfig);
     }
 

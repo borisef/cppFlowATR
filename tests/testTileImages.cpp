@@ -47,12 +47,12 @@ int main()
                             "media/gzir/gzir009.jpg"};
 
 #ifdef WIN32
-    string iniFile = (char *)"config/configATR_Feb2020_win.json";
+    string iniFile = (char *)"config/configATR_May2020_win.json";
 #elif OS_LINUX
     #ifdef JETSON
-        string iniFile = (char *)"config/configATR_Feb2020_linux_jetson.json";
+        string iniFile = (char *)"config/configATR_May2020_linux_jetson.json";
     #else
-        string iniFile = (char *)"config/configATR_Feb2020_linux.json";
+        string iniFile = (char *)"config/configATR_May2020_linux.json";
     #endif
 #endif
 
@@ -67,7 +67,7 @@ int main()
     OD_SupportData supportData = {
         0, 0,                              //imageHeight//imageWidth
         e_OD_ColorImageType::RGB_IMG_PATH, //colorType;
-        100,                               //rangeInMeters
+        0,                               //rangeInMeters
         70.0f,                             //fcameraAngle; //BE
         0,                                 //TEMP:cameraParams[10];//BE
         0                                  //TEMP: float	spare[3];
