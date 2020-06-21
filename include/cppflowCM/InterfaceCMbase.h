@@ -93,12 +93,12 @@ public:
   {
     OD::e_OD_TargetColor ans = OD::e_OD_TargetColor::UNKNOWN_COLOR;
     // map color id to OD::e_OD_TargetColor
-    static OD::e_OD_TargetColor cid_to_enum[] = {OD::e_OD_TargetColor::WHITE,   // 0
-                                                 OD::e_OD_TargetColor::BLACK,   // 1
+    static OD::e_OD_TargetColor cid_to_enum[] = {OD::e_OD_TargetColor::BLACK,   // 0
+                                                 OD::e_OD_TargetColor::BLUE,    // 1
                                                  OD::e_OD_TargetColor::GRAY,    // 2
-                                                 OD::e_OD_TargetColor::RED,     // 3
-                                                 OD::e_OD_TargetColor::GREEN,   // 4
-                                                 OD::e_OD_TargetColor::BLUE,    // 5
+                                                 OD::e_OD_TargetColor::GREEN,   // 3
+                                                 OD::e_OD_TargetColor::RED,     // 4
+                                                 OD::e_OD_TargetColor::WHITE,   // 5
                                                  OD::e_OD_TargetColor::YELLOW}; // 6
     static int num_colors = sizeof(cid_to_enum) / sizeof(OD::e_OD_TargetColor); //num of colors in the array
     if (cid < num_colors)
@@ -108,12 +108,12 @@ public:
 
 #ifdef TEST_MODE
     // map color id to color-name
-    static char *cid_to_cname[] = {"white",   // 0
-                                   "black",   // 1
+    static char *cid_to_cname[] = {"black",   // 0
+                                   "blue",    // 1
                                    "gray",    // 2
-                                   "red",     // 3
-                                   "green",   // 4
-                                   "blue",    // 5
+                                   "green",   // 3
+                                   "red",     // 4
+                                   "white",   // 5
                                    "yellow"}; // 6
     char *color_name = "UNKNOWN_COLOR";
     if (ans != OD::e_OD_TargetColor::UNKNOWN_COLOR)
