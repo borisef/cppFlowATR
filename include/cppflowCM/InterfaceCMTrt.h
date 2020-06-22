@@ -61,8 +61,10 @@ public:
   bool isInitialized() { return m_isInitialized; };
   bool doInference();
   bool normalizeImageIntoInputBuffer(const cv::Mat &img);
+  bool normalizeImagesIntoInputBuffer(const std::vector<cv::Mat> &images);
   bool LoadNewModel(const char *modelPath, const char *ckptPath, const char *intensor, const char *outtensor);
   std::vector<float> RunRGBimage(cv::Mat img);
+  std::vector<std::vector<float>> RunRGBimagesBatch(const std::vector<cv::Mat> &images);
   std::vector<float> RunRGBImgPath(const unsigned char *ptr);
   std::vector<float> RunImgBB(cv::Mat img, OD::OD_BoundingBox bb);
   bool RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, int startInd, int stopInd, bool copyResults = true);
