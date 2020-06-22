@@ -1047,6 +1047,7 @@ bool ObjectDetectionManagerHandler::InitCM()
     const char *outname;
     std::string modelFileType;
     float tileMargin = 0.2;
+    int in_w = 128, in_h = 128, max_batch = 32, num_ch = 3;
 
     bool flag = false;
     std::string prepath = m_configParams->run_params["prePath"];
@@ -1064,7 +1065,9 @@ bool ObjectDetectionManagerHandler::InitCM()
             inname = m_configParams->models[i]["input_layer"].c_str();
             outname = m_configParams->models[i]["output_layer"].c_str();
             tileMargin = std::stof(m_configParams->models[i]["margin"]);
-
+            in_h = std::stoi(m_configParams->models[i]["height"]);
+            in_w = std::stoi(m_configParams->models[i]["width"]);
+            max_batch = std::stoi(m_configParams->models[i]["max_batch_size"]);
             if (m_configParams->models[i]["ckpt"].compare("nullptr") != 0)
                 ckpt = m_configParams->models[i]["ckpt"].c_str();
             else
@@ -1093,12 +1096,12 @@ bool ObjectDetectionManagerHandler::InitCM()
     if (modelFileType == ".engine")
     {
         LOG_F(INFO, "modelFileType is .engine");
-        m_mbCM = new mbInterfaceCMTrt();
+        m_mbCM = new mbInterfaceCMTrt(in_h, in_w, 7, max_batch, true);
     }
     else if (modelFileType == ".pb")
     {
         LOG_F(INFO, "modelFileType is .pb");
-        m_mbCM = new mbInterfaceCM();
+        m_mbCM = new mbInterfaceCM(in_h, in_w, 7, max_batch, false);
     }
     else
     {
