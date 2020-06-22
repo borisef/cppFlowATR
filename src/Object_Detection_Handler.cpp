@@ -583,7 +583,20 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
 
     //Color Model (CM)
     if (odOut->numOfObjects > 0 && m_withActiveCM)
+    {
+        static float total_duration = 0, n_objs = 0;
+        auto tStart = std::chrono::high_resolution_clock::now();
         m_mbCM->RunImgWithCycleOutput(m_mbATR->GetKeepImg(), odOut, 0, (odOut->numOfObjects - 1), true);
+        auto tEnd = std::chrono::high_resolution_clock::now();
+        float iter_duration = std::chrono::duration<float, std::milli>(tEnd - tStart).count();
+        total_duration += iter_duration;
+        n_objs += odOut->numOfObjects;
+        float iter_avg = iter_duration / (float)odOut->numOfObjects;
+        float cum_avg = total_duration / n_objs;
+        cout << "Cumulative timing stats { detections (#), duration(millis), avg (millis/object) }:" << endl;
+        cout << "    This iteration:   { " << odOut->numOfObjects << ", " << iter_duration << ", " << iter_avg << " }" << endl;
+        cout << "    Cumulative stats: { " << n_objs << ", " << total_duration << ", " << cum_avg << " }" << endl;
+    }
 
     odOut->ImgID_output = fi;
 
