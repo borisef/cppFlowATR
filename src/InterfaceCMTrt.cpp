@@ -272,7 +272,6 @@ std::vector<std::vector<float>> mbInterfaceCMTrt::RunRGBimagesBatch(const std::v
         int begin_offset = i * m_numColors;
         int end_offset = begin_offset + m_numColors;
         std::vector<float> one_image_res = std::vector<float>(out_data + begin_offset, out_data + end_offset);
-        cout << "DBG@RunRGBimagesBatch: one_image_res = " << cv::Vec<float, 7>(one_image_res.data()) << std::endl;
         ans.push_back(one_image_res);
     }
     return ans;
@@ -334,10 +333,8 @@ bool mbInterfaceCMTrt::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co
     int origStopInd = stopInd;
 
     int BS = stopInd - startInd + 1; // requested batch size
-    cout << "DBG1: startInd = "  << startInd << ", stopInd = " << stopInd << ", BS = " << BS << endl;
     if (m_hardBatchSize)
         BS = m_batchSize; // force BS
-    cout << "DBG2: m_hardBatchSize = "  << m_hardBatchSize << ", m_batchSize = " << m_batchSize << " => BS = " << BS << endl;
     //BS = 1; //TODO: Support batches
     //std::vector<float> inVec(BS * m_patchHeight * m_patchWidth * 3);
     int tempStopInd = stopInd;
@@ -347,7 +344,6 @@ bool mbInterfaceCMTrt::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co
         {
             tempStopInd = BS - 1 + startInd;
         }
-        cout << "DBG3: startInd = "  << startInd << ", stopInd = " << stopInd << ", BS = " << BS << ", tempStopInd = " << tempStopInd << endl;
 
         // prepare batch input fo inference:
         std::vector<cv::Mat> batchIn;
@@ -377,7 +373,6 @@ bool mbInterfaceCMTrt::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co
 #ifdef TEST_MODE
             cv::rectangle(debugImg, myROI, cv::Scalar(0, 255, 0), 5);
 #endif //#ifdef TEST_MODE
-            cout << "DBG3.5: myROI: = "  << myROI << endl;
             croppedRef = img(myROI);
             //prepare the batch:
             batchIn.push_back(croppedRef);
@@ -386,21 +381,18 @@ bool mbInterfaceCMTrt::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co
             cv::imwrite("color_batch.png", debugImg);
 #endif //#ifdef TEST_MODE
         }
-        cout << "DBG4: batchIn.size() = "  << batchIn.size() << endl;
         std::vector<std::vector<float>> batchResults = RunRGBimagesBatch(batchIn);
-        cout << "DBG5: batchResults.size() = "  << batchResults.size() << endl;
         if (copyResults)
         {
             for (size_t si = startInd; si <= tempStopInd; si++)
             {
                 //subvector
                 vector<float> outRes = batchResults[si - startInd];
-                cout << "DBG6: batchResults[si - startInd = " << si - startInd << "]: "  << cv::Vec<float, 7>(outRes.data()) << endl;
                 //get color
                 //argmax
                 uint color_id = std::distance(outRes.begin(), std::max_element(outRes.begin(), outRes.end()));
 
-//#ifdef TEST_MODE
+#ifdef TEST_MODE
                 cout << "color id = " << color_id << endl;
                 static const char *cid_to_cname[] = {"black",   // 0
                                                      "blue",    // 1
@@ -418,7 +410,7 @@ bool mbInterfaceCMTrt::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co
                 //PrintColor(color_id);
                 // score
                 cout << "Net score: " << outRes[color_id] << endl;
-//#endif //#ifdef TEST_MODE
+#endif //#ifdef TEST_MODE
     // copy res into co
                 co->ObjectsArr[si].tarColor = TargetColor(color_id);
                 co->ObjectsArr[si].tarColorScore = outRes[color_id];

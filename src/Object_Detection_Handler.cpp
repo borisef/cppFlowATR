@@ -598,6 +598,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
         static float total_duration = 0, n_objs = 0;
         auto tStart = std::chrono::high_resolution_clock::now();
         m_mbCM->RunImgWithCycleOutput(m_mbATR->GetKeepImg(), odOut, 0, (odOut->numOfObjects - 1), true);
+#ifdef TEST_MODE
         auto tEnd = std::chrono::high_resolution_clock::now();
         float iter_duration = std::chrono::duration<float, std::milli>(tEnd - tStart).count();
         total_duration += iter_duration;
@@ -607,6 +608,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
         cout << "Cumulative timing stats { detections (#), duration(millis), avg (millis/object) }:" << endl;
         cout << "    This iteration:   { " << odOut->numOfObjects << ", " << iter_duration << ", " << iter_avg << " }" << endl;
         cout << "    Cumulative stats: { " << n_objs << ", " << total_duration << ", " << cum_avg << " }" << endl;
+#endif //#ifdef TEST_MODE
     }
 
     odOut->ImgID_output = fi;
