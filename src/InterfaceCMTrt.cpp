@@ -137,6 +137,7 @@ bool mbInterfaceCMTrt::LoadNewModel(const char *modelPath, const char *ckptPath,
         std::shared_ptr<nvinfer1::ICudaEngine> emptyPtr{};
         std::shared_ptr<nvinfer1::ICudaEngine> aliasPtr(emptyPtr, m_engine);
         m_bufferManager = new BufferManager(aliasPtr, 1, m_context);
+        //m_bufferManager = new BufferManager(aliasPtr, m_batchSize, m_batchSize > 1 ? nullptr : m_context);
         m_inTensors.clear();
         m_outTensors.clear();
         for (int i = 0; i < m_engine->getNbBindings(); i++)
@@ -167,12 +168,16 @@ bool mbInterfaceCMTrt::doInference()
 
     auto tStart = std::chrono::high_resolution_clock::now();
     cudaEventRecord(m_start, m_stream);
+
+
     // for batch inference
     // bool enqueue(int batchSize, void** bindings, cudaStream_t stream, cudaEvent_t* inputConsumed);
     // for one time inference
     // bool enqueueV2(void** bindings, cudaStream_t stream, cudaEvent_t* inputConsumed);
     // m_context->enqueueV2(&m_bufferManager->getDeviceBindings()[0], m_stream, nullptr);
     m_context->enqueue(1, &m_bufferManager->getDeviceBindings()[0], m_stream, nullptr);
+    //m_context->enqueue(m_batchSize, &m_bufferManager->getDeviceBindings()[0], stream, nullptr);
+
     cudaEventRecord(m_end, m_stream);
     cudaEventSynchronize(m_end);
 
@@ -205,6 +210,27 @@ bool mbInterfaceCMTrt::normalizeImageIntoInputBuffer(const cv::Mat &img)
     return (0 == m_bufferManager->copyInputToDevice());
 }
 
+bool mbInterfaceCMTrt::normalizeImagesIntoInputBuffer(const std::vector<cv::Mat> &images)
+{
+    cv::Mat img_resized;
+    size_t img_resized_data_size(m_patchWidth * m_patchHeight * 3);
+    float *hostInputDataBuffer = reinterpret_cast<float *>(m_bufferManager->getHostBuffer(m_inTensors.begin()->second));
+    if (hostInputDataBuffer == nullptr)
+    {
+        return false; //failed to get hostInputDataBuffer
+    }
+    size_t j = 0;
+    for (const cv::Mat &img : images)
+    {
+        cv::resize(img, img_resized, cv::Size(m_patchWidth, m_patchHeight));
+        for (size_t i = 0; i < img_resized_data_size; i++, j++)
+        {
+            hostInputDataBuffer[j] = img_resized.data[i] / 255.0;
+        }
+    }
+    return (0 == m_bufferManager->copyInputToDevice());
+}
+
 std::vector<float> mbInterfaceCMTrt::RunRGBimage(cv::Mat img)
 {
     std::vector<float> ans;
@@ -222,6 +248,33 @@ std::vector<float> mbInterfaceCMTrt::RunRGBimage(cv::Mat img)
 
     float *out_data = reinterpret_cast<float *>(m_bufferManager->getHostBuffer(m_outTensors.begin()->second));
     ans = std::vector<float>(out_data, out_data + m_numColors);
+    return ans;
+}
+
+std::vector<std::vector<float>> mbInterfaceCMTrt::RunRGBimagesBatch(const std::vector<cv::Mat> &images)
+{
+    std::vector<std::vector<float>> ans;
+    if (!normalizeImagesIntoInputBuffer(images))
+    {
+        return ans;
+    }
+
+    doInference();
+
+    if (0 != m_bufferManager->copyOutputToHost())
+    {
+        return ans;
+    }
+
+    float *out_data = reinterpret_cast<float *>(m_bufferManager->getHostBuffer(m_outTensors.begin()->second));
+    for (size_t i = 0 ; i < images.size(); i++)
+    {
+        int begin_offset = i * m_numColors;
+        int end_offset = begin_offset + m_numColors;
+        std::vector<float> one_image_res = std::vector<float>(out_data + begin_offset, out_data + end_offset);
+        cout << "DBG@RunRGBimagesBatch: one_image_res = " << cv::Vec<float, 7>(one_image_res.data()) << std::endl;
+        ans.push_back(one_image_res);
+    }
     return ans;
 }
 
@@ -281,13 +334,12 @@ bool mbInterfaceCMTrt::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co
     int origStopInd = stopInd;
 
     int BS = stopInd - startInd + 1; // requested batch size
-
+    cout << "DBG1: startInd = "  << startInd << ", stopInd = " << stopInd << ", BS = " << BS << endl;
     if (m_hardBatchSize)
         BS = m_batchSize; // force BS
-
-    BS = 1; //TODO: Support batches
+    cout << "DBG2: m_hardBatchSize = "  << m_hardBatchSize << ", m_batchSize = " << m_batchSize << " => BS = " << BS << endl;
+    //BS = 1; //TODO: Support batches
     //std::vector<float> inVec(BS * m_patchHeight * m_patchWidth * 3);
-
     int tempStopInd = stopInd;
     while (1)
     {
@@ -295,7 +347,10 @@ bool mbInterfaceCMTrt::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co
         {
             tempStopInd = BS - 1 + startInd;
         }
-        std::vector<std::vector<float>> batchResults;
+        cout << "DBG3: startInd = "  << startInd << ", stopInd = " << stopInd << ", BS = " << BS << ", tempStopInd = " << tempStopInd << endl;
+
+        // prepare batch input fo inference:
+        std::vector<cv::Mat> batchIn;
         for (size_t i = startInd; i <= tempStopInd; i++)
         {
             if (i >= N)
@@ -322,31 +377,48 @@ bool mbInterfaceCMTrt::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co
 #ifdef TEST_MODE
             cv::rectangle(debugImg, myROI, cv::Scalar(0, 255, 0), 5);
 #endif //#ifdef TEST_MODE
-
+            cout << "DBG3.5: myROI: = "  << myROI << endl;
             croppedRef = img(myROI);
-            batchResults.push_back(RunRGBimage(croppedRef));
+            //prepare the batch:
+            batchIn.push_back(croppedRef);
 
 #ifdef TEST_MODE
             cv::imwrite("color_batch.png", debugImg);
 #endif //#ifdef TEST_MODE
         }
+        cout << "DBG4: batchIn.size() = "  << batchIn.size() << endl;
+        std::vector<std::vector<float>> batchResults = RunRGBimagesBatch(batchIn);
+        cout << "DBG5: batchResults.size() = "  << batchResults.size() << endl;
         if (copyResults)
         {
             for (size_t si = startInd; si <= tempStopInd; si++)
             {
                 //subvector
                 vector<float> outRes = batchResults[si - startInd];
-
+                cout << "DBG6: batchResults[si - startInd = " << si - startInd << "]: "  << cv::Vec<float, 7>(outRes.data()) << endl;
                 //get color
                 //argmax
                 uint color_id = std::distance(outRes.begin(), std::max_element(outRes.begin(), outRes.end()));
 
-#ifdef TEST_MODE
+//#ifdef TEST_MODE
                 cout << "color id = " << color_id << endl;
-                PrintColor(color_id);
+                static const char *cid_to_cname[] = {"black",   // 0
+                                                     "blue",    // 1
+                                                     "gray",    // 2
+                                                     "green",   // 3
+                                                     "red",     // 4
+                                                     "white",   // 5
+                                                     "yellow"}; // 6
+                const char *color_name = "UNKNOWN_COLOR";
+                if (color_id < 7)
+                {
+                    color_name = cid_to_cname[color_id];
+                }
+                cout << "Color: " << color_name << endl;
+                //PrintColor(color_id);
                 // score
                 cout << "Net score: " << outRes[color_id] << endl;
-#endif //#ifdef TEST_MODE \
+//#endif //#ifdef TEST_MODE
     // copy res into co
                 co->ObjectsArr[si].tarColor = TargetColor(color_id);
                 co->ObjectsArr[si].tarColorScore = outRes[color_id];
