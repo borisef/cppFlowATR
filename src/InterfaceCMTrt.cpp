@@ -136,7 +136,7 @@ bool mbInterfaceCMTrt::LoadNewModel(const char *modelPath, const char *ckptPath,
         // Use an aliasing shared_ptr since we don't want engine to be deleted when bufferManager goes out of scope.
         std::shared_ptr<nvinfer1::ICudaEngine> emptyPtr{};
         std::shared_ptr<nvinfer1::ICudaEngine> aliasPtr(emptyPtr, m_engine);
-        m_bufferManager = new BufferManager(aliasPtr, 1, m_context);
+        m_bufferManager = new BufferManager(aliasPtr, m_batchSize, m_context);
         //m_bufferManager = new BufferManager(aliasPtr, m_batchSize, m_batchSize > 1 ? nullptr : m_context);
         m_inTensors.clear();
         m_outTensors.clear();
@@ -175,7 +175,7 @@ bool mbInterfaceCMTrt::doInference()
     // for one time inference
     // bool enqueueV2(void** bindings, cudaStream_t stream, cudaEvent_t* inputConsumed);
     // m_context->enqueueV2(&m_bufferManager->getDeviceBindings()[0], m_stream, nullptr);
-    m_context->enqueue(1, &m_bufferManager->getDeviceBindings()[0], m_stream, nullptr);
+    m_context->enqueue(m_batchSize, &m_bufferManager->getDeviceBindings()[0], m_stream, nullptr);
     //m_context->enqueue(m_batchSize, &m_bufferManager->getDeviceBindings()[0], stream, nullptr);
 
     cudaEventRecord(m_end, m_stream);

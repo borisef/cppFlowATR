@@ -304,7 +304,7 @@ public:
         for (int i = 0; i < mEngine->getNbBindings(); i++)
         {
             auto dims = context ? context->getBindingDimensions(i) : mEngine->getBindingDimensions(i);
-            size_t vol = context ? 1 : static_cast<size_t>(mBatchSize);
+            size_t vol = mBatchSize;//context ? 1 : static_cast<size_t>(mBatchSize);
             nvinfer1::DataType type = mEngine->getBindingDataType(i);
             int vecDim = mEngine->getBindingVectorizedDim(i);
             if (-1 != vecDim) // i.e., 0 != lgScalarsPerVector
