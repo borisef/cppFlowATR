@@ -108,19 +108,19 @@ public:
 
 #ifdef TEST_MODE
     // map color id to color-name
-    static char *cid_to_cname[] = {"black",   // 0
-                                   "blue",    // 1
-                                   "gray",    // 2
-                                   "green",   // 3
-                                   "red",     // 4
-                                   "white",   // 5
-                                   "yellow"}; // 6
-    char *color_name = "UNKNOWN_COLOR";
+    static const char *cid_to_cname[] = {"black",   // 0
+                                         "blue",    // 1
+                                         "gray",    // 2
+                                         "green",   // 3
+                                         "red",     // 4
+                                         "white",   // 5
+                                         "yellow"}; // 6
+    const char *color_name = "UNKNOWN_COLOR";
     if (ans != OD::e_OD_TargetColor::UNKNOWN_COLOR)
     {
       color_name = cid_to_cname[cid];
     }
-    cout << "Color: " << color_name << endl;
+    std::cout << "Color: " << color_name << std::endl;
 #endif
 
     return ans;
