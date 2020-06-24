@@ -83,7 +83,7 @@ bool ObjectDetectionManagerHandler::IsBusy()
             cout << " IsBusy? No" << endl;
         }
 #endif //#ifdef TEST_MODE
-        return !(m_result.wait_for(std::chrono::seconds(0)) == std::future_status::ready);
+        return temp;
     }
     else
     {
@@ -834,16 +834,16 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
         SqueezeCycleOutputInplace(cycleOutput);
     }
 
-    if (m_nms) //do NMS
+    if (m_nms && this->m_initParams->mbMission.missionType != OD::ANALYZE_SAMPLE) //do NMS
     {
         ApplyNMS(cycleOutput);
     }
 
-    if(m_size_filter) // filter by size of distance 
+    if(m_size_filter  && this->m_initParams->mbMission.missionType != OD::ANALYZE_SAMPLE) // filter by size of distance 
         ApplySizeMatch(cycleOutput);
     
     //filter by fine-tune scores 
-    if(m_do_per_class_score_threshold) // filter by size of distance 
+    if(m_do_per_class_score_threshold  && this->m_initParams->mbMission.missionType != OD::ANALYZE_SAMPLE) // filter by size of distance 
         ApplyPerClassThreshold(cycleOutput);
 
     return cycleOutput->numOfObjects;
