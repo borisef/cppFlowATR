@@ -11,7 +11,7 @@ message($ENV{USER})
 
 
 
-set(TEST_MODE TRUE)
+#set(TEST_MODE TRUE)
 set(CMAKE_MAJOR_4 FALSE)
 
 if(TEST_MODE)
@@ -91,17 +91,25 @@ else(OS_WINDOWS) #Linux
         message(STATUS "Configurable variable ${var} set to ${${var}}")
     endmacro()
 
+    # TensorRT's nvinfer and nvinfer_plugin lib
+    ###########################################
     set_ifndef(TRT_LIB /usr/lib/x86_64-linux-gnu)
     set_ifndef(TRT_INCLUDE /usr/include/x86_64-linux-gnu)
 
-    # TensorRT's nvinfer lib
     find_library(_NVINFER_LIB nvinfer HINTS ${TRT_LIB} PATH_SUFFIXES lib lib64)
-    set_ifndef(NVINFER_LIB ${_NVINFER_LIB})
     find_library(_NVINFER_PLUGIN_LIB nvinfer_plugin HINTS ${TRT_LIB} PATH_SUFFIXES lib lib64)
+    set_ifndef(NVINFER_LIB ${_NVINFER_LIB})
     set_ifndef(NVINFER_PLUGIN_LIB ${_NVINFER_PLUGIN_LIB})
 
-    include_directories(${TRT_INCLUDE})
-    set(MY_CUDA_LIBS ${CUDA_CUDART_LIBRARY} ${NVINFER_LIB} ${NVINFER_PLUGIN_LIB})
+    if((${NVINFER_LIB} STREQUAL "_NVINFER_LIB-NOTFOUND") OR (${NVINFER_PLUGIN_LIB} STREQUAL "_NVINFER_PLUGIN_LIB-NOTFOUND"))
+        message(STATUS "Tensor-RT NOT FOUND: This version does not support .engiene models")
+        add_definitions(-DNO_TRT)
+        set(MY_CUDA_LIBS "")
+    else()
+        message(STATUS "Tensor-RT FOUND and will be supported")
+        include_directories(${TRT_INCLUDE})
+        set(MY_CUDA_LIBS ${CUDA_CUDART_LIBRARY} ${NVINFER_LIB} ${NVINFER_PLUGIN_LIB})
+    endif()
 
     if(JETSON) #Linux Jetson ONLY
         add_compile_options(-pthread -lm)
@@ -192,16 +200,16 @@ target_link_libraries (testMultiModels ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2
 
 #NV12toTIFF
 add_executable(NV12toTIFF tests/NV12toTIFF.cpp ${SRC})
-target_link_libraries (NV12toTIFF ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+target_link_libraries (NV12toTIFF ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} ${MY_CUDA_LIBS} -lpthread)
 
 
 #testOnFolderRecurse
 add_executable(testOnFolderRecurse tests/testOnFolderRecurse.cpp ${SRC})
-target_link_libraries (testOnFolderRecurse ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+target_link_libraries (testOnFolderRecurse ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} ${MY_CUDA_LIBS} -lpthread)
 
 # add_executable(sizeMatching tests/sizeMatching_test.cpp ${SRC})
 # target_link_libraries (sizeMatching ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
 
 #testSizeFilter
 add_executable(testSizeFilter tests/testSizeFilter.cpp ${SRC})
-target_link_libraries (testSizeFilter ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} -lpthread)
+target_link_libraries (testSizeFilter ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} ${MY_CUDA_LIBS} -lpthread)

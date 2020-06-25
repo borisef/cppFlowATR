@@ -1116,8 +1116,13 @@ bool ObjectDetectionManagerHandler::InitCM()
 
     if (modelFileType == ".engine")
     {
+#ifdef NO_TRT
+        LOG_F(ERROR, "This version does not support TENSOR-RT but modelFileType of .engine was specified in conf file");
+        return false;
+#else
         LOG_F(INFO, "modelFileType is .engine");
         m_mbCM = new mbInterfaceCMTrt(in_h, in_w, 7, max_batch, true);
+#endif
     }
     else if (modelFileType == ".pb")
     {

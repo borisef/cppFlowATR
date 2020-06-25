@@ -1,5 +1,5 @@
 #pragma once
-
+#ifndef NO_TRT
 #include <string>
 #include <NvInfer.h>
 #include <NvInferPlugin.h>
@@ -70,3 +70,4 @@ public:
   bool RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, int startInd, int stopInd, bool copyResults = true);
   void IdleRun();
 };
+#endif //#ifndef NO_TRT

@@ -1,3 +1,4 @@
+#ifndef NO_TRT
 #include <iostream>
 #include <fstream>
 #include <chrono>
@@ -428,3 +429,4 @@ bool mbInterfaceCMTrt::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co
     }
     return true;
 }
+#endif // #ifndef NO_TRT
