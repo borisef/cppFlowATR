@@ -854,7 +854,7 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
 
     if (m_removeEdgeTargets && this->m_initParams->mbMission.missionType != OD::ANALYZE_SAMPLE) //do NMS
     {
-        //RemoveEdgeTargets(cycleOutput);
+        RemoveEdgeTargets(cycleOutput);
     }
     return cycleOutput->numOfObjects;
 }
@@ -1290,17 +1290,18 @@ int  ObjectDetectionManagerHandler::RemoveEdgeTargets(OD_CycleOutput *co)
 
     for (size_t i = 0; i < co->numOfObjects; i++)
     {
-        if( co->ObjectsArr[i].tarBoundingBox.x1>m_removeEdgeWidthPxls || 
-            co->ObjectsArr[i].tarBoundingBox.x2>W - m_removeEdgeWidthPxls ||
-            co->ObjectsArr[i].tarBoundingBox.y1<m_removeEdgeWidthPxls ||
-            co->ObjectsArr[i].tarBoundingBox.y2> H - m_removeEdgeWidthPxls )
+        if( co->ObjectsArr[i].tarBoundingBox.x1 < m_removeEdgeWidthPxls || 
+            co->ObjectsArr[i].tarBoundingBox.x2 > W - m_removeEdgeWidthPxls ||
+            co->ObjectsArr[i].tarBoundingBox.y1 < m_removeEdgeWidthPxls ||
+            co->ObjectsArr[i].tarBoundingBox.y2 > H - m_removeEdgeWidthPxls )
+            {
 
 #ifdef TEST_MODE
             std::cout << "RemoveEdgeTargets: Will remove object: " <<  DetectionItem2LogString(co->ObjectsArr[i]) << std::endl;
 #endif
             co->ObjectsArr[i].tarScore = 0;
             numObjects--;
-
+            }
 
 
 

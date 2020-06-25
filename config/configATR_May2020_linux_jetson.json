@@ -23,8 +23,9 @@
     "size_matching_ranges": "{\"PERSON\":[0.2, 3.0], \"CAR\": [2, 7], \"LARGE_CAR\" : [5, 17], \"AMBIGUOUS\" : [2, 17]}",
     "lower_score_threshold": "0.5",
     "do_per_class_score_threshold": "0",
-    "per_class_score_threshold": "{\"PERSON\":0.7, \"PRIVATE\": 0.9, \"COMMERCIAL\" : 0.8, \"PICKUP\" : 0.75, \"TRUCK\" : 0.8, \"BUS\" : 0.6, \"VAN\" : 0.7, \"TRACKTOR\" : 0.6 }"
-  
+    "per_class_score_threshold": "{\"PERSON\":0.7, \"PRIVATE\": 0.9, \"COMMERCIAL\" : 0.8, \"PICKUP\" : 0.75, \"TRUCK\" : 0.8, \"BUS\" : 0.6, \"VAN\" : 0.7, \"TRACKTOR\" : 0.6 }"{\"PERSON\":0.7, \"PRIVATE\": 0.9, \"COMMERCIAL\" : 0.8, \"PICKUP\" : 0.75, \"TRUCK\" : 0.8, \"BUS\" : 0.6, \"VAN\" : 0.7, \"TRACKTOR\" : 0.6 }"{\"PERSON\":0.7, \"PRIVATE\": 0.9, \"COMMERCIAL\" : 0.8, \"PICKUP\" : 0.75, \"TRUCK\" : 0.8, \"BUS\" : 0.6, \"VAN\" : 0.7, \"TRACKTOR\" : 0.6 }",
+    "do_remove_edge_targets": "1",
+    "edge_in_pixels": "300"
   },
   "models": [
     {
