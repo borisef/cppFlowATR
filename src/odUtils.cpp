@@ -244,35 +244,14 @@ cv::Scalar GetColor2Draw(OD::e_OD_TargetColor color_id)
     return cv::Scalar(0, 255, 255);
 }
 
-std::string GetColorString(OD::e_OD_TargetColor color_id)
+std::string GetColorString(const OD::e_OD_TargetColor color_id)
 {
-    switch (color_id)
+    const auto &iter = mapOfcolors.find(color_id);
+    if (iter == mapOfcolors.end())
     {
-    case OD::e_OD_TargetColor::WHITE:
-        return(std::string("white"));
-        break;
-    case OD::e_OD_TargetColor::BLACK:
-        return(std::string("black"));
-        break;
-    case OD::e_OD_TargetColor::GRAY:
-        return(std::string("gray"));
-        break;
-    case OD::e_OD_TargetColor::RED:
-        return(std::string("red"));
-        break;
-    case OD::e_OD_TargetColor::GREEN:
-        return(std::string("green"));
-        break;
-    case OD::e_OD_TargetColor::BLUE:
-        return(std::string("blue"));
-        break;
-    case OD::e_OD_TargetColor::YELLOW:
-        return(std::string("yellow"));
-        break;
+        return "weird";
     }
-
-    return(std::string("weird"));
-
+    return iter->second;
 }
 
 std::string GetStringInitParams(OD::OD_InitParams ip)
