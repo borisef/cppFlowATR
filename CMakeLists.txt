@@ -12,6 +12,7 @@ message($ENV{USER})
 
 
 set(TEST_MODE FALSE)
+set(NO_TRT TRUE)
 set(CMAKE_MAJOR_4 FALSE)
 
 if(TEST_MODE)
@@ -62,6 +63,9 @@ if(OS_WINDOWS)
     set(OpenCV_LIBS "opencv_world343d.lib")
     set(MY_TF_LIB2 "")
 else(OS_WINDOWS) #Linux
+    if(NOT JETSON)
+        set (NO_TRT TRUE)
+    endif()
     include_directories(PRIVATE include)
     set(OpenCV_DIR /usr/lib/${CMAKE_SYSTEM_PROCESSOR}-linux-gnu/cmake/opencv4)
     find_package(OpenCV REQUIRED)
@@ -93,14 +97,18 @@ else(OS_WINDOWS) #Linux
 
     # TensorRT's nvinfer and nvinfer_plugin lib
     ###########################################
-    set_ifndef(TRT_LIB /usr/lib/${CMAKE_SYSTEM_PROCESSOR}-linux-gnu)
-    set_ifndef(TRT_INCLUDE /usr/include/${CMAKE_SYSTEM_PROCESSOR}-linux-gnu)
+    if(NO_TRT)
+        set(NVINFER_LIB "_NVINFER_LIB-NOTFOUND")
+        set(NVINFER_PLUGIN_LIB "_NVINFER_PLUGIN_LIB-NOTFOUND")
+    else()
+        set_ifndef(TRT_LIB /usr/lib/${CMAKE_SYSTEM_PROCESSOR}-linux-gnu)
+        set_ifndef(TRT_INCLUDE /usr/include/${CMAKE_SYSTEM_PROCESSOR}-linux-gnu)
 
-    find_library(_NVINFER_LIB nvinfer HINTS ${TRT_LIB} PATH_SUFFIXES lib lib64)
-    find_library(_NVINFER_PLUGIN_LIB nvinfer_plugin HINTS ${TRT_LIB} PATH_SUFFIXES lib lib64)
-    set_ifndef(NVINFER_LIB ${_NVINFER_LIB})
-    set_ifndef(NVINFER_PLUGIN_LIB ${_NVINFER_PLUGIN_LIB})
-
+        find_library(_NVINFER_LIB nvinfer HINTS ${TRT_LIB} PATH_SUFFIXES lib lib64)
+        find_library(_NVINFER_PLUGIN_LIB nvinfer_plugin HINTS ${TRT_LIB} PATH_SUFFIXES lib lib64)
+        set_ifndef(NVINFER_LIB ${_NVINFER_LIB})
+        set_ifndef(NVINFER_PLUGIN_LIB ${_NVINFER_PLUGIN_LIB})
+    endif()
     if((${NVINFER_LIB} STREQUAL "_NVINFER_LIB-NOTFOUND") OR (${NVINFER_PLUGIN_LIB} STREQUAL "_NVINFER_PLUGIN_LIB-NOTFOUND"))
         message(STATUS "Tensor-RT NOT FOUND: This version does not support .engiene models")
         add_definitions(-DNO_TRT)
