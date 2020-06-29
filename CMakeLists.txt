@@ -63,7 +63,7 @@ if(OS_WINDOWS)
     set(MY_TF_LIB2 "")
 else(OS_WINDOWS) #Linux
     include_directories(PRIVATE include)
-    set(OpenCV_DIR /usr/lib/x86_64-linux-gnu/cmake/opencv4)
+    set(OpenCV_DIR /usr/lib/${CMAKE_SYSTEM_PROCESSOR}-linux-gnu/cmake/opencv4)
     find_package(OpenCV REQUIRED)
 
     message("OpenCV_VERSION_MAJOR=" ${OpenCV_VERSION_MAJOR})
@@ -93,8 +93,8 @@ else(OS_WINDOWS) #Linux
 
     # TensorRT's nvinfer and nvinfer_plugin lib
     ###########################################
-    set_ifndef(TRT_LIB /usr/lib/x86_64-linux-gnu)
-    set_ifndef(TRT_INCLUDE /usr/include/x86_64-linux-gnu)
+    set_ifndef(TRT_LIB /usr/lib/${CMAKE_SYSTEM_PROCESSOR}-linux-gnu)
+    set_ifndef(TRT_INCLUDE /usr/include/${CMAKE_SYSTEM_PROCESSOR}-linux-gnu)
 
     find_library(_NVINFER_LIB nvinfer HINTS ${TRT_LIB} PATH_SUFFIXES lib lib64)
     find_library(_NVINFER_PLUGIN_LIB nvinfer_plugin HINTS ${TRT_LIB} PATH_SUFFIXES lib lib64)
