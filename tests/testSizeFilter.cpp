@@ -81,9 +81,9 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
 
     // support data
     OD_SupportData supportData = {
-        ors.H, ors.W, //imageHeight//imageWidth
+        (unsigned)ors.H, (unsigned)ors.W, //imageHeight//imageWidth
         ors.imType,   //colorType;
-        range,          //rangeInMeters
+        (float)range, //rangeInMeters
         80.0f,        //fcameraAngle; //BE
         0,            //TEMP:cameraParams[10];//BE
         0             //TEMP: float	spare[3];

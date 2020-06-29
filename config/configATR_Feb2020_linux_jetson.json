@@ -9,7 +9,7 @@
     "logfile_path" : "log/file.log",
     "log_verbosity" : "9",
     "log_stderr_verbosity" : "0",
-    "prePath": "/media/borisef/nvmeSSD/projects/cppFlowATR/"
+    "prePath": ""
   },
   "models": [
     {

@@ -5,16 +5,27 @@
 #include <stdlib.h>
 
 //constructors/destructors
-mbInterfaceCM::mbInterfaceCM()
+mbInterfaceCM::mbInterfaceCM():mbInterfaceCMbase()
 {
 #ifdef TEST_MODE
-    cout << "Construct mbInterfaceCM" << endl;
+    std::cout << "Construct mbInterfaceCM()" << std::endl;
+#endif //#ifdef TEST_MODE
+    m_model = nullptr;
+    m_inTensorPatches = nullptr;
+    m_outTensorScores = nullptr;
+}
+
+mbInterfaceCM::mbInterfaceCM(int h, int w, int nc, int bs, bool hbs) : mbInterfaceCMbase(h, w, nc, bs, hbs)
+{
+#ifdef TEST_MODE
+    cout << "Construct mbInterfaceCM(h,w,...)" << endl;
 #endif //#ifdef TEST_MODE
 
     m_model = nullptr;
     m_inTensorPatches = nullptr;
     m_outTensorScores = nullptr;
 }
+
 mbInterfaceCM::~mbInterfaceCM()
 {
 #ifdef TEST_MODE
@@ -74,12 +85,12 @@ std::vector<float> mbInterfaceCM::RunRGBimage(cv::Mat img)
 
 std::vector<float> mbInterfaceCM::RunRGBImgPath(const unsigned char *ptr)
 {
-    #ifdef OPENCV_MAJOR_4
-    cv::Mat img = cv::imread(string((const char *)ptr), IMREAD_COLOR);//CV_LOAD_IMAGE_COLOR
-    #else
-    cv::Mat img = cv::imread(string((const char *)ptr), CV_LOAD_IMAGE_COLOR);//CV_LOAD_IMAGE_COLOR
-    #endif
-    
+#ifdef OPENCV_MAJOR_4
+    cv::Mat img = cv::imread(string((const char *)ptr), IMREAD_COLOR); //CV_LOAD_IMAGE_COLOR
+#else
+    cv::Mat img = cv::imread(string((const char *)ptr), CV_LOAD_IMAGE_COLOR); //CV_LOAD_IMAGE_COLOR
+#endif
+
     return (RunRGBimage(img));
 }
 
@@ -98,13 +109,6 @@ void mbInterfaceCM::IdleRun()
     this->m_model->run(m_inTensorPatches, m_outTensorScores);
 }
 
-std::vector<float> mbInterfaceCM::GetResultScores(int i)
-{
-    //TODO: check if results do exist
-
-    return (m_outTensorScores->get_data<float>());
-}
-
 std::vector<float> mbInterfaceCM::RunImgBB(cv::Mat img, OD::OD_BoundingBox bb)
 {
     cv::Mat croppedRef, img_resized;
@@ -113,7 +117,7 @@ std::vector<float> mbInterfaceCM::RunImgBB(cv::Mat img, OD::OD_BoundingBox bb)
 #endif //#ifdef TEST_MODE
 
     //get sub-image
-    //TODO: take tileMargin into account 
+    //TODO: take tileMargin into account
     cv::Rect myROI(bb.x1, bb.y1, bb.x2 - bb.x1, bb.y2 - bb.y1);
 
     croppedRef = img(myROI);
@@ -188,17 +192,16 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
             cv::Mat croppedRef, img_resized;
             //crop
             OD::OD_BoundingBox bb = co->ObjectsArr[i].tarBoundingBox;
-             //TODO: take tileMargin into account
-            float dw = bb.x2-bb.x1;
-            float dh = bb.y2-bb.y1;
-            float x1 = bb.x1 - dw*m_tileMargin;
-            float y1 = bb.y1 - dh*m_tileMargin;
-            float x2 = x1 + dw*(1.0f+2.0f*m_tileMargin);
-            float y2 = y1 + dh*(1.0f+2.0f*m_tileMargin);
-            
-            if(x1 > 0 && y1 > 0 && y2 < img.rows && x2 < img.cols )
+            //TODO: take tileMargin into account
+            float dw = bb.x2 - bb.x1;
+            float dh = bb.y2 - bb.y1;
+            float x1 = bb.x1 - dw * m_tileMargin;
+            float y1 = bb.y1 - dh * m_tileMargin;
+            float x2 = x1 + dw * (1.0f + 2.0f * m_tileMargin);
+            float y2 = y1 + dh * (1.0f + 2.0f * m_tileMargin);
+            if (x1 > 0 && y1 > 0 && y2 < img.rows && x2 < img.cols)
                 myROI = cv::Rect(x1, y1, x2 - x1, y2 - y1);
-            else    
+            else
                 myROI = cv::Rect(bb.x1, bb.y1, bb.x2 - bb.x1, bb.y2 - bb.y1);
 
 #ifdef TEST_MODE
@@ -279,94 +282,4 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
         }
     }
     return true;
-}
-
-OD::e_OD_TargetColor mbInterfaceCM::TargetColor(uint cid)
-{
-//     switch (cid)
-//     {
-//     case 0:
-// #ifdef TEST_MODE
-//         cout << "Color: white" << endl;
-// #endif //#ifdef TEST_MODE
-//         return OD::e_OD_TargetColor::WHITE;
-//     case 1:
-// #ifdef TEST_MODE
-//         cout << "Color: black" << endl;
-// #endif //#ifdef TEST_MODE
-//         return OD::e_OD_TargetColor::BLACK;
-//     case 2:
-// #ifdef TEST_MODE
-//         cout << "Color: gray" << endl;
-// #endif //#ifdef TEST_MODE
-//         return OD::e_OD_TargetColor::GRAY;
-//     case 3:
-// #ifdef TEST_MODE
-//         cout << "Color: red" << endl;
-// #endif //#ifdef TEST_MODE
-//         return OD::e_OD_TargetColor::RED;
-//     case 4:
-// #ifdef TEST_MODE
-//         cout << "Color: green" << endl;
-// #endif //#ifdef TEST_MODE
-//         return OD::e_OD_TargetColor::GREEN;
-//     case 5:
-// #ifdef TEST_MODE
-//         cout << "Color: blue" << endl;
-// #endif //#ifdef TEST_MODE
-//         return OD::e_OD_TargetColor::BLUE;
-//     case 6:
-// #ifdef TEST_MODE
-//         cout << "Color: yellow" << endl;
-// #endif //#ifdef TEST_MODE
-//         return OD::e_OD_TargetColor::YELLOW;
-//     default:
-// #ifdef TEST_MODE
-//         cout << "Color: UNKNOWN_COLOR" << endl;
-// #endif //#ifdef TEST_MODE
-//         return OD::e_OD_TargetColor::UNKNOWN_COLOR;
-//     }
-switch (cid)
-    {
-    case 5:
-#ifdef TEST_MODE
-        cout << "Color: white" << endl;
-#endif //#ifdef TEST_MODE
-        return OD::e_OD_TargetColor::WHITE;
-    case 0:
-#ifdef TEST_MODE
-        cout << "Color: black" << endl;
-#endif //#ifdef TEST_MODE
-        return OD::e_OD_TargetColor::BLACK;
-    case 2:
-#ifdef TEST_MODE
-        cout << "Color: gray" << endl;
-#endif //#ifdef TEST_MODE
-        return OD::e_OD_TargetColor::GRAY;
-    case 4:
-#ifdef TEST_MODE
-        cout << "Color: red" << endl;
-#endif //#ifdef TEST_MODE
-        return OD::e_OD_TargetColor::RED;
-    case 3:
-#ifdef TEST_MODE
-        cout << "Color: green" << endl;
-#endif //#ifdef TEST_MODE
-        return OD::e_OD_TargetColor::GREEN;
-    case 1:
-#ifdef TEST_MODE
-        cout << "Color: blue" << endl;
-#endif //#ifdef TEST_MODE
-        return OD::e_OD_TargetColor::BLUE;
-    case 6:
-#ifdef TEST_MODE
-        cout << "Color: yellow" << endl;
-#endif //#ifdef TEST_MODE
-        return OD::e_OD_TargetColor::YELLOW;
-    default:
-#ifdef TEST_MODE
-        cout << "Color: UNKNOWN_COLOR" << endl;
-#endif //#ifdef TEST_MODE
-        return OD::e_OD_TargetColor::UNKNOWN_COLOR;
-    }
 }

@@ -9,7 +9,7 @@
 using namespace OD;
 using namespace std;
 
-mbInterfaceCM *ObjectDetectionManagerHandler::m_mbCM = nullptr;
+mbInterfaceCMbase *ObjectDetectionManagerHandler::m_mbCM = nullptr;
 InitParams *ObjectDetectionManagerHandler::m_configParams = nullptr;
 
 OD_CycleInput *NewCopyCycleInput(OD_CycleInput *tocopy, uint bufferSize)
@@ -600,7 +600,22 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
 
     //Color Model (CM)
     if (odOut->numOfObjects > 0 && m_withActiveCM)
+    {
+        static float total_duration = 0, n_objs = 0;
+        auto tStart = std::chrono::high_resolution_clock::now();
         m_mbCM->RunImgWithCycleOutput(m_mbATR->GetKeepImg(), odOut, 0, (odOut->numOfObjects - 1), true);
+#ifdef TEST_MODE
+        auto tEnd = std::chrono::high_resolution_clock::now();
+        float iter_duration = std::chrono::duration<float, std::milli>(tEnd - tStart).count();
+        total_duration += iter_duration;
+        n_objs += odOut->numOfObjects;
+        float iter_avg = iter_duration / (float)odOut->numOfObjects;
+        float cum_avg = total_duration / n_objs;
+        cout << "Cumulative timing stats { detections (#), duration(millis), avg (millis/object) }:" << endl;
+        cout << "    This iteration:   { " << odOut->numOfObjects << ", " << iter_duration << ", " << iter_avg << " }" << endl;
+        cout << "    Cumulative stats: { " << n_objs << ", " << total_duration << ", " << cum_avg << " }" << endl;
+#endif //#ifdef TEST_MODE
+    }
 
     odOut->ImgID_output = fi;
 
@@ -1061,7 +1076,10 @@ bool ObjectDetectionManagerHandler::InitCM()
     const char *ckpt;
     const char *inname;
     const char *outname;
+    std::string modelFileType;
     float tileMargin = 0.2;
+    int in_w = 128, in_h = 128, max_batch = 32, num_ch = 3;
+    bool hard_batch_size_on_test = false;
 
     bool flag = false;
     std::string prepath = m_configParams->run_params["prePath"];
@@ -1071,14 +1089,19 @@ bool ObjectDetectionManagerHandler::InitCM()
 #ifdef TEST_MODE
         std::cout << m_configParams->models[i]["nickname"] << std::endl;
         std::cout << m_configParams->models[i]["load_path"] << std::endl;
+        max_batch = 1;
+        hard_batch_size_on_test = true;
 #endif //#ifdef TEST_MODE
         if (m_configParams->models[i]["nickname"].compare("default_CM") == 0)
         {
             modelPath = prepath.append(m_configParams->models[i]["load_path"]).c_str();
+            modelFileType = m_configParams->models[i]["filetype"].c_str();
             inname = m_configParams->models[i]["input_layer"].c_str();
             outname = m_configParams->models[i]["output_layer"].c_str();
             tileMargin = std::stof(m_configParams->models[i]["margin"]);
-
+            in_h = std::stoi(m_configParams->models[i]["height"]);
+            in_w = std::stoi(m_configParams->models[i]["width"]);
+            max_batch = std::stoi(m_configParams->models[i]["max_batch_size"]);
             if (m_configParams->models[i]["ckpt"].compare("nullptr") != 0)
                 ckpt = m_configParams->models[i]["ckpt"].c_str();
             else
@@ -1091,6 +1114,7 @@ bool ObjectDetectionManagerHandler::InitCM()
     {
         LOG_F(INFO, "default_CM is not specified,  `default` default CM loaded");
         modelPath = "graphs/output_graph.pb";
+        modelFileType = ".pb";
         ckpt = nullptr;
         inname = "conv2d_input";
         outname = "dense_1/Softmax";
@@ -1102,7 +1126,28 @@ bool ObjectDetectionManagerHandler::InitCM()
         LOG_F(WARNING, "The color model file: %s  is missing... Skipping", modelPath);
         return false;
     }
-    m_mbCM = new mbInterfaceCM();
+
+    if (modelFileType == ".engine")
+    {
+#ifdef NO_TRT
+        LOG_F(ERROR, "This version does not support TENSOR-RT but modelFileType of .engine was specified in conf file");
+        return false;
+#else
+        LOG_F(INFO, "modelFileType is .engine");
+        m_mbCM = new mbInterfaceCMTrt(in_h, in_w, 7, max_batch, true);
+#endif
+    }
+    else if (modelFileType == ".pb")
+    {
+        LOG_F(INFO, "modelFileType is .pb");
+        m_mbCM = new mbInterfaceCM(in_h, in_w, 7, max_batch, hard_batch_size_on_test);
+    }
+    else
+    {
+        LOG_F(ERROR, "Failed to load CM: Unsupported model type %s (model file path is: %s)", modelFileType, modelPath);
+        return false;
+    }
+
     if (!m_mbCM->LoadNewModel(modelPath, ckpt, inname, outname))
     {
         LOG_F(ERROR, "Failed to load CM: %s\ninname: %s\noutname:%s", modelPath, inname, outname);

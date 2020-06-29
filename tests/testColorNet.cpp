@@ -76,17 +76,6 @@ int mainWithInterface()
     cout << "color id = " << color_id << endl;
     PrintColor(color_id);
     cout << "Net score: " << vecScores[color_id] << endl;
-
-    //extract last vector of scores
-    vecScores = myCM->GetResultScores();
-    color_id = argmax_vector(vecScores);
-    cout << "color id = " << color_id << endl;
-    PrintColor(color_id);
-    cout << "Net score: " << vecScores[color_id] << endl;
-
-
-
-
     return 0;
 }
 

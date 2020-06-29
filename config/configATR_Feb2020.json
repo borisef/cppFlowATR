@@ -8,7 +8,7 @@
   "run_params" : {
     "logfile_path" : "log/file.log",
     "debug_mode" : "false",
-    "prePath": "/home/borisef/projects/cppFlowATR/"
+    "prePath": ""
   },
   "models": [
     {
