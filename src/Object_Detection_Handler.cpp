@@ -399,6 +399,12 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
         if(!m_configParams->run_params["per_class_score_threshold"].empty())
             m_do_per_class_score_threshold = (bool)(std::stoi(m_configParams->run_params["do_per_class_score_threshold"]));
 
+    //m_removeEdgeTargets
+    if (!m_configParams->run_params["do_remove_edge_targets"].empty())
+        m_removeEdgeTargets = (bool)(std::stoi(m_configParams->run_params["do_remove_edge_targets"]));
+        if(m_removeEdgeTargets && !m_configParams->run_params["edge_in_pixels"].empty())
+            m_removeEdgeWidthPxls =  (std::stoi(m_configParams->run_params["edge_in_pixels"]));
+
 
     setParams(odInitParams);
 
@@ -861,6 +867,10 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
     if(m_do_per_class_score_threshold  && this->m_initParams->mbMission.missionType != OD::ANALYZE_SAMPLE) // filter by size of distance 
         ApplyPerClassThreshold(cycleOutput);
 
+    if (m_removeEdgeTargets && this->m_initParams->mbMission.missionType != OD::ANALYZE_SAMPLE) //do NMS
+    {
+        RemoveEdgeTargets(cycleOutput);
+    }
     return cycleOutput->numOfObjects;
 }
 
@@ -1308,6 +1318,42 @@ int ObjectDetectionManagerHandler::ApplySizeMatch(OD_CycleOutput *co)
 
 #ifdef TEST_MODE
     std::cout << "ApplySizeMatch: Num of objects removed: " << (co->numOfObjects - numObjects) << std::endl;
+#endif
+
+    SqueezeCycleOutputInplace(co);
+    co->numOfObjects = numObjects;
+
+    return 0;
+}
+
+int  ObjectDetectionManagerHandler::RemoveEdgeTargets(OD_CycleOutput *co)
+{
+    int numObjects = co->numOfObjects;
+
+    int H = this->m_initParams->supportData.imageHeight;
+    int W = this->m_initParams->supportData.imageWidth;
+
+    for (size_t i = 0; i < co->numOfObjects; i++)
+    {
+        if( co->ObjectsArr[i].tarBoundingBox.x1 < m_removeEdgeWidthPxls || 
+            co->ObjectsArr[i].tarBoundingBox.x2 > W - m_removeEdgeWidthPxls ||
+            co->ObjectsArr[i].tarBoundingBox.y1 < m_removeEdgeWidthPxls ||
+            co->ObjectsArr[i].tarBoundingBox.y2 > H - m_removeEdgeWidthPxls )
+            {
+
+#ifdef TEST_MODE
+            std::cout << "RemoveEdgeTargets: Will remove object: " <<  DetectionItem2LogString(co->ObjectsArr[i]) << std::endl;
+#endif
+            co->ObjectsArr[i].tarScore = 0;
+            numObjects--;
+            }
+
+
+
+    }
+
+#ifdef TEST_MODE
+    std::cout << "RemoveEdgeTargets: Num of objects removed: " << (co->numOfObjects - numObjects) << std::endl;
 #endif
 
     SqueezeCycleOutputInplace(co);

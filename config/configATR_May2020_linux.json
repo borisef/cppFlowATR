@@ -12,6 +12,8 @@
     "log_stderr_verbosity" : "0",
     "prePath": "",
     "os": "LINUX_PC"
+     "do_remove_edge_targets": "1",
+    "edge_in_pixels": "300"
   },
   "models": [
     {

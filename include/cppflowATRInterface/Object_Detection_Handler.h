@@ -52,6 +52,7 @@ public:
     int ApplyNMS(OD_CycleOutput *co);
     int ApplySizeMatch(OD_CycleOutput *co);
     int ApplyPerClassThreshold(OD_CycleOutput *co);
+    int RemoveEdgeTargets(OD_CycleOutput *co);
 
 
 protected:
@@ -86,6 +87,8 @@ protected:
     bool m_size_filter = false; // use size-filter as post-processing?
     bool m_do_per_class_score_threshold = false; //do_per_class_score_threshold ?
     int m_nms_abs_thresh = 100; // min manhatten distance between 2 for sure distinc objects
+    bool m_removeEdgeTargets = false;// remove targets close to the edge ?
+    int  m_removeEdgeWidthPxls = 50; // width in pixels
     float m_nms_IoU_thresh = 0.3; // max IoU between 2 for sure distinc objects
     float m_nms_IoU_thresh_VEHICLE2VEHICLE = 0.3; // max IoU between 2 for sure distinc objects
     float m_nms_IoU_thresh_VEHICLE2HUMAN = 0.7; // max IoU between 2 for sure distinc objects
