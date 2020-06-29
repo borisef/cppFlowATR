@@ -392,28 +392,14 @@ bool mbInterfaceCMTrt::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co
                 //get color
                 //argmax
                 uint color_id = std::distance(outRes.begin(), std::max_element(outRes.begin(), outRes.end()));
-
+                OD::e_OD_TargetColor od_color = TargetColor(color_id);
 #ifdef TEST_MODE
                 cout << "color id = " << color_id << endl;
-                static const char *cid_to_cname[] = {"black",   // 0
-                                                     "blue",    // 1
-                                                     "gray",    // 2
-                                                     "green",   // 3
-                                                     "red",     // 4
-                                                     "white",   // 5
-                                                     "yellow"}; // 6
-                const char *color_name = "UNKNOWN_COLOR";
-                if (color_id < 7)
-                {
-                    color_name = cid_to_cname[color_id];
-                }
+                std::string color_name = GetColorString(od_color);
                 cout << "Color: " << color_name << endl;
-                //PrintColor(color_id);
-                // score
                 cout << "Net score: " << outRes[color_id] << endl;
 #endif //#ifdef TEST_MODE
-    // copy res into co
-                co->ObjectsArr[si].tarColor = TargetColor(color_id);
+                co->ObjectsArr[si].tarColor = od_color;
                 co->ObjectsArr[si].tarColorScore = outRes[color_id];
             }
         }
