@@ -1069,6 +1069,7 @@ bool ObjectDetectionManagerHandler::InitCM()
     std::string modelFileType;
     float tileMargin = 0.2;
     int in_w = 128, in_h = 128, max_batch = 32, num_ch = 3;
+    bool hard_batch_size_on_test = false;
 
     bool flag = false;
     std::string prepath = m_configParams->run_params["prePath"];
@@ -1078,6 +1079,8 @@ bool ObjectDetectionManagerHandler::InitCM()
 #ifdef TEST_MODE
         std::cout << m_configParams->models[i]["nickname"] << std::endl;
         std::cout << m_configParams->models[i]["load_path"] << std::endl;
+        max_batch = 1;
+        hard_batch_size_on_test = true;
 #endif //#ifdef TEST_MODE
         if (m_configParams->models[i]["nickname"].compare("default_CM") == 0)
         {
@@ -1127,7 +1130,7 @@ bool ObjectDetectionManagerHandler::InitCM()
     else if (modelFileType == ".pb")
     {
         LOG_F(INFO, "modelFileType is .pb");
-        m_mbCM = new mbInterfaceCM(in_h, in_w, 7, max_batch, false);
+        m_mbCM = new mbInterfaceCM(in_h, in_w, 7, max_batch, hard_batch_size_on_test);
     }
     else
     {
