@@ -7,34 +7,11 @@
 
 #include <cppflowATRInterface/Object_Detection_Types.h>
 
+#include "utils/trt_loguru_wrapper.h"
 #include "utils/trt_buffers.h"
 #include "utils/loguru.hpp"
 
 #include "InterfaceCMbase.h"
-
-class TRTLoguruWrapper : public nvinfer1::ILogger
-{
-public:
-  TRTLoguruWrapper() { }
-
-  loguru::NamedVerbosity getVerbosity(nvinfer1::ILogger::Severity severity) const
-  {
-    static loguru::NamedVerbosity SevirityToVerbosityMapping[] = {
-        loguru::Verbosity_INVALID, // kINTERNAL_ERROR = 0
-        loguru::Verbosity_ERROR,   // kERROR = 1
-        loguru::Verbosity_WARNING, // kWARNING = 2
-        loguru::Verbosity_INFO,    // kINFO = 3
-        loguru::Verbosity_1,       // kVERBOSE = 4
-    };
-    return SevirityToVerbosityMapping[(int)severity];
-  }
-
-  void log(nvinfer1::ILogger::Severity severity, const char *msg)
-  {
-    loguru::NamedVerbosity verbosity = getVerbosity(severity);
-    VLOG_F(verbosity, msg);
-  }
-};
 
 class mbInterfaceCMTrt : public mbInterfaceCMbase
 {
