@@ -1,5 +1,4 @@
-//#include "../include/cppflowATR/InterfaceATR.h"
-#include "cppflowATR/InterfaceATR.h"
+#include <cppflowATR/InterfaceATR.h>
 #include <utils/imgUtils.h>
 #include <iostream>
 using namespace cv;
@@ -10,7 +9,6 @@ mbInterfaceATR::mbInterfaceATR()
     cout << "Construct mbInterfaceATR" << endl;
 #endif //TEST_MODE
 
-    m_show = false;
     m_model = nullptr;
     m_outTensorNumDetections = nullptr;
     m_outTensorScores = nullptr;
@@ -84,21 +82,21 @@ int mbInterfaceATR::RunRGBimage(cv::Mat inp)
 }
 int mbInterfaceATR::RunRGBImgPath(const unsigned char *ptr, float resize_factor)
 {
-    #ifdef OPENCV_MAJOR_4
-    cv::Mat inp1 = cv::imread(string((const char *)ptr), IMREAD_COLOR);//CV_LOAD_IMAGE_COLOR
-    cv::cvtColor(inp1, inp1, cv::COLOR_BGR2RGB );//CV_BGR2RGB, 4
-    #else
-    cv::Mat inp1 = cv::imread(string((const char *)ptr), CV_LOAD_IMAGE_COLOR);//
-    cv::cvtColor(inp1, inp1, CV_BGR2RGB );//, 4
-    #endif 
-    if(resize_factor>0 && resize_factor != 1)
+#ifdef OPENCV_MAJOR_4
+    cv::Mat inp1 = cv::imread(string((const char *)ptr), IMREAD_COLOR); //CV_LOAD_IMAGE_COLOR
+    cv::cvtColor(inp1, inp1, cv::COLOR_BGR2RGB);                        //CV_BGR2RGB, 4
+#else
+    cv::Mat inp1 = cv::imread(string((const char *)ptr), CV_LOAD_IMAGE_COLOR);                                                   //
+    cv::cvtColor(inp1, inp1, CV_BGR2RGB);                                                                                        //, 4
+#endif
+    if (resize_factor > 0 && resize_factor != 1)
     {
         //imresize of inp1 inplace
-         #ifdef OPENCV_MAJOR_4
-        cv::resize(inp1, inp1, cv::Size(int(inp1.cols * resize_factor),int(inp1.rows * resize_factor)), 0, 0, INTER_LINEAR); //CV_INTER_LINEAR
-        #else
-        cv::resize(inp1, inp1, cv::Size(int(inp1.cols * resize_factor),int(inp1.rows * resize_factor)), 0, 0, CV_INTER_LINEAR); //
-        #endif
+#ifdef OPENCV_MAJOR_4
+        cv::resize(inp1, inp1, cv::Size(int(inp1.cols * resize_factor), int(inp1.rows * resize_factor)), 0, 0, INTER_LINEAR); //CV_INTER_LINEAR
+#else
+        cv::resize(inp1, inp1, cv::Size(int(inp1.cols * resize_factor), int(inp1.rows * resize_factor)), 0, 0, CV_INTER_LINEAR); //
+#endif
     }
 
     return RunRGBimage(inp1);
@@ -111,7 +109,7 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
     cout << "RunRGBVector " << height << " " << width << "prt[10]" << ptr[10] << endl;
 #endif //TEST_MODE
 
-    std::vector<uint8_t> img_data(int(height * resize_factor) * int(width  * resize_factor) * 3);
+    std::vector<uint8_t> img_data(int(height * resize_factor) * int(width * resize_factor) * 3);
     unsigned char *buffer = (unsigned char *)ptr;
 
 #ifdef TEST_MODE
@@ -130,23 +128,22 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
 #endif //TEST_MODE
 
     cv::cvtColor(tempIm, tempIm, cv::COLOR_RGB2BGR);
-    //tempIm.copyTo(m_keepImg);//TODO: clone instead ? 
+    //tempIm.copyTo(m_keepImg);//TODO: clone instead ?
     m_keepImg = tempIm.clone();
 
 #ifdef TEST_MODE
     cv::imwrite("m_keepImg.png", m_keepImg);
 #endif //TEST_MODE
 
-    if(resize_factor>0 && resize_factor != 1)
+    if (resize_factor > 0 && resize_factor != 1)
     {
         //imresize of tempIm inplace
-        cv::resize(tempIm, tempIm, cv::Size(int(tempIm.cols * resize_factor),int(tempIm.rows * resize_factor)), 0, 0, INTER_LINEAR);//CV_INTER_LINEAR
-        #ifdef TEST_MODE
+        cv::resize(tempIm, tempIm, cv::Size(int(tempIm.cols * resize_factor), int(tempIm.rows * resize_factor)), 0, 0, INTER_LINEAR); //CV_INTER_LINEAR
+#ifdef TEST_MODE
         cv::imwrite("tempim_resized.png", tempIm);
-        #endif //TEST_MODE
-        buffer = (unsigned char *)tempIm.data;//suppose it is continues
+#endif                                         //TEST_MODE
+        buffer = (unsigned char *)tempIm.data; //suppose it is continues
     }
-   
 
 #ifdef TEST_MODE
     cout << " RunRGBVector:saving cv::Mat* " << endl;
@@ -155,11 +152,11 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
 
     cv::cvtColor(tempIm, tempIm, cv::COLOR_BGR2RGB); //because we do on original buffer
 
-    for (int i = 0; i < int(height * resize_factor)* int(width  *resize_factor) * 3 ; i++)
+    for (int i = 0; i < int(height * resize_factor) * int(width * resize_factor) * 3; i++)
         img_data[i] = buffer[i];
     //TODO: img_data = buffer;
 
-    return (RunRGBVector(img_data, int(height*resize_factor), int(width*resize_factor)));
+    return (RunRGBVector(img_data, int(height * resize_factor), int(width * resize_factor)));
 }
 int mbInterfaceATR::RunRGBVector(std::vector<uint8_t> img_data, int height, int width, float resize_factor)
 {
@@ -194,7 +191,7 @@ int mbInterfaceATR::RunRawImage(const unsigned char *ptr, int height, int width)
     myRGB->copyTo(m_keepImg);
 #ifdef TEST_MODE
     cv::imwrite("m_keepImg.png", m_keepImg);
-#endif //TEST_MODE
+#endif            //TEST_MODE
     delete myRGB; //??? TODO: is it safe?
     int status = RunRGBVector(img_data, height, width);
 
@@ -204,7 +201,7 @@ int mbInterfaceATR::RunRawImage(const unsigned char *ptr, int height, int width)
 int mbInterfaceATR::RunRawImageFast(const unsigned char *ptr, int height, int width, int colorType, float resize_factor)
 {
 
-    std::vector<uint8_t> img_data(int(height * resize_factor) * int(width* resize_factor)  * 2 ); 
+    std::vector<uint8_t> img_data(int(height * resize_factor) * int(width * resize_factor) * 2);
     unsigned char *buffer = (unsigned char *)ptr;
 
     cv::Mat *myRGB = new cv::Mat(height, width, CV_8UC3);
@@ -218,34 +215,33 @@ int mbInterfaceATR::RunRawImageFast(const unsigned char *ptr, int height, int wi
     // save JPG for debug
     cv::imwrite("debug_raw2rgb.tif", *myRGB);
 #endif //TEST_MODE
-    //TODO: BGR -> RGB 
+       //TODO: BGR -> RGB
 
-     myRGB->copyTo(m_keepImg);
-      cv::cvtColor(m_keepImg, m_keepImg, cv::COLOR_BGR2RGB); //???
+    myRGB->copyTo(m_keepImg);
+    cv::cvtColor(m_keepImg, m_keepImg, cv::COLOR_BGR2RGB); //???
 
 #ifdef TEST_MODE
     cv::imwrite("m_keepImg.png", m_keepImg);
 #endif //TEST_MODE
 
-    if(resize_factor>0 && resize_factor != 1)
+    if (resize_factor > 0 && resize_factor != 1)
     {
-        //imresize of myRGB inplace
-        #ifdef OPENCV_MAJOR_4
-        cv::resize(*myRGB, *myRGB, cv::Size(int(myRGB->cols * resize_factor),int(myRGB->rows * resize_factor)), 0, 0, INTER_LINEAR );//CV_INTER_LINEAR
-        #else
-        cv::resize(*myRGB, *myRGB, cv::Size(int(myRGB->cols * resize_factor),int(myRGB->rows * resize_factor)), 0, 0, CV_INTER_LINEAR );
-        #endif
+//imresize of myRGB inplace
+#ifdef OPENCV_MAJOR_4
+        cv::resize(*myRGB, *myRGB, cv::Size(int(myRGB->cols * resize_factor), int(myRGB->rows * resize_factor)), 0, 0, INTER_LINEAR); //CV_INTER_LINEAR
+#else
+        cv::resize(*myRGB, *myRGB, cv::Size(int(myRGB->cols * resize_factor), int(myRGB->rows * resize_factor)), 0, 0, CV_INTER_LINEAR);
+#endif
 
-        #ifdef TEST_MODE
+#ifdef TEST_MODE
         // save JPG for debug
         cv::imwrite("debug_raw2rgb_resized.tif", *myRGB);
-        #endif //TEST_MODE
-
+#endif //TEST_MODE
     }
     img_data.assign(myRGB->data, myRGB->data + myRGB->total() * myRGB->channels());
-   
+
     delete myRGB; //??? TODO: is it safe?
-    int status = RunRGBVector(img_data, int(height* resize_factor), int(width* resize_factor));
+    int status = RunRGBVector(img_data, int(height * resize_factor), int(width * resize_factor));
 
     return status;
 }

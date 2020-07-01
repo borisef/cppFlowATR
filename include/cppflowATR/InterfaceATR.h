@@ -1,17 +1,16 @@
 #pragma once
 
+#include <string>
+
 #include <opencv2/opencv.hpp>
 #include <cppflow/Tensor.h>
 #include <cppflow/Model.h>
 
 
 
-#include <string>
-
 class mbInterfaceATR
 {
   protected:
-	  bool active;
     Model* m_model;
     Tensor* m_outTensorNumDetections;
     Tensor* m_outTensorScores;
@@ -19,14 +18,12 @@ class mbInterfaceATR
     Tensor* m_outTensorClasses;
     Tensor* m_inpName ;
 
-    
   public:
     cv::Mat m_keepImg;
-    bool m_show;
     cv::Mat GetKeepImg(){return m_keepImg;}
-  public:
+
     //constructors
-	  mbInterfaceATR();
+    mbInterfaceATR();
     ~mbInterfaceATR();
 
     bool LoadNewModel(const char* modelPath);
@@ -40,6 +37,4 @@ class mbInterfaceATR
     int GetResultClasses(int i);
     float GetResultScores(int i);
     std::vector<float>  GetResultBoxes();
-
-    
 };
