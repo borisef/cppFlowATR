@@ -462,6 +462,7 @@ private:
     //return 0 on success
     int memcpyBuffers(const bool copyInput, const bool deviceToHost, const bool async, const cudaStream_t &stream = 0)
     {
+        int has_errors = 0;
         for (int i = 0; i < mEngine->getNbBindings(); i++)
         {
             void *dstPtr = deviceToHost ? mManagedBuffers[i]->hostBuffer.data() : mManagedBuffers[i]->deviceBuffer.data();
@@ -471,11 +472,12 @@ private:
             if ((copyInput && mEngine->bindingIsInput(i)) || (!copyInput && !mEngine->bindingIsInput(i)))
             {
                 if (async)
-                    return cudaMemcpyAsync(dstPtr, srcPtr, byteSize, memcpyType, stream);
+                    has_errors |= cudaMemcpyAsync(dstPtr, srcPtr, byteSize, memcpyType, stream);
                 else
-                    return cudaMemcpy(dstPtr, srcPtr, byteSize, memcpyType);
+                    has_errors |= cudaMemcpy(dstPtr, srcPtr, byteSize, memcpyType);
             }
         }
+        return has_errors;
     }
 
     std::shared_ptr<nvinfer1::ICudaEngine> mEngine;              //!< The pointer to the engine
