@@ -895,10 +895,10 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
     CreateTiledImage(imgName, bigW, bigH, bigIm, tarList);
 
 #ifdef TEST_MODE
-    cv::imwrite("bigImg.tif", *bigIm);
+    cv::imwrite("bigImg.png", *bigIm);
 #endif //#ifdef TEST_MODE
 
-    unsigned char *ptrTif = ParseCvMat(*bigIm); // has new inside
+    unsigned char *ptrTif = ParseCvMat(*bigIm); // has new inside and bgr2rgb 
     //run operate part without sync stuff etc.
 
 #ifdef TEST_MODE
@@ -909,7 +909,7 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
     if (m_ATR_resize_factor > 0 && m_ATR_resize_factor != 1)
         rf = m_ATR_resize_factor;
 
-    this->m_mbATR->RunRGBVector(ptrTif, bigH, bigW, rf); //TODO: resize factor ?
+    this->m_mbATR->RunRGBVector(ptrTif, bigH, bigW, rf); 
 
     OD_CycleOutput *tempCycleOutput = NewOD_CycleOutput(350);
     this->PopulateCycleOutput(tempCycleOutput);
