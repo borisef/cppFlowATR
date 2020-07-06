@@ -55,7 +55,7 @@ struct OneRunStruct
     string iniFile = (char *)"config/configATR_May2020_win.json";
 #elif OS_LINUX
     #ifdef JETSON
-        string iniFile = (char *)"config/configATR_May2020_linux_jetson.json";
+        string iniFile = (char *)"config/configATR_June2020_linux_jetson.json";
     #else
         string iniFile = (char *)"config/configATR_May2020_linux.json";
     #endif
@@ -192,7 +192,7 @@ int main()
     OneRunStruct ors2;
     ors2.splicePath = "media/filter/*";
     ors2.numRepetiotions = 1;
-    ors2.minDelay = 1000;
+    ors2.minDelay = 300;
     ors2.startFrameID = 1;
 
     atrManager = OneRun(atrManager, ors2);

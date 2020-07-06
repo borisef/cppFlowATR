@@ -67,7 +67,7 @@ int main()
     string iniFile = (char *)"config/configATR_May2020_win.json";
 #elif OS_LINUX
 #ifdef JETSON
-    string iniFile = (char *)"config/configATR_May2020_linux_jetson.json";
+    string iniFile = (char *)"config/configATR_June2020_linux_jetson.json";
 #else
     string iniFile = (char *)"config/configATR_May2020_linux.json";
 #endif
