@@ -25,7 +25,7 @@
     "do_per_class_score_threshold": "0",
     "per_class_score_threshold": "{\"PERSON\":0.7, \"PRIVATE\": 0.9, \"COMMERCIAL\" : 0.8, \"PICKUP\" : 0.75, \"TRUCK\" : 0.8, \"BUS\" : 0.6, \"VAN\" : 0.7, \"TRACKTOR\" : 0.6 }", 
     "do_remove_edge_targets": "0",
-    "edge_in_pixels": 50
+    "edge_in_pixels": "50"
   
   },
   "models": [
@@ -214,7 +214,9 @@
       "task": "CM",
       "filetype": ".pb",
       "mission": "0",
-      "load_path": "graphs/cm/output_graph_mnist_18_06_20.pb",
+      "load_path_": "graphs/cm/output_graph_mnist_18_06_20.pb",
+      "load_path_": "graphs/cm/cm.inout_fp32hwc.18_06_20.fp16.engine",
+      "load_path": "graphs/cm/output_graph_try15.pb",
       "nickname": "default_CM",
       "max_objects": "300",
       "accuracy": "5",
@@ -223,10 +225,10 @@
       "width": "128",
       "height": "128",
        "margin": "0.2",
-      "max_batch_size": "64",
+      "max_batch_size": "1",
       "image_format": "RGB",
       "resolution": "5",
-      "input_layer":"conv2d_input_3",
+      "input_layer":"conv2d_input_1",
       "output_layer":"dense_1_1/Softmax",
       "ckpt": "nullptr",
       "additional": "-nms 0 -opp 3"
