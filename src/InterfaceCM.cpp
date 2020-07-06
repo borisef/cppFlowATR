@@ -154,6 +154,7 @@ std::vector<float> mbInterfaceCM::RunImgBB(cv::Mat img, OD::OD_BoundingBox bb)
 
 bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, int startInd, int stopInd, bool copyResults)
 {
+     
     bool dataModeIsBGR = true; 
 #ifdef TEST_MODE
     cv::Mat debugImg = img.clone();

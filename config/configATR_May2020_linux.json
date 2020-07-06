@@ -11,8 +11,8 @@
     "log_verbosity" : "9",
     "log_stderr_verbosity" : "0",
     "prePath": "",
-    "os": "LINUX_PC"
-     "do_remove_edge_targets": "1",
+    "os": "LINUX_PC",
+    "do_remove_edge_targets" : "1",
     "edge_in_pixels": "300"
   },
   "models": [
@@ -201,7 +201,7 @@
       "task": "CM",
       "filetype": ".pb",
       "mission": "0",
-      "load_path": "graphs/cm/output_graph_mnist_18_06_20.pb",
+      "load_path": "graphs/cm/output_graph_try15.pb",
       "nickname": "default_CM",
       "max_objects": "300",
       "accuracy": "5",
@@ -213,7 +213,7 @@
       "max_batch_size": "64",
       "image_format": "RGB",
       "resolution": "5",
-      "input_layer":"conv2d_input_3",
+      "input_layer":"conv2d_input_1",
       "output_layer":"dense_1_1/Softmax",
       "ckpt": "nullptr",
       "additional": "-nms 0 -opp 3"
