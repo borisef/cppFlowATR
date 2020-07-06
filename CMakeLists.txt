@@ -11,7 +11,7 @@ message($ENV{USER})
 
 
 
-set(TEST_MODE TRUE)
+set(TEST_MODE FALSE)
 set(NO_TRT TRUE)
 set(CMAKE_MAJOR_4 FALSE)
 

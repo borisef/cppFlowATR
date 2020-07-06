@@ -99,7 +99,7 @@ public:
                                                  OD::e_OD_TargetColor::GREEN,   // 3
                                                  OD::e_OD_TargetColor::RED,     // 4
                                                  OD::e_OD_TargetColor::WHITE,   // 5
-                                                 OD::e_OD_TargetColor::YELLOW}; // 6
+                                                 OD::e_OD_TargetColor::BROWN}; // 6
     static int num_colors = sizeof(cid_to_enum) / sizeof(OD::e_OD_TargetColor); //num of colors in the array
     if (cid < num_colors)
     {
@@ -114,7 +114,7 @@ public:
                                          "green",   // 3
                                          "red",     // 4
                                          "white",   // 5
-                                         "yellow"}; // 6
+                                         "brown"}; // 6
     const char *color_name = "UNKNOWN_COLOR";
     if (ans != OD::e_OD_TargetColor::UNKNOWN_COLOR)
     {

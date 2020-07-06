@@ -239,6 +239,14 @@ cv::Scalar GetColor2Draw(OD::e_OD_TargetColor color_id)
 
         return cv::Scalar(255, 255, 0);
         break;
+    case OD::e_OD_TargetColor::BROWN:
+#ifdef TEST_MODE
+        cout << "Color: brown" << endl;
+#endif //#ifdef TEST_MODE
+
+        return cv::Scalar(181, 101, 30);
+        break;
+
     }
 
     return cv::Scalar(0, 255, 255);
