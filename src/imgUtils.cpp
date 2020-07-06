@@ -263,11 +263,11 @@ void balance_white(cv::Mat mat)
 unsigned char *ParseCvMat(cv::Mat inp1)
 {
   //cv::Mat inp1 = cv::imread(path, CV_LOAD_IMAGE_COLOR);
-  #ifdef OPENCV_MAJOR_4
-  cv::cvtColor(inp1, inp1, COLOR_BGR2RGB); //CV_BGR2RGB
-  #else
-  cv::cvtColor(inp1, inp1, CV_BGR2RGB); //
-  #endif
+  // #ifdef OPENCV_MAJOR_4
+  // cv::cvtColor(inp1, inp1, COLOR_BGR2RGB); //CV_BGR2RGB
+  // #else
+  // cv::cvtColor(inp1, inp1, CV_BGR2RGB); //
+  // #endif
   //put image in vector
   std::vector<uint8_t> img_data1(inp1.rows * inp1.cols * inp1.channels());
   img_data1.assign(inp1.data, inp1.data + inp1.total() * inp1.channels());
