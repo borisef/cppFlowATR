@@ -462,6 +462,24 @@ bool mbInterfaceATR::doTRTInference()
 #endif //#ifndef NO_TRT
 }
 
+#ifndef NO_TRT
+std::string dimsToStr(const nvinfer1::Dims &dims)
+{
+    //dims str:
+    stringstream sstr;
+    int i = 0;
+    for (; i < dims.nbDims - 1 && i < dims.MAX_DIMS; i++)
+    {
+        sstr << dims.d[i] << ", ";
+    }
+    if(i < dims.nbDims)
+    {
+        sstr << dims.d[i];
+    }
+    return sstr.str();
+}
+#endif //#ifndef NO_TRT
+
 bool mbInterfaceATR::imageToTRTInputBuffer(const std::vector<uint8_t> &img_data)
 {
 #ifndef NO_TRT
