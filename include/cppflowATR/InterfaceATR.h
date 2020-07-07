@@ -34,6 +34,7 @@ class mbInterfaceATR
     e_ATR_MODEL_TYPE m_modelType;
 
 #ifndef NO_TRT
+    //TensorRT related class members:
     struct trtAtrDetection
     {
       float score;
@@ -59,8 +60,14 @@ class mbInterfaceATR
         return ( bb_coords[0] < other.bb_coords[0] ) || ( bb_coords[1] < other.bb_coords[1] ) ||
                ( bb_coords[2] < other.bb_coords[2] ) || ( bb_coords[3] < other.bb_coords[3] );
       }
-    };
-    //TensorRT related clas members:
+    }; //struct trtAtrDetection
+
+    struct inputDims
+    {
+      int m_numChannels;
+      int m_height;
+      int m_width;
+    } m_inputDims;
     TRTLoguruWrapper m_logger;
     nvinfer1::ICudaEngine *m_engine;
     nvinfer1::IExecutionContext *m_context;

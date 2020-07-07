@@ -178,6 +178,10 @@ bool mbInterfaceATR::LoadNewTRTModel(const char *modelPath)
             if (m_engine->bindingIsInput(i))
             {
                 m_inTensors[i] = tensor_name;
+                const nvinfer1::Dims dims = m_engine->getBindingDimensions(i);
+                m_inputDims.m_numChannels = dims.d[0];
+                m_inputDims.m_height = dims.d[1];
+                m_inputDims.m_width = dims.d[2];
                 LOG_F(INFO, "Tensor[%d] is an input tensor, named: %s", i, tensor_name);
             }
             else
