@@ -375,22 +375,26 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
     cv::imwrite("m_keepImg.png", m_keepImg);
 #endif //TEST_MODE
 
-    if (resize_factor > 0 && resize_factor != 1)
+    cv::Size targetSize(int(tempIm.cols * resize_factor), int(tempIm.rows * resize_factor));
+#ifndef NO_TRT
+    // with tensor-rt we require input image to be resized to fit the network input
+    targetSize = cv::Size(m_inputDims.m_width, m_inputDims.m_height);
+#endif
+    if(tempIm.size() != targetSize)
     {
-        //imresize of tempIm inplace
-        cv::resize(tempIm, tempIm, cv::Size(int(tempIm.cols * resize_factor), int(tempIm.rows * resize_factor)), 0, 0, INTER_LINEAR); //CV_INTER_LINEAR
-#ifdef TEST_MODE
-        cv::imwrite("tempim_resized.png", tempIm);
-#endif                                         //TEST_MODE
-        buffer = (unsigned char *)tempIm.data; //suppose it is continues
+        cv::resize(tempIm, tempIm, targetSize, 0, 0, INTER_LINEAR); //CV_INTER_LINEAR
     }
+#ifdef TEST_MODE
+    cv::imwrite("tempim_resized.png", tempIm);
+#endif                                         //TEST_MODE
+    buffer = (unsigned char *)tempIm.data; //suppose it is continues
 
 #ifdef TEST_MODE
     cout << " RunRGBVector:saving cv::Mat* " << endl;
     cv::imwrite("testRGBbuffer.tif", tempIm);
 #endif //TEST_MODE
 
-    std::vector<uint8_t> img_data(buffer, buffer + int(height * resize_factor) * int(width * resize_factor) * 3);
+    std::vector<uint8_t> img_data(buffer, buffer + tempIm.size().area() * 3);
 
     return (RunRGBVector(img_data, int(height * resize_factor), int(width * resize_factor)));
 }
