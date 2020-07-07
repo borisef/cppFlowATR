@@ -484,10 +484,17 @@ bool mbInterfaceATR::imageToTRTInputBuffer(const std::vector<uint8_t> &img_data)
 {
 #ifndef NO_TRT
     float *hostInputDataBuffer = reinterpret_cast<float *>(m_bufferManager->getHostBuffer(m_inTensors.begin()->second));
+    // validity check of input size
+    size_t expected_in_sz = m_bufferManager->size(m_inTensors.begin()->second) / sizeof(float);
+    if(expected_in_sz != img_data.size())
+    {
+        nvinfer1::Dims dims = m_engine->getBindingDimensions(m_inTensors.begin()->first);
+        std::string dims_str = dimsToStr(dims);
+        LOG_F(WARNING,"Input size mismach. Got: %d elements vector for expected network input of %d (%s) elements",
+                      img_data.size(), expected_in_sz, dims_str.c_str());
+    }
     std::copy(img_data.begin(), img_data.end(), hostInputDataBuffer);
-    //TODO: Check the following:
-    // 1. Additional transform for normalize might be needed here
-    // 2. Host input buffer might be different or have another size
+    //TODO: Additional transform for normalize the input might be needed here
     return (0 == m_bufferManager->copyInputToDevice());
 #endif //#ifndef NO_TRT
     return false;
