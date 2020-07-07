@@ -464,12 +464,15 @@ bool mbInterfaceATR::doTRTInference()
 
 bool mbInterfaceATR::imageToTRTInputBuffer(const std::vector<uint8_t> &img_data)
 {
+#ifndef NO_TRT
     float *hostInputDataBuffer = reinterpret_cast<float *>(m_bufferManager->getHostBuffer(m_inTensors.begin()->second));
     std::copy(img_data.begin(), img_data.end(), hostInputDataBuffer);
     //TODO: Check the following:
     // 1. Additional transform for normalize might be needed here
     // 2. Host input buffer might be different or have another size
     return (0 == m_bufferManager->copyInputToDevice());
+#endif //#ifndef NO_TRT
+    return false;
 }
 
 int mbInterfaceATR::RunRawImage(const unsigned char *ptr, int height, int width)
