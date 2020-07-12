@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(cppFlowATR)
 set(CMAKE_CXX_STANDARD 17)
 
-message($ENV{USER})
+#message($ENV{USER})
 
 #DEFINE PATHS
 # IF($ENV{USER} STREQUAL "magshim")
@@ -20,6 +20,12 @@ if(TEST_MODE)
     add_definitions(-DTEST_MODE)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTEST_MODE")#jic
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTEST_MODE")#jic
+endif()
+
+if(NO_TRT)
+    add_definitions(-DNO_TRT)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNO_TRT")#jic
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_TRT")#jic
 endif()
 
 if( WIN32 OR MSVC OR MSYS OR MINGW OR (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
@@ -208,8 +214,8 @@ target_link_libraries (testMultiModels ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2
 
 
 #NV12toTIFF
-add_executable(NV12toTIFF tests/NV12toTIFF.cpp ${SRC})
-target_link_libraries (NV12toTIFF ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} ${MY_CUDA_LIBS} -lpthread)
+# add_executable(NV12toTIFF tests/NV12toTIFF.cpp ${SRC})
+# target_link_libraries (NV12toTIFF ${OpenCV_LIBS} ${MY_TF_LIB}  ${MY_TF_LIB2} ${MY_CUDA_LIBS} -lpthread)
 
 
 #testOnFolderRecurse

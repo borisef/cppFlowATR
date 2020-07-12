@@ -391,6 +391,7 @@ int FilterCycleOutputByClassNoSqueeze(OD_CycleOutput* co, e_OD_TargetClass class
          if(co->ObjectsArr[i].tarClass==class2remove)
             co->ObjectsArr[i].tarScore = 0.0f;
      }
+    return N;
 }
 
 int FilterCycleOutputBySubClassNoSqueeze(OD_CycleOutput* co, e_OD_TargetSubClass subclass2remove)
@@ -401,4 +402,84 @@ int FilterCycleOutputBySubClassNoSqueeze(OD_CycleOutput* co, e_OD_TargetSubClass
          if(co->ObjectsArr[i].tarSubClass==subclass2remove)
             co->ObjectsArr[i].tarScore = 0.0f;
      }
+    return N;
+}
+
+float ValidityScoreColor(e_OD_TargetColor tcolor, e_OD_TargetColor detectedColor)
+{
+    static std::map<OD::e_OD_TargetColor, int> col2ind = {
+    {OD::e_OD_TargetColor::UNKNOWN_COLOR, 0},
+    {OD::e_OD_TargetColor::WHITE, 1},
+    {OD::e_OD_TargetColor::SILVER, 2},
+    {OD::e_OD_TargetColor::GRAY, 3},
+    {OD::e_OD_TargetColor::BLACK, 4},
+    {OD::e_OD_TargetColor::RED, 5},
+    {OD::e_OD_TargetColor::GRAY, 6},
+    {OD::e_OD_TargetColor::BLUE, 7},
+    {OD::e_OD_TargetColor::BROWN, 8}};
+
+    // [mission][detection]
+    static float confColor[9][9] =  {  {1.0, 1.0, 1.0 ,1.0, 1.0, 1.0, 1.0, 1.0, 1.0 },  //UNKNOWN_COLOR = 1,
+                                {1.0, 1.0, 0.8 ,0.8, 0.0, 0.2, 0.2, 0.3, 0.2 }, //WHITE = 2
+                                {1.0, 0.8, 1.0 ,1.0, 0.2, 0.0, 0.2, 0.6, 0.1 },  //  SILVER = 3,
+                                {1.0, 0.8, 1.0 ,1.0, 0.8, 0.0, 0.2, 0.6, 0.1 },  //GRAY = 4
+                                {1.0, 0.1, 0.0 ,0.8, 1.0, 0.0, 0.1, 0.6, 0.4 },  //BLACK = 5
+                                {1.0, 0.2, 0.0 ,0.0, 0.0, 1.0, 0.0, 0.0, 0.3 },  //RED = 6
+                                {1.0, 0.2, 0.2 ,0.2, 0.1, 0.0, 1.0, 0.5, 0.2 },  //GREEN = 7
+                                {1.0, 0.3, 0.4 ,0.4, 0.6, 0.0, 0.6, 1.0, 0.2 },  //,BLUE = 8,
+                                {1.0, 0.2, 0.0 ,0.5, 0.3, 0.2, 0.5, 0.0, 1.0 }}; //BROWN = 9
+
+    return confColor[col2ind[tcolor]][col2ind[detectedColor]];
+
+}
+
+float ValidityScoreClass(e_OD_TargetSubClass tclass, e_OD_TargetSubClass detectedClass)
+{
+    static std::map<e_OD_TargetSubClass, int> class2ind = {
+    {UNKNOWN_SUB_CLASS, 1},
+    {PRIVATE, 2},
+    {COMMERCIAL,3},
+    {PICKUP, 4},
+    {TRUCK, 5},
+    {BUS, 6},
+    {VAN, 7},
+    {TRACKTOR, 8},
+    {OTHER_SUB_CLASS, 0}};
+    
+    
+    static float confClass[9][9] =  {  {1.0, 1.0, 1.0 ,1.0, 1.0, 1.0, 1.0, 1.0, 1.0 },  //OTHER_SUB_CLASS = 999 // used for any
+                                {1.0, 1.0, 0.2 ,0.0, 0.0, 0.0, 0.0, 0.0, 0.0 },  //UNKNOWN_SUB_CLASS = 1,//used for human
+                                {1.0, 0.1, 1.0 ,0.7, 0.7, 0.0, 0.0, 0.2, 0.0 }, //PRIVATE = 2, //small car
+                                {1.0, 0.0, 0.7 ,1.0, 0.7, 0.2, 0.0, 0.3, 0.0 },  // COMMERCIAL = 3,//pickup closed + station + jeep
+                                {1.0, 0.0, 0.5 ,0.7, 1.0, 0.6, 0.0, 0.0, 0.0 },  //PICKUP = 4, // pickup open
+                                {1.0, 0.0, 0.0 ,0.0, 0.6, 1.0, 0.4, 0.0, 0.4 },  //TRUCK = 5,
+                                {1.0, 0.0, 0.0 ,0.0, 0.0, 0.3, 1.0, 0.3, 0.0 },  //BUS = 6,//large vehicle
+                                {1.0, 0.0, 0.4 ,0.6, 0.0, 0.0, 0.3, 1.0, 0.0 },  //VAN = 7,//small car
+                                {1.0, 0.0, 0.0 ,0.0, 0.0, 0.3, 0.0, 0.0, 1.0 }};  //TRACKTOR = 8
+    
+    return confClass[class2ind[tclass]][class2ind[detectedClass]];
+
+}
+
+
+
+float ValidityScore(MB_Mission mbMission, OD_DetectionItem* detItem, int cyclesNotConfirmed, float currentScore)
+{
+    float WEIGHT_COLOR = 0.4;
+    float WEIGHT_CLASS = 1.0 - WEIGHT_COLOR;
+    float WEIGHT_NEW_SCORE = 0.4; 
+
+    float NOT_CONF_MULT = 0.95; // NOT IN USE YET, suppose to multiply oldScore and supress it 
+
+    float scColor = ValidityScoreColor(mbMission.targetColor, detItem->tarColor);
+    float scClass = ValidityScoreClass(mbMission.targetSubClass, detItem->tarSubClass);
+
+    float relevancy = scColor*WEIGHT_COLOR + scClass*WEIGHT_CLASS;
+    if(currentScore > 0)
+    {
+        relevancy = relevancy*WEIGHT_NEW_SCORE + currentScore*(1 - WEIGHT_NEW_SCORE);
+    }
+    
+    return relevancy;
+
 }

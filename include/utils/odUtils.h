@@ -60,6 +60,11 @@ int FilterCycleOutputBySubClassNoSqueeze(OD_CycleOutput* co, e_OD_TargetSubClass
 
 int SqueezeCycleOutputInplace(OD_CycleOutput* co);
 
+float ValidityScore(MB_Mission mbMission, OD_DetectionItem* detItem, int cyclesNotConfirmed, float currentScore);
+
+float ValidityScoreColor(e_OD_TargetColor tcolor, e_OD_TargetColor detectedColor);
+
+float ValidityScoreClass(e_OD_TargetSubClass tclass, e_OD_TargetSubClass detectedClass);
 
 
 #endif
