@@ -79,11 +79,13 @@ int OneRunConvertAndSave( OneRunStruct ors)
     if (mkdir(ors.outputPath.c_str(), 0777) == -1) 
         cerr << "Error :  " << strerror(errno) << endl; 
     else
-        cout << "Directory created"; 
+        cout << "Directory created/"; 
 
 
-    for (size_t i = 0; i < N; i++)
+    for (size_t i = 10; i < N-10; i = i + 3)
     {
+        try
+        {
          ptrTif = (unsigned char*)fastParseRaw(ff[i]);
          std::vector<uint8_t> img_data(int(ors.H ) * int(ors.W)  * 2 ); 
          cv::Mat *myRGB = new cv::Mat(ors.H, ors.W, CV_8UC3);
@@ -98,6 +100,11 @@ int OneRunConvertAndSave( OneRunStruct ors)
          cv::imwrite(outfn , *myRGB);
          cout<< fn << "  --> " << outfn <<endl;
          delete myRGB;
+        }
+        catch (int e)
+        {
+            cout << "An exception occurred. Exception Nr. " << e << '\n';
+        }
     }
     
   return N; 
@@ -110,68 +117,40 @@ int main()
     ors2.W = 4056;
     ors2.H = 3040;
 
-    // ors2.splicePath = "media/NV12_1/*.raw";
-    // ors2.outputPath = "media/NV12_1_tif/";
-    // OneRunConvertAndSave(ors2);
-
-    // ors2.splicePath = "media/NV12_2/*.raw";
-    // ors2.outputPath = "media/NV12_2_tif/";
-    // OneRunConvertAndSave(ors2);
-
-    // ors2.splicePath = "media/NV12_3/*.raw";
-    // ors2.outputPath = "media/NV12_3_tif/";
-    // OneRunConvertAndSave(ors2);
-
-    // ors2.splicePath = "media/20200521_110942_MM";
-    // ors2.outputPath = "media/20200521_110942_MM_tif/";
-    // OneRunConvertAndSave(ors2);
-
-    // ors2.splicePath = "media/20200521_111813_MM";
-    // ors2.outputPath = "media/20200521_111813_MM_tif/";
-    // OneRunConvertAndSave(ors2);
-
-    // ors2.splicePath = "media/20200521_115801_MM";
-    // ors2.outputPath = "media/20200521_115801_MM_tif/";
-    // OneRunConvertAndSave(ors2);
-
-    // ors2.splicePath = "media/20200521_122026_MM";
-    // ors2.outputPath = "media/20200521_122026_MM_tif/";
-    // OneRunConvertAndSave(ors2);
     
-
-    // ors2.splicePath = "media/20200521_142500_MM";
-    // ors2.outputPath = "media/20200521_142500_MM_tif/";
+    // ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/lachish_day1/20200709_092033_XX/";
+    // ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/lachish_day1/20200709_092033_XX_tif/";
     // OneRunConvertAndSave(ors2);
 
-    // ors2.splicePath = "media/20200521_150402_MM";
-    // ors2.outputPath = "media/20200521_150402_MM_tif/";
+    // ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/lachish_day1/20200709_115024_XX/";
+    // ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/lachish_day1/20200709_115024_XX_tif/";
     // OneRunConvertAndSave(ors2);
 
-    // ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp7/20200601_125551_MM";
-    // ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp7/20200601_125551_MM_tif/";
-    // OneRunConvertAndSave(ors2);
-    
-    // ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp7/20200601_132641_MM";
-    // ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp7/20200601_132641_MM_tif/";
-    // ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp8/exp8_20200604_122419_MM/";
-    // ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp8/exp8_20200604_122419_MM_tif/";
-    // ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp10/20200611_094647_MM/";
-    // ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp10/20200611_094647_MM_tif/";
+    // ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/lachish_day1/20200709_125002_XX/";
+    // ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/lachish_day1/20200709_125002_XX_tif/";
     // OneRunConvertAndSave(ors2);
 
-    // ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp10/20200611_110747_MM/";
-    // ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp10/20200611_110747_MM_tif/";
-    // OneRunConvertAndSave(ors2);
-
-    // ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp10/20200611_115249_MM/";
-    // ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp10/20200611_115249_MM_tif/";
-    // OneRunConvertAndSave(ors2);
-
-    ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp10/20200611_123346_MM/";
-    ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/isufim/exp10/20200611_123346_MM_tif/";
-    OneRunConvertAndSave(ors2);
-    
    
+
+    // ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/lachish_day1/20200709_150015_XX/";
+    // ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/lachish_day1/20200709_150015_XX_tif/";
+    // OneRunConvertAndSave(ors2);
+
+    // ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/lachish_day1/20200709_160029_XX/";
+    // ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/lachish_day1/20200709_160029_XX_tif/";
+    // OneRunConvertAndSave(ors2);
+
+    // ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/lachish_day1/20200709_170917_XX/";
+    // ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/lachish_day1/20200709_170917_XX_tif/";
+    // OneRunConvertAndSave(ors2);
+
+    // ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/lachish_day1/20200709_085834_XX/";
+    // ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/lachish_day1/20200709_085834_XX_tif/";
+    // OneRunConvertAndSave(ors2);
+
+    ors2.splicePath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/lachish_day1/20200709_133943_XX/";
+    ors2.outputPath = "/mnt/d1e28558-1377-4bbb-9e48-c8900feaf59d/lachish_day1/20200709_133943_XX_tif/";
+    OneRunConvertAndSave(ors2);
 
     cout << "Ended OneRunConvertAndSave Normally" << endl;
     return 0;

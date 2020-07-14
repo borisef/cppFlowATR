@@ -23,6 +23,14 @@ OD_CycleInput *NewCopyCycleInput(OD_CycleInput *tocopy, uint bufferSize)
     return newCopy;
 }
 
+bool QuickCopyCycleInput(OD_CycleInput *tocopyfrom, OD_CycleInput *tocopyto, uint bufferSize)
+{
+    
+    memcpy((void*)(tocopyto->ptr), tocopyfrom->ptr, bufferSize);
+    
+    return true;
+}
+
 OD_CycleInput *SafeNewCopyCycleInput(OD_CycleInput *tocopy, uint bufferSize)
 {
     if (!tocopy)
@@ -404,8 +412,29 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
         m_removeEdgeTargets = (bool)(std::stoi(m_configParams->run_params["do_remove_edge_targets"]));
         if(m_removeEdgeTargets && !m_configParams->run_params["edge_in_pixels"].empty())
             m_removeEdgeWidthPxls =  (std::stoi(m_configParams->run_params["edge_in_pixels"]));
+    
+    // CCM  
+    if (!m_configParams->run_params["do_CCM"].empty())
+    {
+       m_do_CCM  = (bool)(std::stoi(m_configParams->run_params["do_CCM"]));
+        if(m_do_CCM && !m_configParams->run_params["CCM"].empty())
+        {
+            //m_CCM 
+            //TODO
+        }
+        if(m_do_CCM && !m_configParams->run_params["CCMB"].empty())
+        {
+            //m_CCMB
+            std::string sccmb;
+            sccmb = (m_configParams->run_params["CCMB"]);
+            auto j = json::parse(sccmb);
+            std::vector<float> ff;
+            ff = j.get<std::vector<float>>();
+            m_CCMB[0] = ff[0];m_CCMB[1] = ff[1];m_CCMB[2] = ff[2];
+           
+        }
 
-
+    }
     setParams(odInitParams);
 
 #ifdef TEST_MODE
@@ -448,9 +477,11 @@ OD_ErrorCode ObjectDetectionManagerHandler::PrepareOperateObjectDetection(OD_Cyc
                 //replace next
                 tempCycleInput = m_nextCycleInput;
 
-                m_nextCycleInput = NewCopyCycleInput(cycleInput, m_numPtrPixels);
+                
+                QuickCopyCycleInput(cycleInput,m_nextCycleInput, m_numPtrPixels);
 
-                DeleteCycleInput(tempCycleInput); //delete old "next"
+                //m_nextCycleInput = NewCopyCycleInput(cycleInput, m_numPtrPixels);
+                //DeleteCycleInput(tempCycleInput); //delete old "next"
             }
             else // same next frame
             {
@@ -603,7 +634,14 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
     {
         static float total_duration = 0, n_objs = 0;
         auto tStart = std::chrono::high_resolution_clock::now();
-        m_mbCM->RunImgWithCycleOutput(m_mbATR->GetKeepImg(), odOut, 0, (odOut->numOfObjects - 1), true);
+
+        cv::Mat keepImg = m_mbATR->GetKeepImg();
+        if(m_do_CCM)
+        {
+            keepImg += cv::Scalar(m_CCMB[2],m_CCMB[1],m_CCMB[0]); // add bias B,G,R
+        }
+
+        m_mbCM->RunImgWithCycleOutput(keepImg, odOut, 0, (odOut->numOfObjects - 1), true);
 #ifdef TEST_MODE
         auto tEnd = std::chrono::high_resolution_clock::now();
         float iter_duration = std::chrono::duration<float, std::milli>(tEnd - tStart).count();
