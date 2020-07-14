@@ -48,15 +48,15 @@ std::map<ATR_TargetSubClass_MB, e_OD_TargetSubClass> mapOfATR2SubClass = {
      {ATR_TargetSubClass_MB::ATR_BICYCLE,OD::e_OD_TargetSubClass::UNKNOWN_SUB_CLASS},
       {ATR_TargetSubClass_MB::ATR_MOTORCYCLE,OD::e_OD_TargetSubClass::UNKNOWN_SUB_CLASS},
      {ATR_TargetSubClass_MB::ATR_CAR,OD::e_OD_TargetSubClass::PRIVATE},
-     {ATR_TargetSubClass_MB::ATR_BUS,OD::e_OD_TargetSubClass::BUS},
-     {ATR_TargetSubClass_MB::ATR_TRUCK,OD::e_OD_TargetSubClass::TRUCK},
+     {ATR_TargetSubClass_MB::ATR_BUS,OD::e_OD_TargetSubClass::VAN},//exam2: no bus
+     {ATR_TargetSubClass_MB::ATR_TRUCK,OD::e_OD_TargetSubClass::PICKUP},//exam2: no truck
      {ATR_TargetSubClass_MB::ATR_VAN,OD::e_OD_TargetSubClass::VAN},
      {ATR_TargetSubClass_MB::ATR_JEEP,OD::e_OD_TargetSubClass::COMMERCIAL},
      {ATR_TargetSubClass_MB::ATR_PICKUP,OD::e_OD_TargetSubClass::PICKUP},
      {ATR_TargetSubClass_MB::ATR_PICKUP_OPEN,OD::e_OD_TargetSubClass::PICKUP},
      {ATR_TargetSubClass_MB::ATR_PICKUP_CLOSED,OD::e_OD_TargetSubClass::COMMERCIAL},
-     {ATR_TargetSubClass_MB::ATR_FORKLIFT,OD::e_OD_TargetSubClass::TRACKTOR},//?
-     {ATR_TargetSubClass_MB::ATR_TRACKTOR,OD::e_OD_TargetSubClass::TRACKTOR},
+     {ATR_TargetSubClass_MB::ATR_FORKLIFT,OD::e_OD_TargetSubClass::OTHER_SUB_CLASS},// exam2: no tracktor
+     {ATR_TargetSubClass_MB::ATR_TRACKTOR,OD::e_OD_TargetSubClass::OTHER_SUB_CLASS}, // exam2
      {ATR_TargetSubClass_MB::ATR_STATION,OD::e_OD_TargetSubClass::COMMERCIAL},
      {ATR_TargetSubClass_MB::ATR_OTHER,OD::e_OD_TargetSubClass::OTHER_SUB_CLASS}
      };
