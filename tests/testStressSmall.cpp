@@ -192,9 +192,10 @@ int main()
     OneRunStruct ors2;
     ors2.splicePath = "media/filter/*";
     ors2.numRepetiotions = 1;
-    ors2.minDelay = 300;
+    ors2.minDelay = 100;
     ors2.startFrameID = 1;
 
+    atrManager = OneRun(atrManager, ors2);
     atrManager = OneRun(atrManager, ors2);
     
     OD::TerminateObjectDetection(atrManager);

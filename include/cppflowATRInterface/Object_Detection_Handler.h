@@ -13,6 +13,7 @@
 using namespace OD;
 
 OD_CycleInput *NewCopyCycleInput(OD_CycleInput *, uint);
+bool QuickCopyCycleInput(OD_CycleInput * , OD_CycleInput *, uint );
 OD_CycleInput *SafeNewCopyCycleInput(OD_CycleInput *, uint);
 void DeleteCycleInput(OD_CycleInput *);
 static std::mutex glob_mutexOnNext; // not in use
@@ -95,5 +96,8 @@ protected:
     float m_nms_IoU_thresh_HUMAN2HUMAN = 0.5; // max IoU between 2 for sure distinc objects
     float m_nms_IoU_thresh_VEHICLE2VEHICLE_SAME_SUB = 0.3; // max IoU between 2 for sure distinc objects
     float m_lower_score_threshold = 0.2;
+    bool  m_do_CCM = false; // apply color correction model ? 
+    float m_CCM[9]; // CCM matrix 
+    float m_CCMB[3]; //CCM bias 
     
 };
