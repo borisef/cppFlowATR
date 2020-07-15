@@ -60,6 +60,11 @@ class mbInterfaceATR
         return ( bb_coords[0] < other.bb_coords[0] ) || ( bb_coords[1] < other.bb_coords[1] ) ||
                ( bb_coords[2] < other.bb_coords[2] ) || ( bb_coords[3] < other.bb_coords[3] );
       }
+      // for descending order
+      bool operator>(const trtAtrDetection& other) const
+      {
+        return other.operator<(*this);
+      }
     }; //struct trtAtrDetection
 
     struct inputDims
