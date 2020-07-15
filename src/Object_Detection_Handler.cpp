@@ -664,6 +664,7 @@ bool ObjectDetectionManagerHandler::SaveResultsATRimage(OD_CycleOutput *co, char
     if (!(m_prevCycleInput && m_prevCycleInput->ptr))
     {
         LOG_F(WARNING, "ObjectDetectionManagerHandler::SaveResultsATRimage: No m_prevCycleInput data, skipping");
+        m_mutexOnPrev.unlock();
         return false;
     }
     else
