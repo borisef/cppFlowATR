@@ -115,5 +115,5 @@ class mbInterfaceATR
     int GetResultNumDetections();
     int GetResultClasses(int i);
     float GetResultScores(int i);
-    std::vector<float>  GetResultBoxes();
+    std::vector<float>  GetResultBoxes(); // array of: r,c,r,c,r,c,r,c,... (BB1.y1, BB1.x1, BB1.y2, BB1.x2, BB2.y1, BB2.x1, BB2.y2, BB2.x2, ...)
 };
