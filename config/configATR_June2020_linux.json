@@ -204,7 +204,7 @@
       "task": "CM",
       "filetype": ".pb",
       "mission": "0",
-      "load_path": "graphs/cm/output_graph_try15.pb",
+      "load_path": "graphs/cm/output_graph_try21.pb",
       "nickname": "default_CM",
       "max_objects": "300",
       "accuracy": "5",

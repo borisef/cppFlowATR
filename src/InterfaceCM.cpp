@@ -73,7 +73,8 @@ std::vector<float> mbInterfaceCM::RunRGBimage(cv::Mat img)
 
     for (size_t i = 0; i < img_resized_data.size(); i = i + 1)
     {
-        img_resized_data[i] = img_resized.data[i] / 255.0;
+        //img_resized_data[i] = img_resized.data[i] / 255.0;
+        img_resized_data[i] = img_resized.data[i];
     }
 
     // Put vector in Tensor
@@ -142,7 +143,8 @@ std::vector<float> mbInterfaceCM::RunImgBB(cv::Mat img, OD::OD_BoundingBox bb)
 
     for (size_t i = 0; i < img_resized_data.size(); i = i + 1)
     {
-        img_resized_data[i] = img_resized.data[i] / 255.0;
+        //img_resized_data[i] = img_resized.data[i] / 255.0;
+        img_resized_data[i] = img_resized.data[i];
     }
 
     // Put vector in Tensor
@@ -225,7 +227,8 @@ bool mbInterfaceCM::RunImgWithCycleOutput(cv::Mat img, OD::OD_CycleOutput *co, i
             // Put image in vector
             for (size_t i1 = 0; i1 < m_patchWidth * m_patchHeight * 3; i1++)
             {
-                inVec[ind + i1] = img_resized.data[i1] / 255.0;
+                //inVec[ind + i1] = img_resized.data[i1] / 255.0;
+                inVec[ind + i1] = img_resized.data[i1];
             }
             ind += m_patchWidth * m_patchHeight * 3;
         }
