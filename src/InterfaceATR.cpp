@@ -3,6 +3,10 @@
 #include <iostream>
 using namespace cv;
 
+#ifndef NO_TRT
+std::string dimsToStr(const nvinfer1::Dims &dims);
+#endif
+
 void mbInterfaceATR::InitTRTStuff()
 {
 #ifndef NO_TRT
@@ -175,19 +179,17 @@ bool mbInterfaceATR::LoadNewTRTModel(const char *modelPath)
         for (int i = 0; i < m_engine->getNbBindings(); i++)
         {
             const char *tensor_name = m_engine->getBindingName(i);
+            const nvinfer1::Dims dims = m_engine->getBindingDimensions(i);
             if (m_engine->bindingIsInput(i))
             {
                 m_inTensors[i] = tensor_name;
-                const nvinfer1::Dims dims = m_engine->getBindingDimensions(i);
                 m_inputDims.m_numChannels = dims.d[0];
                 m_inputDims.m_height = dims.d[1];
                 m_inputDims.m_width = dims.d[2];
-                LOG_F(INFO, "Tensor[%d] is an input tensor, named: %s", i, tensor_name);
             }
             else
             {
                 m_outTensors[i] = m_engine->getBindingName(i);
-                LOG_F(INFO, "Tensor[%d] is an output tensor, named: %s", i, tensor_name);
                 if (m_outTensors[i] == "dense_class_td/Softmax") //TODO: get output tensor name from config
                 {
                     m_numProposals = m_engine->getBindingDimensions(i).d[0];
@@ -198,6 +200,8 @@ bool mbInterfaceATR::LoadNewTRTModel(const char *modelPath)
                     m_regressBBCoords.reserve(m_numProposals * 4 * (m_numClasses - 1));
                 }
             }
+            LOG_F(INFO, "Tensor[%d] is an %s tensor, named: %s, dims: %s",
+                  i, (m_engine->bindingIsInput(i) ? "input" : "output"), tensor_name, dimsToStr(dims).c_str());
         }
     }
     LOG_F(INFO, "LoadNewTRTModel is done. m_inTensors.size() = %d, m_outTensors.size() = %d.", m_inTensors.size(), m_outTensors.size());
@@ -480,7 +484,7 @@ std::string dimsToStr(const nvinfer1::Dims &dims)
     {
         sstr << dims.d[i] << ", ";
     }
-    if(i < dims.nbDims)
+    if (i < dims.nbDims)
     {
         sstr << dims.d[i];
     }
