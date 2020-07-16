@@ -1,6 +1,9 @@
 #include <cppflowATR/InterfaceATR.h>
 #include <utils/imgUtils.h>
+#include <utils/odUtils.h>
 #include <iostream>
+#include <cmath>
+
 using namespace cv;
 
 #ifndef NO_TRT
@@ -281,27 +284,90 @@ bool mbInterfaceATR::getTRTOutput()
         return false;
     }
     //TODO: get output tensor names from config
-    float *reg_bbox_data = reinterpret_cast<float *>(m_bufferManager->getHostBuffer("dense_class_td/Softmax"));
-    float *reg_bbox_scores = reinterpret_cast<float *>(m_bufferManager->getHostBuffer("dense_regress_td/BiasAdd"));
-    //std::copy(reg_bbox_data, reg_bbox_data + m_regressBBCoordsCapacity, m_regressBBCoords.begin());
-    //std::copy(reg_bbox_scores, reg_bbox_scores + m_perClassScoresCapacity, m_perClassScores.begin());
+    float *proposals = reinterpret_cast<float *>(m_bufferManager->getHostBuffer("proposal"));                        // Dims: [m_numProposals, m_numClasses]
+    float *per_class_scores = reinterpret_cast<float *>(m_bufferManager->getHostBuffer("dense_class_td/Softmax"));   // Dims: [m_numProposals, m_numClasses]
+    float *fg_regress_boxes = reinterpret_cast<float *>(m_bufferManager->getHostBuffer("dense_regress_td/BiasAdd")); // Dims: [m_numProposals, 4 * (m_numClasses - 1)]
 
     // find num of non-background detections:
     int bgIndex = m_numClasses - 1;
     for (int i = 0; i < m_numProposals; i++)
     {
-        float *scores_begin = &reg_bbox_scores[i*m_numClasses];
+        float *scores_begin = &per_class_scores[i * m_numClasses];
         float *max_e = std::max_element(scores_begin, scores_begin + m_numClasses);
         int class_index = max_e - scores_begin;
         if (class_index != bgIndex) //class_index
         {
             //TODO: Make sure that threshold by class is not required here.
-            float *bboxes_begin = reg_bbox_data + (i * 4 * m_numClasses);
-            m_trtAtrDetections.push_back(trtAtrDetection(bboxes_begin + 4 * class_index, class_index, *max_e));
+            float *bboxes_begin = fg_regress_boxes + (i * 4 * m_numClasses) + 4 * class_index;
+            float y1 = proposals[i * 4 + 0] * m_inputDims.m_height;
+            float x1 = proposals[i * 4 + 1] * m_inputDims.m_width;
+            float y2 = proposals[i * 4 + 2] * m_inputDims.m_height;
+            float x2 = proposals[i * 4 + 3] * m_inputDims.m_width;
+            float x = x1, y = y1, w = x2 - x1, h = y2 - y1;
+            float tx = bboxes_begin[0], ty = bboxes_begin[1], tw = bboxes_begin[2], th = bboxes_begin[3];
+
+            tx /= 10.0; // these consts are from spec.rcnn_regr_std
+            ty /= 10.0;
+            tw /= 5.0;
+            th /= 5.0;
+
+            //def apply_regr(x, y, w, h, tx, ty, tw, th):
+            float cx = x + w / 2.0;
+            float cy = y + h / 2.0;
+            float cx1 = tx * w + cx;
+            float cy1 = ty * h + cy;
+            tw = tw > 50 ? 50 : tw;
+            th = th > 50 ? 50 : th;
+            float w1 = std::exp(tw) * w;
+            float h1 = std::exp(th) * h;
+            x1 = cx1 - w1 / 2.0;
+            y1 = cy1 - h1 / 2.0;
+            x = x1;
+            y = y1;
+            x1 = x + w1;
+            y1 = y + h1;
+            x = x < 0 ? 0 : x;
+            y = y < 0 ? 0 : y;
+            x1 = x1 < 0 ? 0 : x1;
+            y1 = y1 < 0 ? 0 : y1;
+            x = x / m_inputDims.m_width;
+            y = y / m_inputDims.m_height;
+            x1 = x1 / m_inputDims.m_width;
+            y1 = y1 / m_inputDims.m_height;
+            float bb[4] = {y, x, y1, x1};
+            //avoid zero-sized boxes (reuqire at 2x2 pixels size):
+            if (x1 - x < 2 || y1 - y < 2)
+            {
+                LOG_F(INFO, "DBG: Filtered out too small box: ((x1, y1), (x2, y2)) = ((%f, %f), (%f, %f))", x, y, x1, y1);
+                continue;
+            }
+
+            // class mapping
+            // tlt's outputs are lexicographically sorted
+            // ['car', 'bus', 'truck', 'van', 'jeep', 'pickup', 'pickup_open', 'pickup_close', 'forklift', 'tractor', 'station'
+
+            static ATR_TargetSubClass_MB trt_class_to_ATR_TargetSubClass_MB[] = {
+                ATR_TargetSubClass_MB::ATR_BUS,
+                ATR_TargetSubClass_MB::ATR_CAR,
+                ATR_TargetSubClass_MB::ATR_FORKLIFT,
+                ATR_TargetSubClass_MB::ATR_JEEP,
+                ATR_TargetSubClass_MB::ATR_PICKUP_CLOSED,
+                ATR_TargetSubClass_MB::ATR_PICKUP_OPEN,
+                ATR_TargetSubClass_MB::ATR_STATION,
+                ATR_TargetSubClass_MB::ATR_TRACKTOR,
+                ATR_TargetSubClass_MB::ATR_TRUCK,
+                ATR_TargetSubClass_MB::ATR_VAN,
+                ATR_TargetSubClass_MB::ATR_OTHER,
+            };
+
+#ifdef TEST_MODE
+            std::cout << "bb: [" << x << ", " << y << ", " << x1 << ", " << y1 << "], class: " << class_index << ", score: " << *max_e << std::endl;
+#endif //TEST_MODE
+            m_trtAtrDetections.push_back(trtAtrDetection(bb, trt_class_to_ATR_TargetSubClass_MB[class_index], *max_e));
         }
     }
     LOG_F(INFO, "%d objects found on this inference.", m_trtAtrDetections.size());
-    std::sort(m_trtAtrDetections.begin(), m_trtAtrDetections.end());
+    std::sort(m_trtAtrDetections.begin(), m_trtAtrDetections.end(), std::greater<trtAtrDetection>());
     //copy back the score-wise sotred bounding-boxes vector:
     for (const trtAtrDetection &det : m_trtAtrDetections)
     {
@@ -348,6 +414,7 @@ int mbInterfaceATR::RunRGBImgPath(const unsigned char *ptr, float resize_factor)
 
     return RunRGBimage(inp1);
 }
+
 int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width, float resize_factor)
 {
 
@@ -381,11 +448,15 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
 
     cv::Size targetSize(int(tempIm.cols * resize_factor), int(tempIm.rows * resize_factor));
 #ifndef NO_TRT
-    // with tensor-rt we require input image to be resized to fit the network input
-    targetSize = cv::Size(m_inputDims.m_width, m_inputDims.m_height);
-#endif
-    if(tempIm.size() != targetSize)
+    if (m_modelType == e_ATR_MODEL_TYPE::ATR_MODEL_TYPE_TRT)
     {
+        // with tensor-rt we require input image to be resized to fit the network input
+        targetSize = cv::Size(m_inputDims.m_width, m_inputDims.m_height);
+    }
+#endif
+    if (tempIm.size() != targetSize)
+    {
+        LOG_F(INFO, "Reshaping input from (%d, %d) to (%d, %d)", tempIm.cols, tempIm.rows, targetSize.width, targetSize.height);
         cv::resize(tempIm, tempIm, targetSize, 0, 0, INTER_LINEAR); //CV_INTER_LINEAR
     }
 #ifdef TEST_MODE
@@ -398,7 +469,7 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
     cv::imwrite("testRGBbuffer.tif", tempIm);
 #endif //TEST_MODE
 
-    std::vector<uint8_t> img_data(buffer, buffer + tempIm.size().area() * 3);
+    std::vector<uint8_t> img_data(buffer, buffer + tempIm.rows * tempIm.cols * tempIm.channels());
 
     return (RunRGBVector(img_data, int(height * resize_factor), int(width * resize_factor)));
 }
@@ -509,15 +580,30 @@ bool mbInterfaceATR::imageToTRTInputBuffer(const std::vector<uint8_t> &img_data)
     float *hostInputDataBuffer = reinterpret_cast<float *>(m_bufferManager->getHostBuffer(m_inTensors.begin()->second));
     // validity check of input size
     size_t expected_in_sz = m_bufferManager->size(m_inTensors.begin()->second) / sizeof(float);
-    if(expected_in_sz != img_data.size())
+    nvinfer1::Dims dims = m_engine->getBindingDimensions(m_inTensors.begin()->first);
+    if (expected_in_sz != img_data.size())
     {
-        nvinfer1::Dims dims = m_engine->getBindingDimensions(m_inTensors.begin()->first);
         std::string dims_str = dimsToStr(dims);
-        LOG_F(WARNING,"Input size mismach. Got: %d elements vector for expected network input of %d (%s) elements",
-                      img_data.size(), expected_in_sz, dims_str.c_str());
+        LOG_F(WARNING, "Input size mismach. Got: %d elements vector for expected network input of %d (%s) elements",
+              img_data.size(), expected_in_sz, dims_str.c_str());
     }
-    std::copy(img_data.begin(), img_data.end(), hostInputDataBuffer);
-    //TODO: Additional transform for normalize the input might be needed here
+    else
+    {
+        //HWC: offset = h * im.rows * im.elemSize() + w * im.elemSize() + c
+        //CHW: offset = c * im.rows * im.cols + h * im.cols + w
+        const int C = dims.d[0], H = dims.d[1], W = dims.d[2];
+        //for (int ch = C; ch > 0; ch--) //RGB->BGR
+        for (int ch = 0; ch < C; ch++)
+        {
+            for (int row = 0; row < H; row++)
+            {
+                for (int col = 0; col < W; col++)
+                {
+                    *hostInputDataBuffer++ = img_data[row * W * C + col * C + ch];
+                }
+            }
+        }
+    }
     return (0 == m_bufferManager->copyInputToDevice());
 #endif //#ifndef NO_TRT
     return false;
