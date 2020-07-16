@@ -419,18 +419,29 @@ int mbInterfaceATR::RunRGBVector(std::vector<uint8_t> &img_data, int height, int
         LOG_F(ERROR, "Model type is TensorRT but it is not supported in this version!!!");
         return -1;
 #else
+        float totalHost{0};
+        auto tStart = std::chrono::high_resolution_clock::now();
         if (!imageToTRTInputBuffer(img_data))
         {
             LOG_F(ERROR, "Failed to copy input image ");
             return -1;
         }
-
+        auto tEnd = std::chrono::high_resolution_clock::now();
+        totalHost = std::chrono::duration<float, std::milli>(tEnd - tStart).count();
+        LOG_F(INFO, "last imageToTRTInputBuffer took: %f millis", totalHost);
+        tStart = std::chrono::high_resolution_clock::now();
         doTRTInference();
-
+        tEnd = std::chrono::high_resolution_clock::now();
+        totalHost = std::chrono::duration<float, std::milli>(tEnd - tStart).count();
+        LOG_F(INFO, "last doTRTInference took: %f millis", totalHost);
+        tStart = std::chrono::high_resolution_clock::now();
         if (getTRTOutput() == false) //something went wrong
         {
             return -1;
         }
+        tEnd = std::chrono::high_resolution_clock::now();
+        totalHost = std::chrono::duration<float, std::milli>(tEnd - tStart).count();
+        LOG_F(INFO, "last getTRTOutput took: %f millis", totalHost);
 #endif //#ifndef NO_TRT
     }
     return 1; //TODO useful return

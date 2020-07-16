@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <chrono>
 #include <algorithm>
 
 #include <opencv2/opencv.hpp>
