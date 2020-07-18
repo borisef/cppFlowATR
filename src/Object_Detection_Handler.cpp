@@ -435,6 +435,11 @@ OD_ErrorCode ObjectDetectionManagerHandler::InitObjectDetection(OD_InitParams *o
         }
 
     }
+
+    // cropATR
+    if (!m_configParams->run_params["crop_ATR"].empty())
+        m_cropATR = (std::stof(m_configParams->run_params["crop_ATR"]));    
+
     setParams(odInitParams);
 
 #ifdef TEST_MODE
