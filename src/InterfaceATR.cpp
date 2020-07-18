@@ -137,6 +137,8 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
     cv::imwrite("m_keepImg.png", m_keepImg);
 #endif //TEST_MODE
 
+//TODO: crop 
+
     if(resize_factor>0 && resize_factor != 1)
     {
         //imresize of tempIm inplace
@@ -226,6 +228,9 @@ int mbInterfaceATR::RunRawImageFast(const unsigned char *ptr, int height, int wi
 #ifdef TEST_MODE
     cv::imwrite("m_keepImg.png", m_keepImg);
 #endif //TEST_MODE
+
+//TODO: crop myRGB , recompute h, w , record offsetDueToCrop  
+
 
     if(resize_factor>0 && resize_factor != 1)
     {

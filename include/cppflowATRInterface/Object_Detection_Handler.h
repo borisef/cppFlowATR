@@ -100,5 +100,9 @@ protected:
     float m_CCM[9]; // CCM matrix 
     float m_CCMB[3]; //CCM bias 
     float m_cropATR = 0.0; // default 0 , in [0,1]  we do ATR on central part only  (if >0)
+
+    int m_offsetRowsDueToCrop = 0;
+    int m_offsetColumnsDueToCrop = 0;
+    
     
 };

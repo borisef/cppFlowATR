@@ -850,6 +850,8 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
     unsigned int w = this->m_initParams->supportData.imageWidth;
     unsigned int h = this->m_initParams->supportData.imageHeight;
 
+    //TODO: take care of crop 
+
     cycleOutput->numOfObjects = N;
     for (int i = 0; i < N; i++)
     {
@@ -872,6 +874,7 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
         }
 
         odi[i].tarBoundingBox = {bbox_data[i * 4 + 1] * w, bbox_data[i * 4 + 3] * w, bbox_data[i * 4] * h, bbox_data[i * 4 + 2] * h};
+         //TODO: crop 
     }
     //filter by targetClass
     e_OD_TargetClass tc = m_initParams->mbMission.targetClass;
