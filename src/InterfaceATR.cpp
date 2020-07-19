@@ -82,7 +82,7 @@ int mbInterfaceATR::RunRGBimage(cv::Mat inp)
 
     return 1;
 }
-int mbInterfaceATR::RunRGBImgPath(const unsigned char *ptr, float resize_factor)
+int mbInterfaceATR::RunRGBImgPath(const unsigned char *ptr, float resize_factor, float cropATR)
 {
     #ifdef OPENCV_MAJOR_4
     cv::Mat inp1 = cv::imread(string((const char *)ptr), IMREAD_COLOR);//CV_LOAD_IMAGE_COLOR
@@ -91,6 +91,33 @@ int mbInterfaceATR::RunRGBImgPath(const unsigned char *ptr, float resize_factor)
     cv::Mat inp1 = cv::imread(string((const char *)ptr), CV_LOAD_IMAGE_COLOR);//
     cv::cvtColor(inp1, inp1, CV_BGR2RGB );//, 4
     #endif 
+
+     //crop 
+    unsigned int height = inp1.rows;
+    unsigned int width = inp1.cols;
+
+    if(cropATR > 0.01)
+    {
+        #ifdef TEST_MODE
+             cout << " cropATR with  " << cropATR << endl;
+        #endif //TEST_MODE
+        int cropRows = int(inp1.rows*cropATR*0.5);
+        int cropColumns = int(inp1.cols*cropATR*0.5);
+
+        height = height - cropRows*2;
+        width = width - cropColumns*2;
+   
+        // Setup a rectangle to define your region of interest
+        cv::Rect myROI(cropColumns,cropRows, width,  height);
+
+        // Crop the full image to that image contained by the rectangle myROI
+        cv::Mat croppedRef(inp1,myROI);
+        croppedRef.copyTo(inp1);
+
+    }
+
+
+
     if(resize_factor>0 && resize_factor != 1)
     {
         //imresize of inp1 inplace
@@ -103,7 +130,7 @@ int mbInterfaceATR::RunRGBImgPath(const unsigned char *ptr, float resize_factor)
 
     return RunRGBimage(inp1);
 }
-int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width, float resize_factor)
+int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width, float resize_factor, float cropATR)
 {
 
 #ifdef TEST_MODE
@@ -111,7 +138,7 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
     cout << "RunRGBVector " << height << " " << width << "prt[10]" << ptr[10] << endl;
 #endif //TEST_MODE
 
-    std::vector<uint8_t> img_data(int(height * resize_factor) * int(width  * resize_factor) * 3);
+    
     unsigned char *buffer = (unsigned char *)ptr;
 
 #ifdef TEST_MODE
@@ -123,21 +150,39 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
     cout << " RunRGBVector:copy buffer to cv::Mat* " << endl;
 #endif                    //TEST_MODE
     tempIm.data = buffer; //risky
-    //TODO: tempIm.data = (unsigned char *)ptr;
+   
 
 #ifdef TEST_MODE
     cv::imwrite("tempim.png", tempIm);
 #endif //TEST_MODE
 
     cv::cvtColor(tempIm, tempIm, cv::COLOR_RGB2BGR);
-    //tempIm.copyTo(m_keepImg);//TODO: clone instead ? 
     m_keepImg = tempIm.clone();
 
 #ifdef TEST_MODE
     cv::imwrite("m_keepImg.png", m_keepImg);
 #endif //TEST_MODE
 
-//TODO: crop 
+    //crop 
+    if(cropATR > 0.01)
+    {
+        #ifdef TEST_MODE
+             cout << " cropATR with  " << cropATR << endl;
+        #endif //TEST_MODE
+        int cropRows = int(tempIm.rows*cropATR*0.5);
+        int cropColumns = int(tempIm.cols*cropATR*0.5);
+
+        height = height - cropRows*2;
+        width = width - cropColumns*2;
+   
+        // Setup a rectangle to define your region of interest
+        cv::Rect myROI(cropColumns,cropRows, width,  height);
+
+        // Crop the full image to that image contained by the rectangle myROI
+        cv::Mat croppedRef(tempIm,myROI);
+        croppedRef.copyTo(tempIm);
+
+    }
 
     if(resize_factor>0 && resize_factor != 1)
     {
@@ -146,8 +191,9 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
         #ifdef TEST_MODE
         cv::imwrite("tempim_resized.png", tempIm);
         #endif //TEST_MODE
-        buffer = (unsigned char *)tempIm.data;//suppose it is continues
+        
     }
+    buffer = (unsigned char *)tempIm.data;//suppose it is continues
    
 
 #ifdef TEST_MODE
@@ -156,6 +202,7 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
 #endif //TEST_MODE
 
     cv::cvtColor(tempIm, tempIm, cv::COLOR_BGR2RGB); //because we do on original buffer
+    std::vector<uint8_t> img_data(int(height * resize_factor) * int(width  * resize_factor) * 3);
 
     for (int i = 0; i < int(height * resize_factor)* int(width  *resize_factor) * 3 ; i++)
         img_data[i] = buffer[i];
@@ -163,8 +210,9 @@ int mbInterfaceATR::RunRGBVector(const unsigned char *ptr, int height, int width
 
     return (RunRGBVector(img_data, int(height*resize_factor), int(width*resize_factor)));
 }
-int mbInterfaceATR::RunRGBVector(std::vector<uint8_t> img_data, int height, int width, float resize_factor)
+int mbInterfaceATR::RunRGBVector(std::vector<uint8_t> img_data, int height, int width, float resize_factor, float cropATR)
 {
+ // cropATR not in use    
 #ifdef TEST_MODE
     cout << " RunRGBVector:Internal Run on RGB Vector on vector<uint8_t> " << endl;
 #endif //TEST_MODE
@@ -203,7 +251,7 @@ int mbInterfaceATR::RunRawImage(const unsigned char *ptr, int height, int width)
     return status;
 }
 
-int mbInterfaceATR::RunRawImageFast(const unsigned char *ptr, int height, int width, int colorType, float resize_factor)
+int mbInterfaceATR::RunRawImageFast(const unsigned char *ptr, int height, int width, int colorType, float resize_factor, float cropATR)
 {
 
     std::vector<uint8_t> img_data(int(height * resize_factor) * int(width* resize_factor)  * 2 ); 
@@ -220,17 +268,34 @@ int mbInterfaceATR::RunRawImageFast(const unsigned char *ptr, int height, int wi
     // save JPG for debug
     cv::imwrite("debug_raw2rgb.tif", *myRGB);
 #endif //TEST_MODE
-    //TODO: BGR -> RGB 
+   
 
      myRGB->copyTo(m_keepImg);
-      cv::cvtColor(m_keepImg, m_keepImg, cv::COLOR_BGR2RGB); //???
+      cv::cvtColor(m_keepImg, m_keepImg, cv::COLOR_BGR2RGB); //
 
 #ifdef TEST_MODE
     cv::imwrite("m_keepImg.png", m_keepImg);
 #endif //TEST_MODE
 
-//TODO: crop myRGB , recompute h, w , record offsetDueToCrop  
+    //crop myRGB , recompute h, w , record offsetDueToCrop  
+    if(cropATR > 0.01)
+    {
+        int cropRows = int(myRGB->rows*cropATR*0.5);
+        int cropColumns = int(myRGB->cols*cropATR*0.5);
 
+        height = height - cropRows*2;
+        width = width - cropColumns*2;
+   
+        // Setup a rectangle to define your region of interest
+        cv::Rect myROI(cropColumns,cropRows, width,  height);
+
+        // Crop the full image to that image contained by the rectangle myROI
+        cv::Mat croppedRef(*myRGB,myROI);
+        croppedRef.copyTo(*myRGB);
+
+
+
+    }
 
     if(resize_factor>0 && resize_factor != 1)
     {

@@ -16,7 +16,9 @@
     "edge_in_pixels": "300", 
     "do_CCM": "1",
     "CCM": "[1.0, 0.0, 0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 1.0]",
-    "CCMB": "[0.0, 0.0, 0.0]"
+    "CCMB": "[0.0, 0.0, 0.0]",
+    "crop_ATR": "0.2"
+
   },
   "models": [
     {
@@ -32,7 +34,7 @@
       "targets": "ALL",
       "width": "0",
       "height": "0",
-      "imresize_factor": "-1",
+      "imresize_factor": "0.9",
       "max_batch_size": "1",
       "image_format": "RGB",
       "resolution": "5",

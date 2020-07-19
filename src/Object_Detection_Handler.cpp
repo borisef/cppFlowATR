@@ -602,25 +602,25 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetection(OD_CycleOutpu
 
     if (colortype == e_OD_ColorImageType::YUV422) // if raw
     {
-        this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w, (int)colortype, resize_factor);
+        this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w, (int)colortype, resize_factor, m_cropATR);
     }
     else if (colortype == e_OD_ColorImageType::NV12) // if raw NV12
     {
-        this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w, (int)colortype, resize_factor);
+        this->m_mbATR->RunRawImageFast(m_curCycleInput->ptr, h, w, (int)colortype, resize_factor, m_cropATR);
     }
     else if (colortype == e_OD_ColorImageType::RGB) // if rgb
     {
 #ifdef TEST_MODE
         cout << " Internal Run on RGB buffer " << endl;
 #endif //#ifdef TEST_MODE
-        this->m_mbATR->RunRGBVector(m_curCycleInput->ptr, h, w, resize_factor);
+        this->m_mbATR->RunRGBVector(m_curCycleInput->ptr, h, w, resize_factor, m_cropATR);
     }
     else if (colortype == e_OD_ColorImageType::RGB_IMG_PATH) //path
     {
 #ifdef TEST_MODE
         cout << " Internal Run on RGB_IMG_PATH " << endl;
 #endif //#ifdef TEST_MODE
-        this->m_mbATR->RunRGBImgPath(m_curCycleInput->ptr, resize_factor);
+        this->m_mbATR->RunRGBImgPath(m_curCycleInput->ptr, resize_factor, m_cropATR);
     }
     else
     {
@@ -850,7 +850,17 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
     unsigned int w = this->m_initParams->supportData.imageWidth;
     unsigned int h = this->m_initParams->supportData.imageHeight;
 
-    //TODO: take care of crop 
+    //take care of crop 
+    int offsetRowDueToCrop = 0;
+    int offsetColumnDueToCrop = 0;
+    if(m_cropATR > 0.01)
+    {
+        offsetRowDueToCrop = int(h*m_cropATR*0.5);
+        offsetColumnDueToCrop = int(w*m_cropATR*0.5);
+        w = w - 2*offsetColumnDueToCrop;
+        h = h - 2*offsetRowDueToCrop;
+    }
+    
 
     cycleOutput->numOfObjects = N;
     for (int i = 0; i < N; i++)
@@ -873,8 +883,11 @@ int ObjectDetectionManagerHandler::PopulateCycleOutput(OD_CycleOutput *cycleOutp
             break;
         }
 
-        odi[i].tarBoundingBox = {bbox_data[i * 4 + 1] * w, bbox_data[i * 4 + 3] * w, bbox_data[i * 4] * h, bbox_data[i * 4 + 2] * h};
-         //TODO: crop 
+        odi[i].tarBoundingBox = {bbox_data[i * 4 + 1] * w + offsetColumnDueToCrop, 
+        bbox_data[i * 4 + 3] * w + offsetColumnDueToCrop, 
+        bbox_data[i * 4] * h + offsetRowDueToCrop, 
+        bbox_data[i * 4 + 2] * h + offsetRowDueToCrop};
+        
     }
     //filter by targetClass
     e_OD_TargetClass tc = m_initParams->mbMission.targetClass;
@@ -955,11 +968,15 @@ OD_ErrorCode ObjectDetectionManagerHandler::OperateObjectDetectionOnTiledSample(
     if (m_ATR_resize_factor > 0 && m_ATR_resize_factor != 1)
         rf = m_ATR_resize_factor;
 
-    this->m_mbATR->RunRGBVector(ptrTif, bigH, bigW, rf); 
+    float tempCropATR = m_cropATR; // replace by 0 
+    
+    m_cropATR = 0;
+    this->m_mbATR->RunRGBVector(ptrTif, bigH, bigW, rf, m_cropATR); 
 
     OD_CycleOutput *tempCycleOutput = NewOD_CycleOutput(350);
     this->PopulateCycleOutput(tempCycleOutput);
 
+     m_cropATR = tempCropATR; // bring back 
     LOG_F(INFO, "Tiled image found %d targets", tempCycleOutput->numOfObjects);
     // color
     if (m_withActiveCM && m_mbCM != nullptr && tempCycleOutput->numOfObjects > 0)

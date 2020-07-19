@@ -75,7 +75,7 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
     MB_Mission mission = {
         MB_MissionType::MATMON,       //mission1.missionType
         e_OD_TargetClass::UNKNOWN_CLASS, //mission1.targetClass
-        e_OD_TargetSubClass::PRIVATE, //mission1.targetSubClass
+        e_OD_TargetSubClass::UNKNOWN_SUB_CLASS, //mission1.targetSubClass
         e_OD_TargetColor::WHITE       //mission1.targetColor
     };
 
@@ -83,7 +83,7 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
     OD_SupportData supportData = {
         (unsigned)ors.H, (unsigned)ors.W, //imageHeight//imageWidth
         ors.imType,   //colorType;
-        100,          //rangeInMeters
+        0,          //rangeInMeters
         70.0f,        //fcameraAngle; //BE
         0,            //TEMP:cameraParams[10];//BE
         0             //TEMP: float	spare[3];
