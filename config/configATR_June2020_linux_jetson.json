@@ -28,10 +28,8 @@
     "edge_in_pixels": "50", 
     "do_CCM": "1",
     "CCM": "[1.0, 0.0, 0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 1.0]",
-    "CCMB_": "[-20.0, 7.0, 14.0]",
-    "CCMB": "[14.0, 7.0, -20.0]",
-    "CCMB_": "[-125.0, -115.0, -105.0]",
-    "CCMB_": "[-111.0, -108.0, -125.0]"
+    "CCMB": "[14.0, 7.0, -20.0]", 
+    "crop_ATR": "0.15"
   
   },
   "models": [
@@ -60,7 +58,8 @@
       "task": "ATR",
       "filetype": ".pb",
       "mission": "0",
-      "load_path": "graphs/shalev/MB3_frozen_inference_graph_cars_5cm_1_2.pb",
+      "load_path_": "graphs/shalev/MB3_frozen_inference_graph_cars_5cm_1_2.pb",
+      "load_path": "graphs/cars_exam2_MB3_14_07_20_5cm_wide_range_512_hpc/frozen_1_2M/frozen_inference_graph.pb",
       "nickname": "default_ATR_cars",
       "max_objects": "300",
       "accuracy": "5",
@@ -68,8 +67,8 @@
       "targets": "CARS",
       "width": "0",
       "height": "0",
-      "imresize_factor": "0.5",
-      "max_batch_size": "1",
+      "imresize_factor": "0.9",
+      "max_batch_size": "64",
       "image_format": "RGB",
       "resolution": "5",
       "range": "ALL",
@@ -222,7 +221,11 @@
       "mission": "0",
       "load_path_": "graphs/cm/output_graph_mnist_18_06_20.pb",
       "load_path_": "graphs/cm/cm.inout_fp32hwc.18_06_20.fp16.engine",
+<<<<<<< HEAD
       "load_path": "graphs/cm/output_graph_try21.pb",
+=======
+      "load_path": "graphs/cm/output_graph_try22.pb",
+>>>>>>> crop
       "nickname": "default_CM",
       "max_objects": "300",
       "accuracy": "5",
@@ -244,7 +247,8 @@
       "task": "ATR-tiles",
       "filetype": ".pb",
       "mission": "0",
-      "load_path": "graphs/shalev/MB3_frozen_inference_graph_cars_5cm_1_2.pb",
+      "_load_path": "graphs/shalev/MB3_frozen_inference_graph_cars_5cm_1_2.pb",
+      "load_path": "graphs/cars_exam2_MB3_14_07_20_5cm_wide_range_512_hpc/frozen_1_2M/frozen_inference_graph.pb",
       "nickname": "tiles",
       "max_objects": "300",
       "accuracy": "5",

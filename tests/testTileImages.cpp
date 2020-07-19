@@ -108,7 +108,7 @@ int main()
     OD_ErrorCode statusCycle;
 
     // Do it several times
-    for (size_t sample = 0; sample < 27; sample++)
+    for (size_t sample = 0; sample < 2; sample++)
     {
         ci->ptr = (const unsigned char *)tiles[sample];
         statusCycle = OD::OperateObjectDetectionAPI(atrManagerSamples, ci, co);
@@ -126,7 +126,7 @@ int main()
 
     // clean
     delete ci;
-    delete co->ObjectsArr;
+    //delete co->ObjectsArr;
     delete co;
 
     return 0;
