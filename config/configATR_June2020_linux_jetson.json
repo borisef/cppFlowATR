@@ -221,11 +221,7 @@
       "mission": "0",
       "load_path_": "graphs/cm/output_graph_mnist_18_06_20.pb",
       "load_path_": "graphs/cm/cm.inout_fp32hwc.18_06_20.fp16.engine",
-<<<<<<< HEAD
-      "load_path": "graphs/cm/output_graph_try21.pb",
-=======
       "load_path": "graphs/cm/output_graph_try22.pb",
->>>>>>> crop
       "nickname": "default_CM",
       "max_objects": "300",
       "accuracy": "5",
