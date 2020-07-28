@@ -3,6 +3,7 @@
 #include <utils/odUtils.h>
 #include <iostream>
 #include <cmath>
+#include <algorithm>
 
 using namespace cv;
 
@@ -336,7 +337,7 @@ bool mbInterfaceATR::getTRTOutput()
             y1 = y1 / m_inputDims.m_height;
             float bb[4] = {y, x, y1, x1};
             //avoid zero-sized boxes (reuqire at 2x2 pixels size):
-            if (x1 - x < 2 || y1 - y < 2)
+            if (x1 - x < 0 || y1 - y < 0)
             {
                 LOG_F(INFO, "DBG: Filtered out too small box: ((x1, y1), (x2, y2)) = ((%f, %f), (%f, %f))", x, y, x1, y1);
                 continue;
@@ -591,10 +592,17 @@ bool mbInterfaceATR::imageToTRTInputBuffer(const std::vector<uint8_t> &img_data)
     {
         //HWC: offset = h * im.rows * im.elemSize() + w * im.elemSize() + c
         //CHW: offset = c * im.rows * im.cols + h * im.cols + w
+        float rgb_channel_mean[] = {123.68, 116.779, 103.939};
         const int C = dims.d[0], H = dims.d[1], W = dims.d[2];
-        //for (int ch = C; ch > 0; ch--) //RGB->BGR
-        for (int ch = 0; ch < C; ch++)
+        double max_elem = *std::max_element(img_data.begin(),img_data.end());
+        double min_elem = *std::min_element(img_data.begin(),img_data.end());
+
+        std::cout<<"C,H,W : "<< C<<','<<H<<','<<W<<", max value is: "<<max_elem<<", min value is: "<<min_elem<<std::endl;
+        std::cout<<"img_data size: "<<img_data.size()<<std::endl;
+        for (int ch = C-1; ch >= 0; ch--) //RGB->BGR
+        //for (int ch = 0; ch < C; ch++)
         {
+            float channel_mean = rgb_channel_mean[ch];
             for (int row = 0; row < H; row++)
             {
                 for (int col = 0; col < W; col++)
@@ -603,7 +611,18 @@ bool mbInterfaceATR::imageToTRTInputBuffer(const std::vector<uint8_t> &img_data)
                 }
             }
         }
+
+    cv::Mat imm(3040,4056,CV_32FC3,reinterpret_cast<float *>(m_bufferManager->getHostBuffer(m_inTensors.begin()->second)));
+    //cv::Mat imm(3040,4056,CV_8UC3,(float *)img_data.data());
+
+    std::cout<<imm.size()<<std::endl;
+    //cout <<"data:"<<imm.rowRange(0, 2)<<std::endl;
+    cv::Mat imm2;
+    //imm.convertTo(imm2,CV_8UC3);
+    cv::imwrite("blabla.jpg",imm);
+
     }
+
     return (0 == m_bufferManager->copyInputToDevice());
 #endif //#ifndef NO_TRT
     return false;

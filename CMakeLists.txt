@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(cppFlowATR)
 set(CMAKE_CXX_STANDARD 17)
-
+set(CMAKE_BUILD_TYPE Debug CACHE STRING "" FORCE)
+#set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
 message($ENV{USER})
 
 #DEFINE PATHS
@@ -11,8 +12,8 @@ message($ENV{USER})
 
 
 
-set(TEST_MODE FALSE)
-set(NO_TRT TRUE)
+set(TEST_MODE TRUE)
+set(NO_TRT FALSE)
 set(CMAKE_MAJOR_4 FALSE)
 
 if(TEST_MODE)

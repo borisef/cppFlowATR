@@ -155,8 +155,7 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
            
             statusCycle = OD::OperateObjectDetectionAPI(atrManager, ci, co);
             
-           
-            if (lastReadyFrame != co->ImgID_output)
+            if (true)//lastReadyFrame != co->ImgID_output)
             { //draw
                  cout << " . Detected new results for frame " << co->ImgID_output << endl;
                 string outName = "outRes/out_res3_" + std::to_string(co->ImgID_output) + ".png";
@@ -188,16 +187,23 @@ OD::ObjectDetectionManager *OneRun(OD::ObjectDetectionManager *atrManager, OneRu
 
 int main()
 {
-    OD::ObjectDetectionManager *atrManager = nullptr;
-    OneRunStruct ors2;
-    ors2.splicePath = "media/filter/*";
-    ors2.numRepetiotions = 1;
-    ors2.minDelay = 1000;
-    ors2.startFrameID = 1;
+    const int NUM_ITERS=100;
+    for (int i = 0; i < NUM_ITERS ; i++)
+    {
+        cout << "Starting iteration " << i << "/" << NUM_ITERS << ":"<< endl;
+        OD::ObjectDetectionManager *atrManager = nullptr;
+        OneRunStruct ors2;
+        //ors2.splicePath = "media/filter/0000001.jpg";
+        //ors2.splicePath = "media/filter/resized/*";
+        ors2.splicePath = "media/exp10/20200611_123346_MM_tif/*";
+        ors2.numRepetiotions = 1;
+        ors2.minDelay = 1000;
+        ors2.startFrameID = 1;
 
-    atrManager = OneRun(atrManager, ors2);
-    
-    OD::TerminateObjectDetection(atrManager);
-    cout << "Ended StressTest Normally" << endl;
+        atrManager = OneRun(atrManager, ors2);
+        
+        OD::TerminateObjectDetection(atrManager);
+        cout << "Ended StressTest Normally (iteration: " << i << "/" << NUM_ITERS << ")" << endl;
+    }
     return 0;
 }

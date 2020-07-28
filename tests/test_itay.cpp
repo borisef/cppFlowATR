@@ -137,7 +137,7 @@ void doInference(cv::Mat img, OD::ObjectDetectionManager *atrManager, OD_CycleIn
 
 unsigned char *ParseImage(cv::Mat inp)
 {
-    cv::cvtColor(inp, inp, CV_BGR2RGB);
+    //cv::cvtColor(inp, inp, CV_BGR2RGB);
 
     //put image in vector
     std::vector<uint8_t> img_data;
