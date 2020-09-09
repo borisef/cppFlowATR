@@ -1,6 +1,29 @@
 # CppFlowATR
 ###### a fork by borisef
 
+## About 
+
+Implements inference for ATR followed by color classifier 
+Both ATR model and color classifier are tensorflow models (frozen .PB files) 
+
+Operates in multi-thread fashion (1 thread for CPU, 1 thread mainly for GPU) in such a way some frames are skipped if GPU is busy. 
+Supports several additional functionalities:
+* log file, config file
+* several input formats
+* works in cropped region
+* post-processing user-defined filters (e.g. NMS, per class threshold score, size filter etc.)
+* supports resize mode 
+
+Folders structure: 
+   * config - contains config files (json files)
+   * graphs - location of models (pb files)
+   * tests - cpp files for tests 
+   * include - h files (source code)
+   * src - cpp files (source code)
+   * media - images, videos, raw files etc. 
+
+
+
 ## Installation
 
 - Clone the project:
@@ -36,4 +59,4 @@ cd build
 cmake ..
 make ```
 
-3) Test with build/stressTest or build/videoTest
+3) Test with build/stressTestSmall or build/stressTest or build/videoTest
